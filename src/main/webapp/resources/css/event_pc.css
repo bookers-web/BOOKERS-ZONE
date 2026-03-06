@@ -1,0 +1,162 @@
+@charset "utf8";
+
+
+
+img {image-rendering: -moz-crisp-edges; image-rendering: -o-crisp-edges; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor; -ms-transform: translateZ(0); -moz-transform: translateZ(0); -transform: translateZ(0);
+    -webkit-transform: translateZ(0); transform: translateZ(0);}
+
+h1,h2,h3,h4,h5,h6, p 	{margin:0; padding:0 }
+form{display: contents;}
+
+.single_title       	{ width:100%; height:79px; font-weight:bold; font-size:22px; line-height:55px; }
+.galleylist_Wrap 		{width: 100%; height: 100%; display:flex; flex-wrap:wrap; }
+.galleylist_Wrap .list-item {clear:both; box-sizing: border-box; width: 340px; margin: 0 0 45px 30px;line-height: 22px; }
+.galleylist_Wrap .list-item:nth-child(3n+1) {margin-left: 0 }
+.galleylist_Wrap .list-item img {width: 340px;}
+.list_infoArea 			{width: 100%; margin-top: 18px; }
+.list_infoArea .event_title {font-size: 16px; font-weight: bold; line-height: 20px; padding-bottom: 6px; color: #121212}
+.list_infoArea .event_date, .list_view_head .event_date {float: left; color: #616161}
+.list_infoArea .event_Dday, .list_view_head .event_Dday {float: right; color: #1BAFC1; text-align: right;}
+.event_date, .event_Dday {font-size: 15px;}
+.list-item .expire		{display:block; position: relative; height: 190px; }
+.list-item .expire::after {content: "이벤트 종료"; position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); opacity: 1; 
+	display: flex;font-size: 22px; color: #fff; font-weight: bold; align-items:center; justify-content: center; z-index: 1;}
+
+.list_view_head 		{width: 100%; height:102px; border-top:1px solid #E6E6E6; border-bottom:1px solid #E6E6E6;  padding: 20px 0 21px;  }
+.list_view_head h3.title{width: 100%; font-size: 24px; font-weight: bold; color: #121212; padding-bottom:15px }
+.list_view_cont 		{width: 100%; height: auto; margin: 50px 0 86px; text-align: center;}
+.list_view_button 		{width: 100%; text-align: center; margin-top: 30px; margin-bottom: 0px}
+.btn_back_list 			{width: 280px; padding: 21px 0 20px; font-size: 20px; color: #121212; border: 1px solid #b2b2b2; background: #fff; border-radius: 60px;}
+
+.event_empty            {width: 90%; margin: 105px auto 135px; height: 160px; position: relative; text-align: center; background: url("../images/event_empty.svg") no-repeat center top; background-size: 100px; }
+.event_empty .event_empty_txt {width: 100%; font-size: 17px; position: absolute; bottom: 0; }
+
+.event_comment{ width: 100%; border-top: 1px solid #E6E6E6; border-bottom: 1px solid #E6E6E6; padding: 20px 0 21px;}
+.event_comment_ul{width: 1080px; margin: 40px auto 0;}
+.event_comment_ul li{padding: 24px 20px; border-top: solid 1px #cccccc;}
+.event_comment_ul li:nth-child(24n){border-bottom: solid 1px #cccccc;}
+.myId{color: #999999;}/* 본인 이외의 회원이 작성한 경우 */
+
+
+/* 내 글 버튼 */
+.myComment_bt{width: 120px; height: 36px; border: solid 1px #cccccc; border-radius: 4px; background-color: #ffffff; font-size: 14px;}
+
+.LR_addSetting_m{position: absolute; right: -4px; cursor: pointer; display: block;}
+.LR_settingBody_m{width: 132px; background-color: #ffffff; border: solid 1px #cccccc; position: absolute; right: 0px; top: 28px; z-index: 10; display: none;}
+
+/* 0420 다독 이벤트 */
+.event_0420 {width: 100%; height: auto; background:#F1F1F1; padding: 0 0 30px 0;}
+.event_0420 .btnArea {margin:60px auto 20px; }
+.event_0420 .agreeArea {width: 852px; margin: 0 auto;}
+.event_0420 .agreeArea .chkArea {width: 100%; text-align: left; margin:43px 0 0 0; } 
+.event_0420 .agreeArea .chkArea label, .event_0420 .agreeArea .chkArea input[type="checkbox"] {display: inline-flex !important;}
+.event_0420 .agreeArea .chkArea label {font-size: 18px; font-weight: 600; line-height: 22px; color: #121212; vertical-align: middle; padding: 4px 4px 0 0;}
+.event_0420 .agreeArea .chkArea input[type="checkbox"] {position: relative; width: 26px; height: 26px; cursor: pointer; outline: none !important; -webkit-appearance:none; box-sizing: border-box; border: 1px solid #999;vertical-align: middle;}
+.event_0420 .agreeArea .chkArea input[type="checkbox"]::before {position: absolute; top: 50%; left: 50%; line-height: 1; font-size: 20px; overflow:hidden; transform:scale(0) translate(-60%, -20%); }
+.event_0420 .agreeArea .chkArea input[type="checkbox"]:checked { color:#fff; border: 1px solid #FFFFFF; background:#000000; padding:3px; }
+.event_0420 .agreeArea .rule_Area { width:852px; height:185px; background:#FFFFFF; padding:18px 23px; margin:15px 0 52px; border-radius: 10px;}
+.event_0420 .agreeArea .rule_Area .txt_rule {width: 100%; font-size: 14px; color: #333; line-height: 22px; text-align: left;}
+
+
+/* 0511 설문조사 이벤트 */
+.event_survey         {width: 100%; height: auto; background:#F1F1F1; padding: 0 0 30px 0;} /* 0621 */
+.event_survey .btnArea{ margin:60px auto 20px; text-align: center;background: transparent; }
+.event_survey .btnArea button {background: transparent;}
+.event_survey .agreeArea{width: 852px; margin: 0 auto;}
+.event_survey .agreeArea .chkArea {width: 100%; text-align: left; margin:43px 0 0 0; } 
+.event_survey .agreeArea .chkArea label, .event_survey .agreeArea .chkArea input[type="checkbox"] {display: inline-flex !important;}
+.event_survey .agreeArea .chkArea label {font-size: 18px; font-weight: 600; line-height: 22px; color: #000; vertical-align: middle; padding: 4px 4px 0 0;}
+.event_survey .agreeArea .chkArea input[type="checkbox"] {position: relative; width: 26px; height: 26px; cursor: pointer; outline: none !important; -webkit-appearance:none; box-sizing: border-box; border: 1px solid #999;vertical-align: middle;}
+.event_survey .agreeArea .chkArea input[type="checkbox"]::before {position: absolute; top: 50%; left: 50%; line-height: 1; font-size: 20px; overflow:hidden; transform:scale(0) translate(-60%, -20%); }
+.event_survey .agreeArea .chkArea input[type="checkbox"]:checked { color:#fff; border: 1px solid #FFFFFF; background:#000000; padding:3px; }/* 0621 */
+.event_survey .agreeArea .rule_Area { width:852px; height:185px; background:#FFFFFF; padding:18px 23px; margin:15px 0 52px; border-radius: 10px;}
+.event_survey .agreeArea .rule_Area .txt_rule {width: 100%; font-size: 14px; color: #333; line-height: 22px; text-align: left;}
+
+/* 0621 국회부산도서관 설문조사 이벤트 */
+.surveyBG_0621         {background:#ACCAF4;}
+
+/* 0519 event */
+.eventWrap          {width: 100%; height: auto; }
+
+/* 0830 9월 이벤트 */
+.eventBG_sept         {background:#9EB582;}
+.eventWrap .btnArea  button {background: transparent; }
+.agreeArea          {width: 852px; margin: 0 auto;}
+.agreeArea .chkArea {width: 100%; text-align: left; margin:43px 0 0 0; } 
+.agreeArea .chkArea label, .agreeArea .chkArea input[type="checkbox"] {display: inline-flex !important;}
+.agreeArea .chkArea label {font-size: 18px; font-weight: 600; line-height: 22px; color: #121212; vertical-align: middle; padding: 4px 4px 0 0;}
+.agreeArea .chkArea input[type="checkbox"] {position: relative; width: 26px; height: 26px; cursor: pointer; outline: none !important; -webkit-appearance:none; box-sizing: border-box; border: 1px solid #BFBFBF; background: #fff; vertical-align: middle;}
+.agreeArea .chkArea input[type="checkbox"]::before {position: absolute; top: 50%; left: 50%; line-height: 1; font-size: 20px; overflow:hidden; transform:scale(0) translate(-60%, -20%); }
+.agreeArea .chkArea input[type="checkbox"]:checked { color:#fff; border: 1px solid #536938; background:#536938; content:url("../images/mark_event_chk.svg"); padding:3px;  }
+.agreeArea .rule_Area { width:852px; height:185px; background:#65B1D8; padding:18px 23px; margin:15px 0 52px; }
+.agreeArea .rule_Area .txt_rule {width: 100%; font-size: 14px; color: #000000; line-height: 22px; text-align: left;}
+
+.agreeArea2          {width: 852px; margin: 0 auto;}
+.agreeArea2 .chkArea {width: 100%; text-align: left; margin:43px 0 0 0; }
+.agreeArea2 .chkArea label, .agreeArea .chkArea input[type="checkbox"] {display: inline-flex !important;}
+.agreeArea2 .chkArea label {font-size: 18px; font-weight: 600; line-height: 22px; color: #121212; vertical-align: middle; padding: 4px 4px 0 0;}
+.agreeArea2 .chkArea input[type="checkbox"] {position: relative; width: 26px; height: 26px; cursor: pointer; outline: none !important; -webkit-appearance:none; box-sizing: border-box; border: 1px solid #BFBFBF; background: #fff; vertical-align: middle;}
+.agreeArea2 .chkArea input[type="checkbox"]::before {position: absolute; top: 50%; left: 50%; line-height: 1; font-size: 20px; overflow:hidden; transform:scale(0) translate(-60%, -20%); }
+.agreeArea2 .chkArea input[type="checkbox"]:checked { color:#fff; border: 1px solid #FFFFFF; background:#000000; content:url("../images/mark_event_chk.svg"); padding:3px;  }
+.agreeArea2 .rule_Area { width:852px; height:185px; background:#FFFFFF; padding:18px 23px; margin:15px 0 52px; border-radius: 10px;}
+.agreeArea2 .rule_Area .txt_rule {width: 100%; font-size: 14px; color: #000000; line-height: 22px; text-align: left;}
+
+/* 1012 세종시립이벤트 */
+.eventBG_sejong      {background:#ECF6F7;}
+.agreeArea .chkArea input.black[type="checkbox"]::before {position: absolute; top: 50%; left: 50%; line-height: 1; font-size: 20px; overflow:hidden; transform:scale(0) translate(-60%, -20%); }
+.agreeArea .chkArea input.black[type="checkbox"]:checked { color:#fff; border: 1px solid #000; background:#000; content:url("../images/mark_event_chk.svg"); padding:3px;  }
+
+/* 1123 충청북도교육청 이벤트 */
+.eventBG_sejong      {background:#B3C8EE;}
+
+/* 1127 전체이벤트 */
+.eventBG_dec            {width: 100%; height: auto; background:#F1F1F1; padding: 0 0 30px 0;}
+/* 입과 확인 페이지 색상 교체 240625*/
+.eventBG_dec2            {background: #FFFFFF;}
+.fieldBG_white          {width:852px; background: rgba(208, 232, 235, 0.7); border:none; padding:22px 60px; text-align: left; margin: 38px auto 0;}
+.fieldBG_white label    {display:inline-flex; width:auto; font-size: 18px; font-weight: bold; color: #000; padding:0 12px 8px 0 ;}
+.fieldBG_white input.type_name, input.type_mobile {height: 38px; border:1px solid #1A3C53; background: rgba(255, 255, 255, 0.6); text-align: left; font-size: 18px; padding:3px 12px 0 12px; box-sizing:border-box;}
+.fieldBG_white input.type_name {width: 210px; margin:0 20% 0 0;}
+.fieldBG_white input.type_mobile {width: 240px;}
+.eventBG_dec .btnArea {margin-bottom: 6%;}
+.eventBG_dec2 .btnArea {margin-bottom: 6%;}
+.txt_red                 {color: #9B2B1F;}
+.fieldBG_white2          {width:852px; border:none; padding:22px 60px; text-align: left; margin: 38px auto 0;}
+.fieldBG_white2 label    {display:inline-flex; width:auto; font-size: 18px; font-weight: bold; color: #000; padding:0 12px 8px 0 ;}
+.fieldBG_white2 input.type_name, input.type_mobile {height: 38px; border:1px solid #1A3C53; background: rgba(255, 255, 255, 0.6); text-align: left; font-size: 18px; padding:3px 12px 0 12px; box-sizing:border-box;}
+.fieldBG_white2 input.type_name {width: 210px; margin:0 20% 0 0;}
+.fieldBG_white2 input.type_mobile {width: 240px;}
+
+/* 지워야함*/
+.fieldBG_white3          {width:852px; background: #FFFFFF; padding:22px 60px; text-align: left; margin: 38px auto 0;border-radius: 10px;}
+.fieldBG_white3 label    {display:inline-flex; width:auto; font-size: 18px; font-weight: bold; color: #000; padding:0 12px 8px 0 ;}
+.fieldBG_white3 input.type_name, input.type_mobile {height: 38px; border:1px solid #E4E4E4; background: rgba(255, 255, 255, 0.6); text-align: left; font-size: 18px; padding:3px 12px 0 12px; box-sizing:border-box;}
+.fieldBG_white3 input.type_name {width: 210px; margin:0 20% 0 0;}
+.fieldBG_white3 input.type_mobile {width: 240px;}
+
+/* 광주광역시교육청 */
+.eventBG_gwangju      {background:#FFFFFF;}
+.eventBG_gwangju .agreeArea .chkArea input.black[type="checkbox"]::before {position: absolute; top: 50%; left: 50%; line-height: 1; font-size: 20px; overflow:hidden; transform:scale(0) translate(-60%, -20%); }
+.eventBG_gwangju .agreeArea .chkArea input.black[type="checkbox"]:checked { color:#FFEDEE; border: 1px solid #FFEDEE; background:#FFEDEE; content:url("../images/evnet_btn0420.svg"); padding:3px;  }
+.eventBG_gwangju .btnArea{width: auto; margin:60px auto 20px; text-align: center;background: transparent; }
+.eventBG_gwangju .fieldBG_white{width:852px; background: #FFEDEE; border:none; padding:22px 60px; text-align: left; margin: 38px auto 0;}
+.eventBG_gwangju .agreeArea .rule_Area {width: 852px; height: 185px; background: #FFEDEE; padding: 18px 23px; border: 1px solid #FFEDEE; margin: 15px 0 52px;}
+/* UEM0000022 */
+.eventBG_gwangju2      {background:#FFFFFF;}
+.eventBG_gwangju2 .agreeArea .chkArea input.black[type="checkbox"]::before {position: absolute; top: 50%; left: 50%; line-height: 1; font-size: 20px; overflow:hidden; transform:scale(0) translate(-60%, -20%); }
+.eventBG_gwangju2 .agreeArea .chkArea input.black[type="checkbox"]:checked { color:#EBED92; border: 1px solid #EBED92; background:#EBED92; content:url("../images/evnet_btn0420.svg"); padding:3px;  }
+.eventBG_gwangju2 .btnArea{width: auto; margin:60px auto 20px; text-align: center;background: transparent; }
+.eventBG_gwangju2 .fieldBG_white{width:852px; background: #fafafa; border:none; padding:22px 60px; text-align: left; margin: 38px auto 0;}
+.eventBG_gwangju2 .agreeArea .rule_Area {width: 852px; height: 185px; background: #EBED92; padding: 18px 23px; border: 1px solid #EBED92; margin: 15px 0 52px;}
+
+/* 260204 [고] : gallerySwiper를 위한 custom css 추가 (gallerySwiper 공통으로 쓰인다면 event_pc.css에 넣어주시면 됩니다.) */
+.gallerySwiperWrapper {position:relative;}
+.gallerySwiperWrapper .gallerySwiper {width:100%;overflow:hidden;}
+.gallerySwiperWrapper .gallerySwiper .galleylist_Wrap {flex-wrap:nowrap}
+.gallerySwiperWrapper .gallerySwiper .galleylist_Wrap .list-item {margin:0}
+.gallerySwiperWrapper .swiper-button {position:absolute;top:100px !important;z-index:100;opacity:1 !important;pointer-events: auto;}
+.gallerySwiperWrapper .swiper-button svg {display:none}
+.gallerySwiperWrapper .swiper-button-next {right:-20px !important;background:url(/images/btn_slide_next.png) no-repeat 50% 50%;}
+.gallerySwiperWrapper .swiper-button-prev {left:-20px !important;background:url(/images/btn_slide_prev.png) no-repeat 50% 50%;}
+

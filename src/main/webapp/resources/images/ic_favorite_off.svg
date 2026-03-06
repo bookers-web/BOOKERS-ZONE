@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 23 23">
+  <g id="icon_favorite_on" transform="translate(0 0.442)">
+    <rect id="사각형_1564" data-name="사각형 1564" width="23" height="23" transform="translate(0 -0.442)" fill="none" opacity="0.06"/>
+    <path id="FontAwsome_heart_" data-name="FontAwsome heart " d="M899.274,2389.4a5.359,5.359,0,0,0-7.313.532l-.772.8-.772-.8a5.361,5.361,0,0,0-7.314-.532,5.624,5.624,0,0,0-.58,7.934c.061.072.125.142.19.21l7.58,7.827a1.228,1.228,0,0,0,1.737.04.508.508,0,0,0,.038-.04l7.58-7.827a5.621,5.621,0,0,0-.16-7.949C899.419,2389.535,899.347,2389.467,899.274,2389.4Z" transform="translate(-879.707 -2385.441)" fill="none" stroke="#dc3545" stroke-width="1"/>
+  </g>
+</svg>

@@ -1,0 +1,58 @@
+/* Pretendard */
+@font-face {
+     font-family: 'Pretendard';
+     font-style: normal;
+     font-weight: 100;
+     src: url('font/Pretendard-Thin.woff2') format('woff2'),
+          url('font/Pretendard-Thin.woff') format('woff')
+}
+@font-face {
+     font-family: 'Pretendard';
+     font-style: normal;
+     font-weight: 200;
+     src: url('font/Pretendard-Light.woff2') format('woff2'),
+          url('font/Pretendard-Light.woff') format('woff')
+}
+@font-face {
+     font-family: 'Pretendard';
+     font-style: normal;
+     font-weight: 300;
+     src: url('font/Pretendard-Regular.woff2') format('woff2'),
+          url('font/Pretendard-Regular.woff') format('woff')
+}
+@font-face {
+     font-family: 'Pretendard';
+     font-style: normal;
+     font-weight: 400;
+     src: url('font/Pretendard-Medium.woff2') format('woff2'),
+          url('font/Pretendard-Medium.woff') format('woff')
+}
+@font-face {
+     font-family: 'Pretendard';
+     font-style: normal;
+     font-weight: 500;
+     src: url('font/Pretendard-SemiBold.woff') format('woff2'),
+          url('font/Pretendard-SemiBold.woff2') format('woff')
+}
+@font-face {
+     font-family: 'Pretendard';
+     font-style: normal;
+     font-weight: 600;
+     src: url('font/Pretendard-Bold.woff2') format('woff2'),
+          url('font/Pretendard-Bold.woff') format('woff')
+}
+@font-face {
+     font-family: 'Pretendard';
+     font-style: normal;
+     font-weight: 700;
+     src: url('font/Pretendard-Black.woff2') format('woff2'),
+     url('font/Pretendard-Black.woff') format('woff')
+}
+
+/* GmarketSansBold */
+@font-face {
+     font-family: 'GmarketSansBold';
+     font-style: normal;
+     font-weight: 700;
+     src: url('font/GmarketSansBold.woff2') format('woff2')
+}

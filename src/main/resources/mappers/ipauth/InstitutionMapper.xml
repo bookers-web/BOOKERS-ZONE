@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="life.bks.zone.mapper.InstitutionMapper">
+
+    <resultMap id="institutionInfoMap" type="life.bks.zone.domain.InstitutionInfo">
+        <result property="uisCode" column="UIS_CODE"/>
+        <result property="uisName" column="UIS_NAME"/>
+        <result property="uisUcpCode" column="UIS_UCP_CODE"/>
+        <result property="uisWebLogoUrl" column="UIS_WEB_LOGO_URL"/>
+        <result property="uisMobileLogoUrl" column="UIS_MOBILE_LOGO_URL"/>
+        <result property="uisKeycolor" column="UIS_KEYCOLOR"/>
+        <result property="uisPreviewFlag" column="UIS_PREVIEW_FLAG"/>
+        <result property="uisReturnFlag" column="UIS_RETURN_FLAG"/>
+        <result property="uisReturnUiFlag" column="UIS_RETURN_UI_FLAG"/>
+        <result property="uisPwFlag" column="UIS_PW_FLAG"/>
+        <result property="uisCommonBookFlag" column="UIS_COMMON_BOOK_FLAG"/>
+        <result property="uisCopyBookFlag" column="UIS_COPY_BOOK_FLAG"/>
+        <result property="uisAuthMethod" column="UIS_AUTH_METHOD"/>
+    </resultMap>
+
+    <select id="selectByUisCode" resultMap="institutionInfoMap">
+        SELECT
+            UIS_CODE,
+            UIS_NAME,
+            IFNULL(UIS_UCP_CODE, '')        AS UIS_UCP_CODE,
+            UIS_WEB_LOGO_URL,
+            UIS_MOBILE_LOGO_URL,
+            UIS_KEYCOLOR,
+            UIS_PREVIEW_FLAG,
+            UIS_RETURN_FLAG,
+            UIS_RETURN_UI_FLAG,
+            UIS_PW_FLAG,
+            UIS_COMMON_BOOK_FLAG,
+            UIS_COPY_BOOK_FLAG,
+            UIS_AUTH_METHOD
+        FROM
+            TBL_INSTITUTION_MASTER
+        WHERE
+            UIS_CODE = #{uisCode}
+    </select>
+
+</mapper>

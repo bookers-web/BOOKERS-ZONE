@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="resources.mappers.front.lounge.FrontLoungeMapper">
+	
+	<update id="getSeqence" parameterType="commonVO" >
+		<selectKey keyProperty="seq_currval" resultType="java.lang.Integer" order="BEFORE">
+			SELECT
+				MAX(SEQ_CURRVAL)+1
+			FROM
+				TBL_SEQUENCES
+			WHERE
+				SEQ_NAME = #{seq_name}
+		</selectKey>
+		UPDATE TBL_SEQUENCES
+		SET
+			SEQ_CURRVAL = #{seq_currval}
+		WHERE
+			SEQ_NAME = #{seq_name}
+	</update>
+	
+	<select id="allBookReportListCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT COUNT(A.UBR_CODE)
+		FROM ( SELECT BOOK_REPORT.UBR_CODE AS UBR_CODE
+				FROM TBL_BOOK_REPORT BOOK_REPORT
+				LEFT OUTER
+					JOIN TBL_CONTENTS_MASTER CONTENTS_MASTER
+						ON BOOK_REPORT.UBR_UCM_CODE = CONTENTS_MASTER.UCM_CODE
+				LEFT OUTER
+					JOIN TBL_B2B_MEMBER_MASTER MEMBER_MASTER
+						ON BOOK_REPORT.UBR_UM_CODE = MEMBER_MASTER.UM_CODE
+				LEFT OUTER
+					JOIN TBL_INSTITUTION_MASTER INSTITUTION_MASTER
+						ON MEMBER_MASTER.UM_UIS_CODE = INSTITUTION_MASTER.UIS_CODE
+				<if test='uis_return_flag == "Y"'>
+				JOIN TBL_RETURN_CONTENTS RETURN_CONTENTS
+					ON CONTENTS_MASTER.UCM_CODE = RETURN_CONTENTS.URC_UCM_CODE
+						AND RETURN_CONTENTS.URC_UCM_CODE = BOOK_REPORT.UBR_UCM_CODE
+				</if>
+				LEFT OUTER
+					JOIN TBL_CONTENTS_EXCLUDE V
+						ON V.UCE_UCM_CODE = CONTENTS_MASTER.UCM_CODE
+							AND V.UCE_UIS_CODE = #{uis_code}
+				WHERE CONTENTS_MASTER.UCM_STATUS = 'S'
+					AND CONTENTS_MASTER.UCM_SVRYN = 'Y'
+					AND CONTENTS_MASTER.UCM_LIMIT_AGE = 'N'
+					AND V.UCE_UCM_CODE IS NULL
+				<if test='uis_return_flag == "Y"'>
+					AND	RETURN_CONTENTS.URC_UIS_CODE = #{uis_code}
+				</if>
+				<if test='ubr_is_open_checking == "N"'>
+					AND BOOK_REPORT.UBR_UIS_CODE = #{uis_code}
+				</if>
+				<if test='ubr_is_open_checking == "Y" or ubr_is_open_checking == null'>
+					AND ( BOOK_REPORT.UBR_IS_OPEN = 'Y' OR (BOOK_REPORT.UBR_IS_OPEN = 'N' AND BOOK_REPORT.UBR_UIS_CODE = #{uis_code}))
+				</if>
+				<if test='uis_copy_book_flag == "N"'>
+					AND	CONTENTS_MASTER.UCM_COPY_BOOK_FLAG = 'N'
+				</if>
+				<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+					AND CONTENTS_MASTER.UCM_UCP_CODE = #{uis_ucp_code}
+				</if>
+				<if test='searchKey != null and searchKey != ""'>
+					AND REPLACE(CONTENTS_MASTER.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchKey}, '%')
+				</if>
+				GROUP BY BOOK_REPORT.UBR_UCM_CODE
+		) A
+	</select>
+	
+	<select id="allBookReportList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT  BOOK_REPORT.UBR_CODE                                       AS UBR_CODE
+		       ,CONTENTS_MASTER.UCM_CODE                                   AS UCM_CODE
+		       ,CONTENTS_MASTER.UCM_TITLE                                  AS UCM_TITLE
+		       ,CONTENTS_MASTER.UCM_SUB_TITLE                              AS UCM_SUB_TITLE
+		       ,CONTENTS_MASTER.UCM_WRITER                                 AS UCM_WRITER
+		       ,CONTENTS_MASTER.UCM_PUBLISHER                              AS UCP_BRAND
+		       ,DATE_FORMAT(CONTENTS_MASTER.UCM_EBOOK_PUBDATE, '%Y/%M/%D') AS UCM_EBOOK_PUBDATE
+		       ,CONTENTS_MASTER.UCM_THUMB_URL                              AS UCM_COVER_url
+		       ,CONTENTS_MASTER.UCM_UCT_CODE                               AS UCM_UCT_CODE
+		       ,CONTENTS_MASTER.UCM_FILE_TYPE                              AS UCM_FILE_TYPE
+		       ,CONTENTS_MASTER.UCM_LIMIT_AGE                              AS UCM_LIMIT_AGE
+		       ,BOOK_REPORT.UBR_REGDATE                                    AS UBR_REGDATE
+		FROM TBL_BOOK_REPORT BOOK_REPORT
+			LEFT OUTER
+				JOIN TBL_CONTENTS_MASTER CONTENTS_MASTER
+					ON BOOK_REPORT.UBR_UCM_CODE = CONTENTS_MASTER.UCM_CODE
+			LEFT OUTER
+				JOIN TBL_B2B_MEMBER_MASTER MEMBER_MASTER
+					ON BOOK_REPORT.UBR_UM_CODE = MEMBER_MASTER.UM_CODE
+			LEFT OUTER
+				JOIN TBL_INSTITUTION_MASTER INSTITUTION_MASTER
+					ON MEMBER_MASTER.UM_UIS_CODE = INSTITUTION_MASTER.UIS_CODE
+		<if test='uis_return_flag == "Y"'>
+		JOIN TBL_RETURN_CONTENTS RETURN_CONTENTS
+			ON CONTENTS_MASTER.UCM_CODE = RETURN_CONTENTS.URC_UCM_CODE
+				AND RETURN_CONTENTS.URC_UCM_CODE = BOOK_REPORT.UBR_UCM_CODE
+		</if>
+		LEFT OUTER
+			JOIN TBL_CONTENTS_EXCLUDE V
+				ON V.UCE_UCM_CODE = CONTENTS_MASTER.UCM_CODE
+					AND V.UCE_UIS_CODE = #{uis_code}
+		WHERE CONTENTS_MASTER.UCM_STATUS = 'S'
+			AND CONTENTS_MASTER.UCM_SVRYN = 'Y'
+			AND CONTENTS_MASTER.UCM_LIMIT_AGE = 'N'
+			AND V.UCE_UCM_CODE IS NULL
+		<if test='uis_return_flag == "Y"'>
+			AND	RETURN_CONTENTS.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='ubr_is_open_checking == "N"'>
+			AND BOOK_REPORT.UBR_UIS_CODE = #{uis_code}
+		</if>
+		<if test='ubr_is_open_checking == "Y" or ubr_is_open_checking == null'>
+			AND ( BOOK_REPORT.UBR_IS_OPEN = 'Y' OR (BOOK_REPORT.UBR_IS_OPEN = 'N' AND BOOK_REPORT.UBR_UIS_CODE = #{uis_code}))
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+			AND	CONTENTS_MASTER.UCM_COPY_BOOK_FLAG = 'N'
+		</if> 
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND CONTENTS_MASTER.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='searchKey != null and searchKey != ""'>
+			AND REPLACE(CONTENTS_MASTER.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchKey}, '%')
+		</if>
+		GROUP BY BOOK_REPORT.UBR_UCM_CODE
+		ORDER BY BOOK_REPORT.UBR_REGDATE DESC
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<select id="allBookReportDetailCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT
+			COUNT(A.ubr_code)
+		FROM(
+			SELECT 
+				book_report.UBR_CODE AS ubr_code
+			FROM
+				TBL_BOOK_REPORT book_report
+			LEFT OUTER JOIN
+				TBL_CONTENTS_MASTER contents_master
+			ON
+				book_report.UBR_UCM_CODE = contents_master.UCM_CODE
+			LEFT OUTER JOIN
+				TBL_B2B_MEMBER_MASTER member_master
+			ON
+				book_report.UBR_UM_CODE = member_master.UM_CODE
+			LEFT OUTER JOIN
+				TBL_CP_MASTER cp_master
+			ON
+				contents_master.UCM_UCP_CODE = cp_master.UCP_CODE
+			
+			WHERE
+				1 = 1
+			AND
+				book_report.UBR_UCM_CODE = #{ucm_code}
+			<choose>
+				<when test='ubr_flag == "I"'>
+				AND
+					book_report.UBR_IS_OPEN ='N'
+				AND
+					book_report.UBR_UIS_CODE = #{uis_code}
+				</when>
+				<otherwise>
+				AND (book_report.UBR_IS_OPEN = 'Y' OR (book_report.UBR_IS_OPEN ='N' AND book_report.UBR_UIS_CODE = #{uis_code}))
+				</otherwise>
+			</choose>
+		) A
+	</select>
+	
+	<select id="allBookReportDetail" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  book_report.UBR_CODE												AS ubr_code
+			, book_report.UBR_UM_CODE											AS ubr_um_code
+			, book_report.UBR_TITLE												AS ubr_title
+			, book_report.UBR_CONTENT											AS ubr_content
+			, book_report.UBR_IS_OPEN											AS ubr_is_open
+			, book_report.UBR_REGDATE											AS ubr_regdate
+			, (SELECT COUNT(UBRC_CODE) FROM TBL_BOOK_REPORT_COMMENT WHERE UBRC_UBR_CODE = book_report.UBR_CODE AND UBRC_TYPE = 'Y')
+																				AS ubr_like
+			, (SELECT UBRC_TYPE FROM TBL_BOOK_REPORT_COMMENT WHERE UBRC_UBR_CODE = book_report.UBR_CODE AND UBRC_UM_CODE = #{um_code})
+																				AS ubrc_type
+			, member_master.UM_USERID											AS um_userid																
+			, contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_SUB_TITLE										AS ucm_sub_title
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_PUBLISHER										AS ucp_brand
+			, DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y/%m/%d')		AS ucm_ebook_pubdate
+			, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+			, contents_master.UCM_UCT_CODE										AS ucm_uct_code
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_LIMIT_AGE										AS ucm_limit_age
+			, (SELECT UBRC_CODE FROM TBL_BOOK_REPORT_COMMENT WHERE UBRC_UBR_CODE = book_report.UBR_CODE AND UBRC_UM_CODE = #{um_code})
+																				AS ubrc_code
+																				
+		FROM
+				TBL_BOOK_REPORT book_report
+			LEFT OUTER JOIN
+				TBL_CONTENTS_MASTER contents_master
+			ON
+				book_report.UBR_UCM_CODE = contents_master.UCM_CODE
+			LEFT OUTER JOIN
+				TBL_B2B_MEMBER_MASTER member_master
+			ON
+				book_report.UBR_UM_CODE = member_master.UM_CODE
+			WHERE
+				1 = 1
+			AND
+				book_report.UBR_UCM_CODE = #{ucm_code}
+			<choose>
+				<when test='ubr_flag == "I"'>
+				
+				AND
+					book_report.UBR_IS_OPEN ='N'
+				AND
+					book_report.UBR_UIS_CODE = #{uis_code}
+				</when>
+				<otherwise>
+				AND (book_report.UBR_IS_OPEN = 'Y' OR (book_report.UBR_IS_OPEN ='N' AND book_report.UBR_UIS_CODE = #{uis_code}))
+				</otherwise>
+			</choose>
+			
+			<!--  
+			AND
+				book_report.UBR_CODE NOT IN (
+								SELECT UBR_CODE FROM TBL_BOOK_REPORT WHERE UBR_UCM_CODE = #{ucm_code}
+																	 AND UBR_UM_CODE != #{um_code}
+																	 AND UBR_IS_OPEN = 'N'
+			)
+			-->
+		ORDER BY book_report.UBR_REGDATE DESC
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<select id="allBookReportDetailView" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  book_report.UBR_CODE												AS ubr_code
+			, book_report.UBR_UM_CODE											AS ubr_um_code
+			, book_report.UBR_TITLE												AS ubr_title
+			, book_report.UBR_CONTENT											AS ubr_content
+			, book_report.UBR_IS_OPEN											AS ubr_is_open
+			, (SELECT COUNT(UBRC_CODE) FROM TBL_BOOK_REPORT_COMMENT WHERE UBRC_UBR_CODE = book_report.UBR_CODE AND UBRC_TYPE = 'Y')
+																				AS ubr_like
+			, DATE_FORMAT(book_report.UBR_REGDATE, '%Y.%m.%d %H:%i')			AS ubr_regdate
+			, contents_master.UCM_CODE											AS ucm_code
+			, member_master.UM_USERID											AS um_userid
+			, book_report_comment.UBRC_TYPE										AS ubrc_type
+			, book_report_comment.UBRC_CODE										AS ubrc_code
+		FROM
+				TBL_BOOK_REPORT book_report
+			LEFT OUTER JOIN
+				TBL_CONTENTS_MASTER contents_master
+			ON
+				book_report.UBR_UCM_CODE = contents_master.UCM_CODE
+			LEFT OUTER JOIN
+				TBL_B2B_MEMBER_MASTER member_master
+			ON
+				book_report.UBR_UM_CODE = member_master.UM_CODE
+			LEFT OUTER JOIN
+				TBL_BOOK_REPORT_COMMENT book_report_comment
+			ON
+				book_report.UBR_CODE = book_report_comment.UBRC_UBR_CODE
+			AND
+				book_report_comment.UBRC_UM_CODE = #{um_code}
+		WHERE
+			book_report.UBR_CODE = #{ubr_code}
+		<if test='ubr_flag == "M"'>
+		AND
+			book_report.UBR_UM_CODE = #{um_code}
+		</if>
+	</select>
+	
+	<insert id="insertBookReportComment" parameterType="frontCmVO">
+		INSERT INTO TBL_BOOK_REPORT_COMMENT
+		(
+			UBRC_CODE,									UBRC_UBR_CODE,
+			UBRC_UM_CODE,		UBRC_TYPE
+		)
+		VALUES
+		(
+			CONCAT('UBRC',LPAD(#{ubrc_code},11,'0')),	#{ubrc_ubr_code},
+			#{um_code},			'Y'
+		)
+	</insert>
+	
+	<delete id="deleteBookReportComment" parameterType="frontCmVO">
+		DELETE FROM TBL_BOOK_REPORT_COMMENT
+		WHERE
+			UBRC_CODE = #{ubrc_code}
+	</delete>
+	
+	<select id="selectBookReportComment" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  UBRC_CODE										AS ubrc_code
+			, UBRC_UBR_CODE									AS ubrc_ubr_code
+			, UBRC_UM_CODE									AS ubrc_um_code
+			, UBRC_TYPE										AS ubrc_type
+			, UBRC_CONTENT									AS ubrc_content
+			, DATE_FORMAT(UBRC_REGDATE, '%Y.%m.%d %H:%i')	AS ubrc_regdate
+		FROM
+			TBL_BOOK_REPORT_COMMENT
+		WHERE
+			UBRC_UBR_CODE = #{ubrc_ubr_code}
+		AND
+			UBRC_UM_CODE = #{um_code}
+	</select>
+	
+	<update id="bookReportState" parameterType="frontCmVO">
+		UPDATE TBL_BOOK_REPORT
+		SET
+			UBR_TYPE			= '0'
+			<if test='ubrc_type != null and ubrc_type == "Y"'>
+			, UBR_LIKE			= UBR_LIKE+1
+			</if>
+			<if test='ubrc_type != null and ubrc_type == "N"'>
+			, UBR_LIKE			= UBR_LIKE-1
+			</if>
+		WHERE
+			UBR_CODE = #{ubrc_ubr_code}
+	</update>
+	
+	<select id="allDiscussionListCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT
+			COUNT(A.ucd_code)
+		FROM(
+			SELECT 
+				content_discussion.UCD_CODE AS ucd_code
+			FROM
+				TBL_CONTENT_DISCUSSION content_discussion
+			LEFT OUTER JOIN
+				TBL_CONTENTS_MASTER contents_master
+			ON
+				content_discussion.UCD_UCM_CODE = contents_master.UCM_CODE
+			LEFT OUTER JOIN
+				TBL_B2B_MEMBER_MASTER member_master
+			ON
+				content_discussion.UCD_UM_CODE = member_master.UM_CODE
+			LEFT OUTER JOIN
+				TBL_CP_MASTER cp_master
+			ON
+				contents_master.UCM_UCP_CODE = cp_master.UCP_CODE
+			<if test='uis_return_flag == "Y"'>
+			JOIN
+				TBL_RETURN_CONTENTS return_contents
+			ON
+				contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+				AND return_contents.URC_UCM_CODE = content_discussion.UCD_UCM_CODE
+			</if>
+			LEFT OUTER JOIN (
+				SELECT UCE_UCM_CODE
+				 FROM TBL_CONTENTS_EXCLUDE
+				 WHERE UCE_UIS_CODE = #{uis_code}
+				) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+			WHERE
+				1=1
+			AND
+				contents_master.UCM_STATUS = 'S'
+			AND
+				contents_master.UCM_SVRYN = 'Y'
+			AND V.uce_ucm_code is null
+			AND content_discussion.UCD_UIS_CODE = #{uis_code}
+			<if test='uis_return_flag == "Y"'>
+			AND	return_contents.URC_UIS_CODE = #{uis_code}
+			</if>
+			<if test='uis_copy_book_flag == "N"'>
+			AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+			</if> 
+			<if test="uis_ucp_code != null and uis_ucp_code != ''">
+			AND
+				contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+			</if>
+			<if test='searchKey != null and searchKey != ""'>
+			AND
+				REPLACE(contents_master.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchKey}, '%')
+			</if>
+			GROUP BY content_discussion.UCD_UCM_CODE
+		) A
+	</select>
+	
+	<select id="allDiscussionList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  content_discussion.UCD_CODE										AS ucd_code
+			, contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_SUB_TITLE										AS ucm_sub_title
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_PUBLISHER										AS ucp_brand
+			, DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y/%m/%d')		AS ucm_ebook_pubdate
+			, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+			, contents_master.UCM_UCT_CODE										AS ucm_uct_code
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_LIMIT_AGE										AS ucm_limit_age
+		FROM
+			TBL_CONTENT_DISCUSSION content_discussion
+		LEFT OUTER JOIN
+			TBL_CONTENTS_MASTER contents_master
+		ON
+			content_discussion.UCD_UCM_CODE = contents_master.UCM_CODE
+		LEFT OUTER JOIN
+			TBL_B2B_MEMBER_MASTER member_master
+		ON
+			content_discussion.UCD_UM_CODE = member_master.UM_CODE
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+			AND return_contents.URC_UCM_CODE = content_discussion.UCD_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			1=1
+		AND
+			contents_master.UCM_STATUS = 'S'
+		AND
+			contents_master.UCM_SVRYN = 'Y'
+		AND content_discussion.UCD_UIS_CODE = #{uis_code}
+		AND V.uce_ucm_code is null
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if> 
+		<if test="uis_ucp_code != null and uis_ucp_code != ''">
+		AND
+			contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='searchKey != null and searchKey != ""'>
+		AND
+			REPLACE(contents_master.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchKey}, '%')
+		</if>
+		GROUP BY content_discussion.UCD_UCM_CODE
+		ORDER BY content_discussion.UCD_REGDATE DESC
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<select id="allDiscussionDetailCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT
+			COUNT(A.ucd_code)
+		FROM(
+			SELECT 
+				content_discussion.UCD_CODE AS ucd_code
+			FROM
+				TBL_CONTENT_DISCUSSION content_discussion
+			LEFT OUTER JOIN
+				TBL_CONTENT_DISCUSSION_COMMENT discussion_comment
+			ON
+				content_discussion.UCD_CODE = discussion_comment.UCDC_UCD_CODE
+			AND
+				discussion_comment.UCDC_UM_CODE = #{um_code}
+			WHERE
+				1 = 1
+			AND
+				content_discussion.UCD_UCM_CODE = #{ucm_code}
+			AND
+				content_discussion.UCD_UIS_CODE = #{uis_code}
+			<if test='ucd_um_code != null and ucd_um_code != ""'>
+			AND content_discussion.UCD_UM_CODE = #{ucd_um_code}
+			</if>
+		) A
+	</select>
+	
+	<select id="allDiscussionDetail" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  content_discussion.UCD_CODE										AS ucd_code
+			, content_discussion.UCD_UCM_CODE									AS ucd_ucm_code
+			, content_discussion.UCD_UIS_CODE									AS ucd_uis_code
+			, content_discussion.UCD_UM_CODE									AS ucd_um_code
+			, content_discussion.UCD_UM_USERID									AS ucd_um_userid
+			, content_discussion.UCD_COMMENT									AS ucd_comment
+			, DATE_FORMAT(content_discussion.UCD_REGDATE, '%Y.%m.%d %H:%i')		AS ucd_regdate
+			, (SELECT COUNT(UCDC_CODE) FROM TBL_CONTENT_DISCUSSION_COMMENT WHERE UCDC_UCD_CODE = content_discussion.UCD_CODE AND UCDC_UIS_CODE = #{uis_code} AND UCDC_TYPE = 'Y')
+																				AS like_count
+			, discussion_comment.UCDC_CODE										AS ucdc_code
+			, discussion_comment.UCDC_UM_CODE									AS ucdc_um_code
+		FROM
+			TBL_CONTENT_DISCUSSION content_discussion
+		LEFT OUTER JOIN
+			TBL_CONTENT_DISCUSSION_COMMENT discussion_comment
+		ON
+			content_discussion.UCD_CODE = discussion_comment.UCDC_UCD_CODE
+		AND
+			discussion_comment.UCDC_UM_CODE = #{um_code}
+		WHERE
+			1 = 1
+		AND
+			content_discussion.UCD_UCM_CODE = #{ucm_code}
+		AND
+			content_discussion.UCD_UIS_CODE = #{uis_code}
+		<if test='ucd_um_code != null and ucd_um_code != ""'>
+		AND content_discussion.UCD_UM_CODE = #{ucd_um_code}
+		</if>
+		ORDER BY content_discussion.UCD_REGDATE DESC
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<insert id="insertDiscussion" parameterType="frontCmVO">
+		INSERT INTO TBL_CONTENT_DISCUSSION
+		(
+			UCD_CODE,									UCD_UCM_CODE,
+			UCD_UIS_CODE,		UCD_UM_CODE,
+			UCD_UM_USERID,		UCD_COMMENT
+		)
+		VALUES
+		(
+			CONCAT('UCD',LPAD(#{ucd_code},18,'0')),		#{ucd_ucm_code},
+			#{ucd_uis_code},			#{ucd_um_code},
+			#{ucd_um_userid},			#{ucd_comment}
+		)
+	</insert>
+	
+	<update id="updateDiscussion" parameterType="frontCmVO">
+		UPDATE TBL_CONTENT_DISCUSSION
+		SET
+			UCD_COMMENT			= #{ucd_comment}
+		WHERE
+			UCD_CODE			= #{ucd_code}
+	</update>
+	
+	<delete id="deleteDiscussion" parameterType="frontCmVO">
+		DELETE FROM TBL_CONTENT_DISCUSSION
+		WHERE
+			UCD_CODE			= #{ucd_code}
+	</delete>
+	
+	<insert id="insertDiscussionComment" parameterType="frontCmVO">
+		INSERT INTO TBL_CONTENT_DISCUSSION_COMMENT
+		(
+			UCDC_CODE,									UCDC_UCD_CODE,
+			UCDC_UIS_CODE,	UCDC_UM_CODE,		UCDC_TYPE
+		)
+		VALUES
+		(
+			CONCAT('UCD',LPAD(#{ucdc_code},18,'0')),	#{ucdc_ucd_code},
+			#{uis_code},	#{ucdc_um_code},	'Y'
+		)
+	</insert>
+	
+	<delete id="deleteDiscussionComment" parameterType="frontCmVO">
+		DELETE FROM TBL_CONTENT_DISCUSSION_COMMENT
+		WHERE
+			UCDC_CODE			= #{ucdc_code}
+	</delete>
+	
+	<select id="selectDiscussionComment" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  UCDC_CODE										AS ucdc_code
+			, UCDC_UCD_CODE									AS ucdc_ucd_code
+			, UCDC_UM_CODE									AS ucdc_um_code
+			, UCDC_TYPE										AS ucdc_type
+			, UCDC_CONTENT									AS ucdc_content
+			, DATE_FORMAT(UCDC_REGDATE, '%Y.%m.%d %H:%i')	AS ucdc_regdate
+		FROM
+			TBL_CONTENT_DISCUSSION_COMMENT
+		WHERE
+			UCDC_UCD_CODE	= #{ucdc_ucd_code}
+		AND
+			UCDC_UM_CODE	= #{ucdc_um_code}
+	</select>
+	
+	<insert id="insertReportCopyright" parameterType="frontCmVO">
+		INSERT INTO TBL_REPORT_COPYRIGHT
+		(
+			URC_NO,				URC_UM_CODE,		URC_UCM_CODE,
+			URC_UCD_CODE,		URC_TITLE,			URC_CONTENT
+		)
+		VALUES
+		(
+			#{urc_no},			#{urc_um_code},		#{urc_ucm_code},
+			#{urc_ucd_code},	#{urc_title},		#{urc_content}
+		)
+	</insert>
+	
+	<select id="selectProhibition" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  prohibition.UPW_NO												AS upw_no
+			, prohibition.UPW_LIST												AS upw_list
+			, prohibition.UPW_AM_USERID											AS upw_am_userid
+			, DATE_FORMAT(prohibition.UPW_REGDATE, '%Y-%m-%d %H:%i:%s')			AS upw_regdate
+		FROM
+			TBL_PROHIBITION prohibition
+		WHERE
+			prohibition.UPW_NO			= 1
+	</select>
+</mapper>

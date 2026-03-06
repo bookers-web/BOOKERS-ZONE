@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="life.bks.zone.mapper.FrontMypageMapper">
+	
+	<select id="mainFaqList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  faq.UFQ_NO											AS ufq_no
+			, faq.UFQ_QUESTION										AS ufq_question
+			, faq.UFQ_ANSWER										AS ufq_answer
+			, faq.UFQ_AM_USERID										AS ufq_am_userid
+			, DATE_FORMAT(faq.UFQ_REGDATE, '%Y-%m-%d %h:%i')		AS ufq_regdate
+		FROM
+			TBL_FAQ faq
+		ORDER BY faq.UFQ_REGDATE DESC
+		LIMIT 3
+	</select>
+	
+	<select id="faqListCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT
+			COUNT(faq.UFQ_NO) AS count
+		FROM
+			TBL_FAQ faq
+		WHERE
+			1=1
+		<if test='searchKey != null and searchKey != ""'>
+		AND (
+				faq.UFQ_QUESTION LIKE CONCAT('%', #{searchKey}, '%')
+			OR
+				faq.UFQ_ANSWER LIKE CONCAT('%', #{searchKey}, '%')
+			)
+		</if>
+	</select>
+	
+	<select id="faqList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  faq.UFQ_NO											AS ufq_no
+			, faq.UFQ_QUESTION										AS ufq_question
+			, faq.UFQ_ANSWER										AS ufq_answer
+			, faq.UFQ_AM_USERID										AS ufq_am_userid
+			, DATE_FORMAT(faq.UFQ_REGDATE, '%Y-%m-%d %h:%i')		AS ufq_regdate
+		FROM
+			TBL_FAQ faq
+		WHERE
+			1=1
+		<if test='searchKey != null and searchKey != ""'>
+		AND (
+				faq.UFQ_QUESTION LIKE CONCAT('%', #{searchKey}, '%')
+			OR
+				faq.UFQ_ANSWER LIKE CONCAT('%', #{searchKey}, '%')
+			)
+		</if>
+		ORDER BY faq.UFQ_REGDATE DESC
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<select id="myExcellentSelect" parameterType="frontCmVO" resultType="frontCmVO">
+		select
+			  institution_bookers.UIB_YEAR						AS uib_year
+			, institution_bookers.UIB_MONTH						AS uib_month
+		FROM
+			TBL_INSTITUTION_BOOKERS institution_bookers
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_BOOKERS_MEMBER institution_bookers_member
+		ON
+			institution_bookers.UIB_CODE  = institution_bookers_member.UIM_UIB_CODE
+		AND
+			institution_bookers_member.UIM_UM_CODE = #{um_code}
+		ORDER BY institution_bookers.UIB_REGDATE DESC
+		LIMIT 1
+	</select>
+	
+	<select id="myInfoSelect" parameterType="frontCmVO" resultType="frontCmVO">
+		select
+			  UM_CODE									AS um_code
+			, UM_USERID									AS um_userid
+			, UM_PWD									AS um_pwd
+		FROM
+			TBL_B2B_MEMBER_MASTER member_master
+		WHERE
+			member_master.UM_CODE = #{um_code}
+		AND
+			member_master.UM_PWD = PASSWORD(#{um_pwd})
+	</select>
+	
+	<select id="myInfoNoSelect" parameterType="frontCmVO" resultType="frontCmVO">
+		select
+			  UM_CODE									AS um_code
+			, UM_USERID									AS um_userid
+			, UM_PWD									AS um_pwd
+		FROM
+			TBL_B2B_MEMBER_MASTER member_master
+		WHERE
+			member_master.UM_CODE = #{um_code}
+	</select>
+	
+	<update id="myInfoModifyProc" parameterType="frontCmVO">
+		UPDATE TBL_B2B_MEMBER_MASTER
+		SET
+			UM_PWD = PASSWORD(#{um_pwd})
+		   ,UM_PW_CHANGE = 'Y'
+		WHERE
+			UM_CODE = #{um_code}
+	</update>
+	
+	<select id="myDeviceListCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT
+			COUNT(member_device.UMD_CODE) AS count
+		FROM
+			TBL_MEMBER_DEVICE member_device
+		WHERE
+			1=1
+		AND
+			member_device.UMD_UM_CODE = #{um_code}
+	</select>
+	
+	<select id="myDeviceList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  member_device.UMD_CODE										AS umd_code
+			, member_device.UMD_UID											AS umd_uid
+			, member_device.UMD_NAME										AS umd_name
+			, DATE_FORMAT(member_device.UMD_REGDATE, '%Y.%m.%d')			AS umd_regdate
+		FROM
+			TBL_MEMBER_DEVICE member_device
+		WHERE
+			1=1
+		AND
+			member_device.UMD_UM_CODE = #{um_code}
+	</select>
+	
+	<update id="myDeviceModify" parameterType="frontCmVO">
+		UPDATE TBL_MEMBER_DEVICE
+		SET
+			UMD_NAME = #{umd_name}
+		WHERE
+			UMD_CODE = #{umd_code}
+	</update>
+	
+	<delete id="deleteDevice" parameterType="frontCmVO">
+		DELETE FROM TBL_MEMBER_DEVICE
+		WHERE
+			UMD_CODE = #{umd_code}
+	</delete>
+	
+	<select id="myExcellentListCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT
+			COUNT(bookers_member.UIM_CODE) AS count
+		FROM
+			TBL_INSTITUTION_BOOKERS_MEMBER bookers_member
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_BOOKERS institution_bookers
+		ON
+			bookers_member.UIM_UIB_CODE = institution_bookers.UIB_CODE
+		LEFT OUTER JOIN
+			TBL_AUTHORIZATION_TEMPLATE template
+		ON
+			institution_bookers.UIB_IAT_NO = template.IAT_NO
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			bookers_member.UIM_UIS_CODE = institution_master.UIS_CODE
+		LEFT OUTER JOIN
+			TBL_B2B_MEMBER_MASTER member_master
+		ON
+			bookers_member.UIM_UM_CODE = member_master.UM_CODE
+		WHERE
+			bookers_member.UIM_UM_CODE = #{um_code}
+	</select>
+	
+	<select id="myExcellentList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  bookers_member.UIM_CODE										AS uim_code
+			, bookers_member.UIM_UIB_CODE									AS uim_uib_code
+			, bookers_member.UIM_UIS_CODE									AS uim_uis_code
+			, bookers_member.UIM_UM_CODE									AS uim_um_code
+			, bookers_member.UIM_READED										AS uim_readed
+			, bookers_member.UIM_READED_RMD									AS uim_readed_rmd
+			, bookers_member.UIM_READ										AS uim_read
+			, bookers_member.UIM_READ_RMD									AS uim_read_rmd
+			, bookers_member.UIM_REPORT										AS uim_report
+			, bookers_member.UIM_REPORT_RMD									AS uim_report_rmd
+			, bookers_member.UIM_POINT										AS uim_point
+			, bookers_member.UIM_ISSUED_YN									AS uim_issued_yn
+			, DATE_FORMAT(bookers_member.UIM_ISSUED_DATE, '%Y-%m-%d')		AS uim_issued_date
+			, bookers_member.UIM_CANCEL_YN									AS uim_cancel_yn
+			, bookers_member.UIM_CANCEL_DATE								AS uim_cancel_date
+			, bookers_member.UIM_PRINT_YN									AS uim_print_yn
+			, bookers_member.UIM_PRINT_DATE									AS uim_print_date
+			, bookers_member.UIM_UPDATEDATE									AS uim_updatedate
+			, bookers_member.UIM_REGDATE									AS uim_regdate
+			, institution_bookers.UIB_CODE									AS uib_code
+			, institution_bookers.UIB_UIS_CODE								AS uib_uis_code
+			, institution_bookers.UIB_IAT_NO								AS uib_iat_no
+			, institution_bookers.UIB_YEAR									AS uib_year
+			, institution_bookers.UIB_MONTH									AS uib_month
+			, DATE_FORMAT(institution_bookers.UIB_STARTDATE, '%Y.%m.%d')	AS uib_startdate
+			, DATE_FORMAT(institution_bookers.UIB_ENDDATE, '%Y.%m.%d')		AS uib_enddate
+			, institution_bookers.UIB_UIS_USERID							AS uib_uis_userid
+			, institution_bookers.UIB_REGDATE								AS uib_regdate
+			, institution_master.UIS_NAME									AS uis_name
+			, member_master.UM_NAME											AS um_name
+			, DATE_FORMAT(bookers_member.UIM_ISSUED_DATE, '%Y-%m-%d')		AS uim_issued_date
+			, member_master.UM_USERID										AS um_userid
+			, template.IAT_IMG												AS iat_img
+			, template.IAT_TEXT												AS iat_text
+		FROM
+			TBL_INSTITUTION_BOOKERS_MEMBER bookers_member
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_BOOKERS institution_bookers
+		ON
+			bookers_member.UIM_UIB_CODE = institution_bookers.UIB_CODE
+		LEFT OUTER JOIN
+			TBL_AUTHORIZATION_TEMPLATE template
+		ON
+			institution_bookers.UIB_IAT_NO = template.IAT_NO
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			bookers_member.UIM_UIS_CODE = institution_master.UIS_CODE
+		LEFT OUTER JOIN
+			TBL_B2B_MEMBER_MASTER member_master
+		ON
+			bookers_member.UIM_UM_CODE = member_master.UM_CODE
+		WHERE
+			bookers_member.UIM_UM_CODE = #{um_code}
+		ORDER BY institution_bookers.UIB_REGDATE DESC
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<update id="myExcellentPrintState" parameterType="frontCmVO">
+		UPDATE TBL_INSTITUTION_BOOKERS_MEMBER
+		SET
+			UIM_PRINT_YN		= 'Y',
+			UIM_PRINT_DATE		= CURRENT_TIMESTAMP
+		WHERE
+			UIM_CODE = #{uim_code}
+	</update>
+
+</mapper>

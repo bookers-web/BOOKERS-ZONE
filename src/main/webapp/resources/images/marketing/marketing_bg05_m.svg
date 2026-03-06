@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="165" height="35" viewBox="0 0 165 35">
+    <g data-name="그룹 2485">
+        <path data-name="합치기 13" d="M17.5 35a17.5 17.5 0 0 1 0-35h87.823a17.5 17.5 0 0 1 15.487 9.343L132 15.764a2 2 0 0 1 0 3.469l-11.186 6.42A17.5 17.5 0 0 1 105.323 35z" transform="rotate(180 82.5 17.5)" style="fill:#8fccd4"/>
+        <g data-name="타원 251" transform="translate(0 3.097)" style="fill:#fff;stroke:#8fccd4;stroke-width:5px">
+            <circle cx="15" cy="15" r="15" style="stroke:none"/>
+            <circle cx="15" cy="15" r="12.5" style="fill:none"/>
+        </g>
+    </g>
+</svg>

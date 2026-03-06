@@ -1,0 +1,3016 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="resources.mappers.front.recommend.FrontRecommendMapper">
+	
+	<select id="groupCommonListCount" parameterType="searchVO" resultType="java.lang.Integer">
+			SELECT IFNULL(SUM(( SELECT COUNT(A.UIE_UIL_CODE)
+						   FROM TBL_INSTITUTION_LIBRARY_EBOOK A
+						  WHERE institution_library_master.UIL_CODE = A.UIE_UIL_CODE)), 0) AS count
+			FROM TBL_INSTITUTION_LIBRARY_MASTER institution_library_master
+			LEFT OUTER
+			    JOIN TBL_INSTITUTION_MASTER institution_master
+					ON institution_library_master.UIL_UIS_CODE = institution_master.UIS_CODE
+			LEFT OUTER
+			    JOIN TBL_INSTITUTION_LIBRARY_EXCLUDE exclude
+					ON  exclude.UILE_UIL_CODE = institution_library_master.UIL_CODE AND exclude.UILE_UIS_CODE = institution_master.UIS_CODE
+			WHERE 1 = 1
+				AND institution_library_master.UIL_DISPLAY_STARTDATE <![CDATA[ <= ]]> CURRENT_TIMESTAMP
+				AND institution_library_master.UIL_DISPLAY_ENDDATE <![CDATA[ >= ]]> CURRENT_TIMESTAMP
+				AND institution_library_master.UIL_USEYN = 'Y'
+			<if test='searchUcpCode != null and searchUcpCode != ""'>
+				AND institution_library_master.UIL_UIS_CODE = #{searchUisCode}
+			</if>
+			<if test='searchUcpCode == null or searchUcpCode == ""'>
+				AND ( institution_library_master.UIL_UIS_CODE = ''
+				<if test='searchUisCode != null and searchUisCode != ""'>
+					OR institution_library_master.UIL_UIS_CODE = #{searchUisCode}
+				</if>
+				)
+			</if>
+			<if test='searchUisCode != null and searchUisCode != ""'>
+				AND NOT EXISTS ( SELECT 1
+									FROM TBL_INSTITUTION_LIBRARY_EXCLUDE sub_exclude
+									WHERE sub_exclude.UILE_UIL_CODE = institution_library_master.UIL_CODE
+										AND sub_exclude.UILE_UIS_CODE = #{searchUisCode}
+				)
+			</if>
+	</select>
+
+	<select id="groupCommonList" parameterType="searchVO" resultType="frontRecommendGroupVO">
+		SELECT DISTINCT	institution_library_master.UIL_CODE AS uil_code
+						,institution_library_master.UIL_NAME AS uil_name
+						,institution_master.UIS_USE_ADULT_BOOK AS uis_use_adult_book
+						,( SELECT COUNT(A.UIE_UIL_CODE) AS uie_uis_count
+							FROM TBL_INSTITUTION_LIBRARY_EBOOK A
+							WHERE institution_library_master.UIL_CODE = A.UIE_UIL_CODE ) AS book_count
+		FROM TBL_INSTITUTION_LIBRARY_MASTER institution_library_master
+			LEFT OUTER JOIN TBL_INSTITUTION_MASTER institution_master
+				ON institution_library_master.UIL_UIS_CODE = institution_master.UIS_CODE
+			LEFT OUTER JOIN TBL_INSTITUTION_LIBRARY_EXCLUDE exclude
+				ON  exclude.UILE_UIL_CODE = institution_library_master.UIL_CODE
+					AND exclude.UILE_UIS_CODE = institution_master.UIS_CODE
+		WHERE 1 = 1
+			AND institution_library_master.UIL_DISPLAY_STARTDATE <![CDATA[ <= ]]> CURRENT_TIMESTAMP
+			AND institution_library_master.UIL_DISPLAY_ENDDATE <![CDATA[ >= ]]> CURRENT_TIMESTAMP
+			AND institution_library_master.UIL_USEYN = 'Y'
+		<if test='search_uis_copy_book_flag  == "N"'>
+			AND institution_library_master.UIL_CODE NOT IN ('UIL0000000115')
+		</if>
+		<if test='searchUcpCode != null and searchUcpCode != ""'>
+			AND institution_library_master.UIL_UIS_CODE = #{searchUisCode}
+		</if>
+		<if test='searchUcpCode == null or searchUcpCode == ""'>
+			AND ( institution_library_master.UIL_UIS_CODE = ''
+				<if test='searchUisCode != null and searchUisCode != ""'>
+					OR institution_library_master.UIL_UIS_CODE = #{searchUisCode}
+				</if>
+				)
+		</if>
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND NOT EXISTS ( SELECT 1
+								FROM TBL_INSTITUTION_LIBRARY_EXCLUDE sub_exclude
+								WHERE sub_exclude.UILE_UIL_CODE = institution_library_master.UIL_CODE
+									AND sub_exclude.UILE_UIS_CODE = #{searchUisCode}
+							)
+		</if>
+		ORDER BY (Case When UIL_UIS_CODE Is Null Then 2 WHEN UIL_UIS_CODE = '' THEN 1 Else 0 End) ASC, institution_library_master.UIL_DISPLAY_NUMBER ASC
+	</select>
+
+	<select id="groupListCount" parameterType="searchVO" resultType="java.lang.Integer">
+		SELECT COUNT(institution_library_master.UIL_CODE) AS count
+		FROM TBL_INSTITUTION_LIBRARY_MASTER institution_library_master
+			LEFT OUTER
+				JOIN TBL_INSTITUTION_MASTER institution_master
+					ON institution_library_master.UIL_UIS_CODE = institution_master.UIS_CODE
+		WHERE 1 = 1
+			AND institution_library_master.UIL_DISPLAY_STARTDATE <![CDATA[ <= ]]> CURRENT_TIMESTAMP
+			AND institution_library_master.UIL_DISPLAY_ENDDATE <![CDATA[ >= ]]> CURRENT_TIMESTAMP
+			AND institution_library_master.UIL_USEYN = 'Y'
+		<if test='searchUcpCode != null and searchUcpCode != ""'>
+			AND institution_library_master.UIL_UIS_CODE = #{searchUisCode}
+		</if>
+		<if test='searchUcpCode == null or searchUcpCode == ""'>
+			AND ( <if test='searchUisCode != null and searchUisCode != ""'>
+			    	institution_library_master.UIL_UIS_CODE = #{searchUisCode}
+  				  </if> )
+		</if>
+	</select>
+
+	<select id="groupList" parameterType="searchVO" resultType="frontRecommendGroupVO">
+			SELECT
+				  institution_library_master.UIL_CODE											AS uil_code
+				, institution_library_master.UIL_NAME											AS uil_name
+				, institution_master.UIS_USE_ADULT_BOOK											AS uis_use_adult_book
+				,( SELECT COUNT(UIE_UIL_CODE) AS uie_uis_count FROM bookers.TBL_INSTITUTION_LIBRARY_EBOOK WHERE institution_library_master.UIL_CODE = UIE_UIL_CODE ) AS book_count
+			FROM
+				TBL_INSTITUTION_LIBRARY_MASTER institution_library_master
+			LEFT OUTER JOIN
+				TBL_INSTITUTION_MASTER institution_master
+			ON
+				institution_library_master.UIL_UIS_CODE = institution_master.UIS_CODE
+			WHERE
+				1 = 1
+			AND institution_library_master.UIL_DISPLAY_STARTDATE <![CDATA[ <= ]]> CURRENT_TIMESTAMP
+			AND institution_library_master.UIL_DISPLAY_ENDDATE <![CDATA[ >= ]]> CURRENT_TIMESTAMP
+			AND institution_library_master.UIL_USEYN = 'Y'
+			<if test='searchUcpCode != null and searchUcpCode != ""'>
+			AND
+				institution_library_master.UIL_UIS_CODE = #{searchUisCode}
+			</if>
+			<if test='searchUcpCode == null or searchUcpCode == ""'>
+			AND (
+				<if test='searchUisCode != null and searchUisCode != ""'>
+				institution_library_master.UIL_UIS_CODE = #{searchUisCode}
+				</if>
+			)
+			</if>
+			ORDER BY (Case When UIL_UIS_CODE Is Null Then 2 WHEN UIL_UIS_CODE = '' THEN 1 Else 0 End) ASC, institution_library_master.UIL_DISPLAY_NUMBER ASC
+	</select>
+	
+	<select id="bookList" parameterType="frontRecommendGroupVO" resultType="cmVO">
+		SELECT
+			  contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_PUBLISHER										AS ucp_brand
+			, DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y/%m/%d')		AS ucm_ebook_pubdate
+			, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+			, contents_master.UCM_UCT_CODE										AS ucm_uct_code
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_LIMIT_AGE										AS ucm_limit_age
+			, contents_master.UCM_UCS_CODE										AS ucm_ucs_code
+			, contents_master.UCM_SERIES_NO										AS ucm_series_no
+			, early.uce_use_yn													AS uce_use_yn
+			, CASE 
+				WHEN evently.uec_ucm_code IS NULL
+				THEN 'N' ELSE 'Y'
+			END AS badge_e
+			, CASE 
+				WHEN popular.ucm_code IS NULL 
+		        THEN 'N' ELSE 'Y' 
+		    END AS badge_p
+			, CASE 
+				WHEN contents_master.UCM_REGDATE >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+				THEN 'Y' ELSE 'N'
+		    END AS badge_n 
+			<!--  , (SELECT COUNT(UCM_CODE) FROM TBL_CONTENTS_MASTER WHERE ucm_ucs_code != '' 
+														AND UCM_UCS_CODE = contents_master.UCM_UCS_CODE 
+														AND UCM_STATUS = 'S'
+														AND UCM_SVRYN = 'Y' ) AS ucm_series_count-->
+		FROM
+			TBL_INSTITUTION_LIBRARY_EBOOK library_ebook
+		LEFT OUTER JOIN
+			TBL_CONTENTS_MASTER contents_master
+		ON
+			library_ebook.UIE_UCM_CODE = contents_master.UCM_CODE
+		LEFT JOIN TBL_CONTENTS_EARLY early
+		ON early.UCE_UCM_CODE = contents_master.UCM_CODE
+		   AND early.UCE_USE_YN = 'Y'
+		   AND NOW() BETWEEN early.UCE_START_DT AND early.UCE_END_DT
+		LEFT JOIN (
+			SELECT DISTINCT ec.uec_ucm_code
+		    FROM TBL_EVENT_MASTER em
+		    JOIN TBL_EVENT_CONTENT ec
+		      ON em.uem_code = ec.uec_uem_code
+		    WHERE (em.uem_uis_code IS NULL 
+		           OR em.uem_uis_code = #{searchUisCode})
+		      AND NOW() BETWEEN em.UEM_DISPLAY_STARTDATE
+		                     AND em.UEM_DISPLAY_ENDDATE
+		) evently
+			ON evently.uec_ucm_code = contents_master.UCM_CODE
+		LEFT JOIN (
+			SELECT
+				tdpl.ucm_code
+				, ROUND((
+					((SUM(tdpl.read_cnt) * 0.35)
+				   + ((SUM(tdpl.read_time) / 3600) * 0.10)
+				   + (AVG(tdpl.read_percent) * 0.20)
+				   + (SUM(tdpl.order_cnt) * 0.35)) / 100),2) AS score
+			FROM TBL_DAILY_POPULAR_LOG tdpl
+			WHERE tdpl.LOG_YMD = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+			GROUP BY tdpl.ucm_code
+		    ORDER BY score DESC
+		    limit 30
+		) popular
+			ON popular.UCM_CODE = contents_master.UCM_CODE
+		<if test='search_uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+			AND return_contents.URC_UCM_CODE = library_ebook.UIE_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{searchUisCode}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			library_ebook.UIE_UIL_CODE = #{uil_code}
+		AND UCM_STATUS = 'S'
+		AND UCM_SVRYN = 'Y'
+		AND V.uce_ucm_code is null
+		<if test='search_uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{searchUisCode}
+		</if>
+		<if test='search_uis_copy_book_flag  == "N"'>
+		AND UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+	</select>
+	
+	<select id="searchRecommendCount" parameterType="ormRecommendVO" resultType="java.lang.Integer">
+		SELECT 
+			count(contents_master.UCM_CODE)
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			1 = 1
+		AND V.uce_ucm_code is null
+		AND contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		<if test='uct_type != null and uct_type != ""'>
+			<if test='uct_code != null and uct_code != ""'>
+				AND contents_master.UCM_UCT_CODE LIKE CONCAT(LEFT(#{uct_code}, 8), '%')
+			</if>
+			AND substring(contents_master.UCM_UCT_CODE, 4,1) = #{uct_type}
+		</if>
+		AND
+			contents_master.UCM_CODE IN (SELECT UIE_UCM_CODE FROM TBL_INSTITUTION_LIBRARY_EBOOK WHERE UIE_UIL_CODE = #{uil_code})
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+	</select>
+	
+	<select id="searchRecommend" parameterType="cmVO" resultType="cmVO">
+		SELECT 
+			  contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_EBOOK_ISBN									AS ucm_ebook_isbn
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_SUB_TITLE										AS ucm_sub_title
+			, contents_master.UCM_UCP_CODE										AS ucm_ucp_code
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+			, cp_master.UCP_NAME												AS ucp_name
+			, cp_master.UCP_CP_BRAND											AS ucp_cp_brand
+			, contents_master.UCM_PUBLISHER										AS ucm_publisher
+			, contents_master.UCM_INTRO											AS ucm_intro
+		    , IFNULL(library.UME_CODE, '')										AS ume_code
+		    , contents_master.UCM_WEBDRM2_YN									AS ucm_webdrm_yn
+		    , (SELECT COUNT(UME_CODE) FROM TBL_MEMBER_LIBRARY_BOOK 
+        		WHERE UME_UCM_CODE = contents_master.UCM_CODE AND UME_READ_STATUS = 'R' AND UME_STATUS = 'A') AS ucm_read_count
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		LEFT OUTER JOIN
+			TBL_CP_MASTER cp_master
+		ON
+			contents_master.UCM_UCP_CODE = cp_master.UCP_CODE
+		LEFT OUTER JOIN TBL_MEMBER_LIBRARY_BOOK library 
+		ON 
+			library.UME_UCM_CODE = contents_master.UCM_CODE 
+				AND library.UME_UM_CODE = #{um_code} 
+				AND library.UME_STATUS = 'A'
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			1 = 1
+		AND V.uce_ucm_code is null
+		AND contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		<if test='uct_type != null and uct_type != ""'>
+			<if test='uct_code != null and uct_code != ""'>
+				AND contents_master.UCM_UCT_CODE LIKE CONCAT(LEFT(#{uct_code}, 8), '%')
+			</if>
+			AND substring(contents_master.UCM_UCT_CODE, 4,1) = #{uct_type}
+		</if>
+		AND
+			contents_master.UCM_CODE IN (SELECT UIE_UCM_CODE FROM TBL_INSTITUTION_LIBRARY_EBOOK WHERE UIE_UIL_CODE = #{uil_code})
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+
+	<select id="recommendBookListCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT 
+			count(contents_master.UCM_CODE)
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			1 = 1
+		AND V.uce_ucm_code is null
+		AND contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		<if test='uct_type != null and uct_type != ""'>
+			<if test='uct_code != null and uct_code != ""'>
+				AND contents_master.UCM_UCT_CODE LIKE CONCAT(LEFT(#{uct_code}, 8), '%')
+			</if>
+			AND substring(contents_master.UCM_UCT_CODE, 4,1) = #{uct_type}
+		</if>
+		AND
+			contents_master.UCM_CODE IN (SELECT UIE_UCM_CODE FROM TBL_INSTITUTION_LIBRARY_EBOOK WHERE UIE_UIL_CODE = #{uil_code})
+		<if test='uis_return_flag == "Y"'>
+		AND return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+	</select>
+
+	<select id="recommendBookList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT 
+			  contents_master.UCM_CODE							AS ucm_code
+			, contents_master.UCM_EBOOK_ISBN					AS ucm_ebook_isbn
+			, contents_master.UCM_FILE_TYPE						AS ucm_file_type
+			, contents_master.UCM_TITLE							AS ucm_title
+			, contents_master.UCM_SUB_TITLE						AS ucm_sub_title
+			, contents_master.UCM_UCP_CODE						AS ucm_ucp_code
+			, contents_master.UCM_WRITER							AS ucm_writer
+			, contents_master.UCM_THUMB_URL						AS ucm_cover_url
+			, contents_master.UCM_PUBLISHER						AS ucp_brand
+			, contents_master.UCM_INTRO							AS ucm_intro
+			, contents_master.UCM_UCT_CODE						AS ucm_uct_code
+			, contents_master.UCM_LIMIT_AGE						AS ucm_limit_age
+			, contents_master.UCM_UCS_CODE						AS ucm_ucs_code
+			, contents_master.UCM_SERIES_NO						AS ucm_series_no
+			, IFNULL(library.UME_CODE, '')						AS ume_code
+			, contents_master.UCM_WEBDRM2_YN					AS ucm_webdrm_yn
+			, (SELECT COUNT(UME_CODE) FROM TBL_MEMBER_LIBRARY_BOOK 
+				WHERE UME_UCM_CODE = contents_master.UCM_CODE AND UME_READ_STATUS = 'R' AND UME_STATUS = 'A') AS ucm_read_count
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		LEFT OUTER JOIN TBL_MEMBER_LIBRARY_BOOK library 
+		ON 
+			library.UME_UCM_CODE = contents_master.UCM_CODE 
+			AND library.UME_UM_CODE = #{um_code}
+			AND library.UME_STATUS = 'A'
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			1 = 1
+		AND V.uce_ucm_code is null
+		AND contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		<if test='uct_type != null and uct_type != ""'>
+			<if test='uct_code != null and uct_code != ""'>
+				AND contents_master.UCM_UCT_CODE LIKE CONCAT(LEFT(#{uct_code}, 8), '%')
+			</if>
+			AND substring(contents_master.UCM_UCT_CODE, 4,1) = #{uct_type}
+		</if>
+		AND
+			contents_master.UCM_CODE IN (SELECT UIE_UCM_CODE FROM TBL_INSTITUTION_LIBRARY_EBOOK WHERE UIE_UIL_CODE = #{uil_code})
+		<if test='uis_return_flag == "Y"'>
+		AND return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		ORDER BY
+		<choose>
+		  <when test="sortField1 == 'ucm_regdate'">
+			contents_master.UCM_REGDATE DESC
+		  </when>
+		  <when test="sortField1 == 'ucm_ebook_pubdate'">
+			contents_master.ucm_ebook_pubdate DESC, contents_master.UCM_REGDATE DESC
+		  </when>
+		  <when test="sortField1 == 'ucm_download_count'">
+			contents_master.ucm_download_count DESC, contents_master.UCM_REGDATE DESC
+		  </when>
+		  <when test="sortField1 == 'ucm_title'">
+			contents_master.ucm_title ASC
+		  </when>
+		  <otherwise>
+			contents_master.UCM_REGDATE DESC
+		  </otherwise>
+		</choose>
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+
+	<select id="selectRecommendGroupName" parameterType="frontCmVO" resultType="java.lang.String">
+		SELECT UIL_NAME
+		FROM TBL_INSTITUTION_LIBRARY_MASTER
+		WHERE UIL_CODE = #{uil_code}
+		LIMIT 1
+	</select>
+	
+	
+	<resultMap type="frontCmVO" id="bookDetailResult">
+		<result property="ucm_code" column="ucm_code"/>
+		<result property="ucm_limit_age" column="ucm_limit_age"/>
+		<result property="ucm_cover_url" column="ucm_cover_url"/>
+		<result property="uct_type" column="uct_type"/>
+		<result property="uct_parent_name" column="uct_parent_name"/>
+		<result property="uct_name" column="uct_name"/>
+		<result property="ucm_title" column="ucm_title"/>
+		<result property="ucm_sub_title" column="ucm_sub_title"/>
+		<result property="ucm_writer" column="ucm_writer"/>
+		<result property="ucp_brand" column="ucp_brand"/>
+		<result property="ucm_ebook_pubdate" column="ucm_ebook_pubdate"/>
+		<result property="ucm_read_count" column="ucm_read_count"/>
+		<result property="ume_code" column="ume_code"/>
+		<result property="ume_status" column="ume_status"/>
+		<result property="ume_finishread_count" column="ume_finishread_count"/>
+		<result property="ubr_code" column="ubr_code"/>
+		<result property="ucd_code" column="ucd_code"/>
+		<result property="ucm_file_type" column="ucm_file_type"/>
+		<result property="ucm_text_count" column="ucm_text_count"/>
+		<result property="ucm_filesize" column="ucm_filesize"/>
+		<result property="ucm_total_playtime" column="ucm_total_playtime"/>
+		<result property="ucm_paper_pages" column="ucm_paper_pages"/>
+		<result property="ucm_ucs_code" column="ucm_ucs_code"/>
+		<result property="ucm_series_no" column="ucm_series_no"/>
+		<result property="ucm_toc" column="ucm_toc"/>
+		<result property="ucm_review" column="ucm_review"/>
+		<result property="ucm_publish_review" column="ucm_publish_review"/>
+		<result property="uil_code" column="uil_code"/>
+		<result property="uct_parent_name" column="uct_parent_name"/>
+		<result property="ucm_uct_code" column="ucm_uct_code"/>
+		<result property="ucm_ucp_code" column="ucm_ucp_code"/>
+		<result property="ucm_ebook_isbn" column="ucm_ebook_isbn"/>
+		<result property="ucd_code" column="ucd_code"/>
+		<result property="uclc_like" column="uclc_like"/>
+		<result property="uclc_type" column="uclc_type"/>
+		<collection property="seriesList" column="{ ucm_ucs_code, = ucm_ucs_code, ucm_code = ucm_code }" javaType="java.util.ArrayList" ofType="frontCmVO" select="bookSeriesList"/>
+	</resultMap>
+	
+	<select id="selectBookDetail" parameterType="frontCmVO" resultMap="bookDetailResult">
+		SELECT 
+			  contents_master.UCM_CODE																		AS ucm_code
+			, contents_master.UCM_LIMIT_AGE																	AS ucm_limit_age
+			, contents_master.UCM_COVER_URL																	AS ucm_cover_url
+			, contents_master.UCM_INTRO_IMG_URL																AS ucm_intro_img_url
+			, contents_master.UCM_INTRO_MOVIE_URL															AS ucm_intro_movie_url
+			, (SELECT UCT_TYPE FROM TBL_CATEGORY_MASTER WHERE UCT_CODE = contents_master.UCM_UCT_CODE)		AS uct_type
+			, (SELECT UCT_NAME FROM TBL_CATEGORY_MASTER WHERE UCT_CODE = CONCAT(LEFT(contents_master.UCM_UCT_CODE, 8), '00000'))	AS uct_parent_name
+			, (SELECT UCT_NAME FROM TBL_CATEGORY_MASTER WHERE UCT_CODE = contents_master.UCM_UCT_CODE)		AS uct_name
+			, contents_master.UCM_TITLE																		AS ucm_title
+			, contents_master.UCM_SUB_TITLE																	AS ucm_sub_title
+			, contents_master.UCM_WRITER																	AS ucm_writer
+			, contents_master.UCM_PUBLISHER																	AS ucp_brand
+			, DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y.%m.%d')									AS ucm_ebook_pubdate
+			, (SELECT COUNT(UME_CODE) FROM TBL_MEMBER_LIBRARY_BOOK WHERE UME_UCM_CODE = contents_master.UCM_CODE AND UME_READ_STATUS = 'R' AND UME_STATUS = 'A') AS ucm_read_count
+			, library_book.UME_CODE																			AS ume_code
+			, library_book.UME_STATUS																		AS ume_status
+			, IFNULL(library_book.UME_FINISHREAD_COUNT, 0)													AS ume_finishread_count
+			, (SELECT UBR_CODE FROM TBL_BOOK_REPORT WHERE UBR_UM_CODE = #{um_code}
+													AND UBR_UCM_CODE = contents_master.UCM_CODE
+													AND UBR_UME_CODE = library_book.UME_CODE)				AS ubr_code
+			, (SELECT UCD_CODE FROM TBL_CONTENT_DISCUSSION WHERE UCD_UM_CODE = #{um_code}
+													AND UCD_UCM_CODE = contents_master.UCM_CODE LIMIT 1)	AS ucd_code
+			, contents_master.UCM_FILE_TYPE																	AS ucm_file_type
+			, IFNULL(contents_master.UCM_TEXT_COUNT, 0)														AS ucm_text_count
+			, IFNULL(contents_master.UCM_FILESIZE, 0)														AS ucm_filesize
+			, contents_master.UCM_TOTAL_PLAYTIME															AS ucm_total_playtime
+			, contents_master.UCM_PAPER_PAGES																AS ucm_paper_pages
+			, contents_master.UCM_INTRO																		AS ucm_intro
+			, contents_master.UCM_UCS_CODE																	AS ucm_ucs_code
+			, contents_master.UCM_SERIES_NO																	AS ucm_series_no
+			, contents_master.UCM_TOC																		AS ucm_toc
+			, contents_master.UCM_REVIEW																	AS ucm_review
+			, contents_master.UCM_PUBLISH_REVIEW															AS ucm_publish_review
+			<if test='uis_common_book_flag == "Y"'>
+			,(select library_master.UIL_CODE from TBL_INSTITUTION_LIBRARY_MASTER library_master 
+				join TBL_INSTITUTION_LIBRARY_EBOOK library_ebook on library_master.UIL_CODE = library_ebook.UIE_UIL_CODE
+        		and library_ebook.UIE_UCM_CODE = #{ucm_code} and library_master.UIL_UIS_CODE in (#{uis_code},'') 
+         		AND library_master.UIL_DISPLAY_STARTDATE <![CDATA[ <= ]]> CURRENT_TIMESTAMP
+				AND library_master.UIL_DISPLAY_ENDDATE <![CDATA[ >= ]]> CURRENT_TIMESTAMP 
+				limit 1
+        	) AS uil_code
+			,(select library_master.UIL_NAME from TBL_INSTITUTION_LIBRARY_MASTER library_master 
+				join TBL_INSTITUTION_LIBRARY_EBOOK library_ebook on library_master.UIL_CODE = library_ebook.UIE_UIL_CODE
+        		and library_ebook.UIE_UCM_CODE = #{ucm_code} and library_master.UIL_UIS_CODE in (#{uis_code},'') 
+         		AND library_master.UIL_DISPLAY_STARTDATE <![CDATA[ <= ]]> CURRENT_TIMESTAMP
+				AND library_master.UIL_DISPLAY_ENDDATE <![CDATA[ >= ]]> CURRENT_TIMESTAMP 
+				limit 1
+        	) AS uil_name
+			</if>
+			<if test='uis_common_book_flag == "N"'>
+			,(select library_master.UIL_CODE from TBL_INSTITUTION_LIBRARY_MASTER library_master 
+				join TBL_INSTITUTION_LIBRARY_EBOOK library_ebook on library_master.UIL_CODE = library_ebook.UIE_UIL_CODE
+        		and library_ebook.UIE_UCM_CODE = #{ucm_code} and library_master.UIL_UIS_CODE in (#{uis_code}) 
+         		AND library_master.UIL_DISPLAY_STARTDATE <![CDATA[ <= ]]> CURRENT_TIMESTAMP
+				AND library_master.UIL_DISPLAY_ENDDATE <![CDATA[ >= ]]> CURRENT_TIMESTAMP 
+				limit 1
+        	) AS uil_code
+			,(select library_master.UIL_NAME from TBL_INSTITUTION_LIBRARY_MASTER library_master 
+				join TBL_INSTITUTION_LIBRARY_EBOOK library_ebook on library_master.UIL_CODE = library_ebook.UIE_UIL_CODE
+        		and library_ebook.UIE_UCM_CODE = #{ucm_code} and library_master.UIL_UIS_CODE in (#{uis_code}) 
+         		AND library_master.UIL_DISPLAY_STARTDATE <![CDATA[ <= ]]> CURRENT_TIMESTAMP
+				AND library_master.UIL_DISPLAY_ENDDATE <![CDATA[ >= ]]> CURRENT_TIMESTAMP 
+				limit 1
+        	) AS uil_name
+			</if>
+			, contents_master.UCM_UCT_CODE																	AS ucm_uct_code
+			, contents_master.UCM_UCP_CODE																	AS ucm_ucp_code
+			, contents_master.UCM_EBOOK_ISBN																AS ucm_ebook_isbn
+			, contents_master.UCM_SUPPORT_TTS																AS ucm_support_tts
+			, contents_master.UCM_PREVIEW_FLAG																AS ucm_preview_flag
+			, (SELECT COUNT(UCLC_CODE) FROM TBL_CONTENTS_LIKE_COMMENT WHERE UCLC_UCM_CODE = contents_master.UCM_CODE AND UCLC_TYPE = 'Y')
+																				AS uclc_like
+			, (SELECT DISTINCT UCLC_TYPE FROM TBL_CONTENTS_LIKE_COMMENT WHERE UCLC_UCM_CODE = contents_master.UCM_CODE AND UCLC_UM_CODE = #{um_code})
+																				AS uclc_type
+			, (SELECT DISTINCT UCLC_CODE FROM TBL_CONTENTS_LIKE_COMMENT WHERE UCLC_UCM_CODE = contents_master.UCM_CODE AND UCLC_UM_CODE = #{um_code} limit 1)
+																				AS uclc_code
+			, contents_master.UCM_WEBDRM2_YN															AS ucm_webdrm_yn
+			, contents_master.UCM_COPY_BOOK_FLAG														AS ucm_copy_book_flag
+			, (SELECT UIS_COPY_BOOK_FLAG FROM TBL_INSTITUTION_MASTER WHERE UIS_CODE = #{uis_code})
+																				AS uis_copy_book_flag
+			, (SELECT UIS_RETURN_FLAG FROM TBL_INSTITUTION_MASTER WHERE UIS_CODE = #{uis_code})
+																				AS uis_return_flag
+			, (SELECT UIS_RETURN_UI_FLAG FROM TBL_INSTITUTION_MASTER WHERE UIS_CODE = #{uis_code})
+																				AS uis_return_ui_flag																	
+			, (SELECT UIS_PREVIEW_FLAG FROM TBL_INSTITUTION_MASTER WHERE UIS_CODE = #{uis_code})
+																				AS uis_preview_flag																	
+			, EXISTS(SELECT UICE_UCM_CODE FROM TBL_INSTITUTION_COPY_EBOOK WHERE UICE_UCM_CODE = ucm_code AND UICE_UIS_CODE = #{uis_code})
+																				AS copy_book_flag
+			, EXISTS(SELECT UDR_CODE FROM TBL_ORDER_MASTER WHERE UDR_UCM_CODE = ucm_code AND UDR_UM_CODE = #{um_code} AND DATE_FORMAT(UDR_ENDDATE, '%Y-%m-%d %H:%i:%s') <![CDATA[ >= ]]> DATE_FORMAT(CURRENT_TIMESTAMP, '%Y-%m-%d %H:%i:%s') limit 1)
+																				AS copy_order_exist
+			<if test='uis_return_flag == "N"'>
+			, (
+			(SELECT UICE_COPY FROM TBL_INSTITUTION_COPY_EBOOK WHERE UICE_UCM_CODE = contents_master.UCM_CODE AND UICE_UIS_CODE = #{uis_code})
+			 - (SELECT COUNT(UDR_CODE) FROM TBL_ORDER_MASTER WHERE UDR_UCM_CODE = #{ucm_code} AND UDR_UIS_CODE = #{uis_code} AND DATE_FORMAT(UDR_REGDATE, '%Y-%m-%d') = DATE_FORMAT(NOW(), '%Y-%m-%d')))
+																				AS today_copy_count
+			</if>
+			<if test='uis_return_flag == "Y"'>
+			, (
+			(SELECT URC_COPY FROM TBL_RETURN_CONTENTS WHERE URC_UCM_CODE = contents_master.UCM_CODE AND URC_UIS_CODE = #{uis_code})
+			 - (SELECT COUNT(UDR_CODE) FROM TBL_ORDER_MASTER WHERE UDR_UCM_CODE = #{ucm_code} AND UDR_UIS_CODE = #{uis_code} 
+			 AND DATE_FORMAT(UDR_STARTDATE, '%Y-%m-%d %H:%i:%s') <![CDATA[ <= ]]> DATE_FORMAT(CURRENT_TIMESTAMP, '%Y-%m-%d %H:%i:%s') AND DATE_FORMAT(UDR_ENDDATE, '%Y-%m-%d %H:%i:%s') <![CDATA[ >= ]]> DATE_FORMAT(CURRENT_TIMESTAMP, '%Y-%m-%d %H:%i:%s')))
+																				AS today_copy_count
+			</if>
+			
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		LEFT OUTER JOIN
+			TBL_MEMBER_LIBRARY member_library
+		ON
+			member_library.UML_UM_CODE = #{um_code}
+		LEFT OUTER JOIN
+			TBL_MEMBER_LIBRARY_BOOK library_book
+		ON
+			member_library.UML_CODE = library_book.UME_UML_CODE
+		AND
+			contents_master.UCM_CODE = library_book.UME_UCM_CODE
+					
+		WHERE
+			1 = 1
+		AND contents_master.UCM_CODE = #{ucm_code}
+		LIMIT 1
+	</select>
+	
+	<select id="selectBookDetailInfo" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT 
+			  contents_master.UCM_CODE																		AS ucm_code
+			, contents_master.UCM_LIMIT_AGE																	AS ucm_limit_age
+			, contents_master.UCM_COVER_URL																	AS ucm_cover_url
+			, (SELECT UCT_TYPE FROM TBL_CATEGORY_MASTER WHERE UCT_CODE = contents_master.UCM_UCT_CODE)		AS uct_type
+			, contents_master.UCM_TITLE																		AS ucm_title
+			, contents_master.UCM_SUB_TITLE																	AS ucm_sub_title
+			, contents_master.UCM_WRITER																	AS ucm_writer
+			, contents_master.UCM_PUBLISHER																	AS ucp_brand
+			, contents_master.UCM_UCP_CODE																	AS ucm_ucp_code
+		FROM
+			TBL_CONTENTS_MASTER contents_master	
+		WHERE
+			1 = 1
+		AND contents_master.UCM_CODE = #{ucm_code}
+		LIMIT 1
+	</select>
+	
+	<select id="bookSeriesList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT 
+			  contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_PUBLISHER										AS ucp_brand
+			, DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y/%m/%d')		AS ucm_ebook_pubdate
+			, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+			, contents_master.UCM_UCT_CODE										AS ucm_uct_code
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_LIMIT_AGE										AS ucm_limit_age
+			, contents_master.UCM_UCS_CODE										AS ucm_ucs_code
+			, contents_master.UCM_SERIES_NO										AS ucm_series_no
+			, (SELECT COUNT(UCM_CODE) FROM TBL_CONTENTS_MASTER WHERE ucm_ucs_code != '' 
+														AND UCM_UCS_CODE = contents_master.UCM_UCS_CODE 
+														AND UCM_STATUS = 'S'
+														AND UCM_SVRYN = 'Y' ) AS ucm_series_count
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+			SELECT UCE_UCM_CODE
+			 FROM TBL_CONTENTS_EXCLUDE
+			 WHERE UCE_UIS_CODE = #{uis_code}
+			) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			1 = 1
+		AND	contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y' 
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		<choose>
+		<when test='ucm_ucs_code != null and ucm_ucs_code != ""'>
+		AND
+			contents_master.UCM_UCS_CODE = #{ucm_ucs_code}
+		AND contents_master.UCM_CODE != #{ucm_code}
+		</when>
+		<otherwise>
+		AND
+			contents_master.UCM_UCS_CODE is not null
+		AND contents_master.UCM_CODE = #{ucm_code}
+		</otherwise>
+		</choose>
+		ORDER BY contents_master.UCM_SERIES_NO
+	</select>
+	
+	<select id="bookPopularList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT 
+			  contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_EBOOK_ISBN									AS ucm_ebook_isbn
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_SUB_TITLE										AS ucm_sub_title
+			, contents_master.UCM_LIMIT_AGE										AS ucm_limit_age
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_PUBLISHER										AS ucp_brand
+			, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+			, contents_master.UCM_DOWNLOAD_COUNT								AS totalCount
+			<!--  , (SELECT COUNT(UCM_CODE) FROM TBL_CONTENTS_MASTER WHERE ucm_ucs_code != '' 
+														AND UCM_UCS_CODE = contents_master.UCM_UCS_CODE 
+														AND UCM_STATUS = 'S'
+														AND UCM_SVRYN = 'Y' )	AS ucm_series_count-->
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+			SELECT UCE_UCM_CODE
+			 FROM TBL_CONTENTS_EXCLUDE
+			 WHERE UCE_UIS_CODE = #{uis_code}
+			) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			1 = 1
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		AND	contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		AND V.uce_ucm_code is null
+		AND contents_master.UCM_CODE != #{ucm_code}
+		AND contents_master.UCM_UCT_CODE LIKE CONCAT(LEFT(#{ucm_uct_code}, 8), '%')
+		ORDER BY totalCount DESC, contents_master.UCM_REGDATE DESC
+		LIMIT 12
+	</select>
+	
+	<update id="getSeqence" parameterType="commonVO" >
+		<selectKey keyProperty="seq_currval" resultType="java.lang.Integer" order="BEFORE">
+			SELECT
+				MAX(SEQ_CURRVAL)+1
+			FROM
+				TBL_SEQUENCES
+			WHERE
+				SEQ_NAME = #{seq_name}
+		</selectKey>
+		UPDATE TBL_SEQUENCES
+		SET
+			SEQ_CURRVAL = #{seq_currval}
+		WHERE
+			SEQ_NAME = #{seq_name}
+	</update>
+	
+	<select id="memberLibraryExist" parameterType="frontMemberLibraryVO" resultType="java.lang.Integer">
+		SELECT
+			  COUNT(UML_CODE)
+		FROM
+			TBL_MEMBER_LIBRARY
+		WHERE
+			UML_UM_CODE = #{uml_um_code}
+	</select>
+	
+	<insert id="insertMemberLibrary" parameterType="frontMemberLibraryVO">
+		INSERT INTO TBL_MEMBER_LIBRARY
+			(
+				UML_CODE,									UML_UM_CODE,	UML_NAME
+			)
+			VALUES
+			(
+				CONCAT('UML',LPAD(#{uml_code},10,'0')),		#{uml_um_code},	'내서재'
+			)
+	</insert>
+	
+	<insert id="insertMemberLibraryBook" parameterType="frontMemberLibraryVO">
+		INSERT INTO TBL_MEMBER_LIBRARY_BOOK
+			(
+				UME_CODE,
+				UME_UML_CODE,
+				UME_UM_CODE,
+				UME_UCM_CODE,
+				UME_INPUT_DATE
+			)
+			VALUES
+			(
+				CONCAT('UME', substring(#{ume_ucm_code}, 4, 13), substring(#{uml_um_code}, 3, 13), LPAD(#{ume_code},19,'0')),
+				CONCAT('UML',LPAD(#{uml_code},10,'0')),
+				#{uml_um_code},
+				#{ume_ucm_code},
+				CURRENT_TIMESTAMP
+			)
+	</insert>
+	
+	<select id="memberLibraryBookExist" parameterType="frontMemberLibraryVO" resultType="java.lang.Integer">
+		SELECT
+			  COUNT(UME_CODE)
+		FROM
+			TBL_MEMBER_LIBRARY_BOOK
+		WHERE
+			UME_UML_CODE = #{uml_code}
+		AND
+			UME_UCM_CODE = #{ume_ucm_code}
+	</select>
+	
+	<update id="updateReadCountBook" parameterType="frontMemberLibraryVO">
+		UPDATE
+			TBL_CONTENTS_MASTER
+		SET 
+			UCM_READBOOK_COUNT = IFNULL(UCM_READBOOK_COUNT, 0) + 1
+		WHERE
+			UCM_CODE = #{ume_ucm_code}
+	</update>
+	
+	<update id="updateOnlyMemberLibraryEook" parameterType="frontMemberLibraryVO">
+		UPDATE 
+			TBL_MEMBER_LIBRARY_BOOK
+		SET
+			UME_STATUS = #{ume_status}
+			, UME_MOD_DATE = CURRENT_TIMESTAMP
+			<if test='ume_status == "A"'>
+			, UME_INPUT_DATE = CURRENT_TIMESTAMP
+			</if>
+		WHERE
+			UME_UML_CODE = #{uml_code}
+		AND
+			UME_UCM_CODE = #{ume_ucm_code}
+	</update>
+	
+	<select id="selectMemberLibrary" parameterType="frontMemberLibraryVO" resultType="frontMemberLibraryVO">
+		SELECT
+			  UML_CODE														AS uml_code
+			, UML_UM_CODE													AS uml_um_code
+			, UML_NAME														AS uml_name
+			, UML_PWD														AS uml_pwd
+			, UML_BOOK_COUNT												AS uml_book_count
+			, UML_TYPE														AS uml_type
+			, UML_REGDATE													AS uml_regdate
+		FROM
+			TBL_MEMBER_LIBRARY
+		WHERE
+			UML_UM_CODE = #{uml_um_code}
+		LIMIT 1
+	</select>
+	
+	<insert id="insertOnlyMemberLibraryBook" parameterType="frontMemberLibraryVO">
+		INSERT INTO TBL_MEMBER_LIBRARY_BOOK
+			(
+				UME_CODE,
+				UME_UML_CODE,
+				UME_UM_CODE,
+				UME_UCM_CODE,
+				UME_INPUT_DATE
+			)
+			VALUES
+			(
+				CONCAT('UME', substring(#{ume_ucm_code}, 4, 13), substring(#{uml_um_code}, 3, 13), LPAD(#{ume_code},19,'0')),
+				#{ume_uml_code},
+				#{uml_um_code},
+				#{ume_ucm_code},
+				CURRENT_TIMESTAMP
+			)
+	</insert>
+	
+	<select id="selectMemberLibraryBook" parameterType="frontMemberLibraryVO" resultType="frontMemberLibraryVO">
+		SELECT
+			  UME_CODE												AS ume_code
+			, UME_UML_CODE											AS ume_uml_code
+			, UME_UCM_CODE											AS ume_ucm_code
+			, UME_UDR_CODE											AS ume_udr_code
+			, UME_SEQ												AS ume_seq
+			, UME_LAST_READ_PERCENT									AS ume_last_read_percent
+			, UME_LAST_READ_IDX										AS ume_last_read_idx
+			, UME_LAST_READ_POSITION								AS ume_last_read_position
+			, UME_LAST_READ_DATE									AS ume_last_read_date
+			, UME_FINISHREAD_COUNT									AS ume_finishread_count
+			, UME_FINISHREAD_DATE									AS ume_finishread_date
+			, UME_READ_STATUS										AS ume_read_status
+			, UME_ISLOCK											AS ume_islock
+			, UME_PASSWORD											AS ume_password
+			, UME_STATUS											AS ume_status
+			, UME_ISDOWNLOAD										AS ume_isdownload
+			, UME_RATE												AS ume_rate
+			, UME_RATE_MEMO											AS ume_rate_memo
+			, UME_MOD_DATE											AS ume_mod_date
+			, UME_REGDATE											AS ume_regdate
+		FROM
+			TBL_MEMBER_LIBRARY_BOOK
+			
+		WHERE
+			UME_UML_CODE = #{uml_code}
+		AND
+			UME_UCM_CODE = #{ume_ucm_code}
+		LIMIT 1
+	</select>
+	
+	<delete id="deleteMemberLibraryBook" parameterType="frontMemberLibraryVO">
+		UPDATE 
+			TBL_MEMBER_LIBRARY_BOOK
+		SET
+			UME_STATUS = #{ume_status}
+			, UME_ISDOWNLOAD = 'N'
+			, UME_MOD_DATE = CURRENT_TIMESTAMP
+		WHERE
+			UME_CODE = #{ume_code}
+	</delete>
+	
+	<delete id="deleteMemberLibraryBookArray" parameterType="frontMemberLibraryVO">
+		UPDATE 
+			TBL_MEMBER_LIBRARY_BOOK
+		SET
+			UME_STATUS = #{ume_status}
+			, UME_ISDOWNLOAD = 'N'
+			, UME_MOD_DATE = CURRENT_TIMESTAMP
+		WHERE
+			UME_CODE IN
+			<foreach item="item" index="index" collection="ume_codes" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</delete>
+	
+	<select id="newBookListCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(*) AS count
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		LEFT OUTER JOIN
+			TBL_CATEGORY_MASTER category_master
+		ON
+			contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if> 
+		LEFT OUTER JOIN (
+			SELECT UCE_UCM_CODE
+			 FROM TBL_CONTENTS_EXCLUDE
+			 WHERE UCE_UIS_CODE = #{uis_code}
+			) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			1 = 1
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='uct_type != null and uct_type != ""'>
+			<if test='uct_type != null and uct_type != ""'>
+				AND category_master.UCT_TYPE = #{uct_type}
+			</if>
+			<choose>
+			    <when test="uct_code != null and uct_code != '' and uct_code == uct_parent">
+			        AND contents_master.UCM_MAIN_CODE = LEFT(#{uct_code}, 8)
+			    </when>
+			    <when test="uct_code != null and uct_code != '' and uct_code != uct_parent">
+			        AND contents_master.UCM_UCT_CODE = #{uct_code}
+			    </when>
+			</choose>
+		</if>
+		AND
+			contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		AND V.uce_ucm_code is null
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>  
+		AND
+			category_master.UCT_TYPE != 'C'
+	</select>
+	
+	<select id="newBookList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT 
+			  contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_EBOOK_ISBN									AS ucm_ebook_isbn
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_SUB_TITLE										AS ucm_sub_title
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_PUBLISHER										AS ucp_brand
+			, DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y-%m-%d')		AS ucm_ebook_pubdate
+			, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+			, contents_master.UCM_THUMB_URL										AS ucm_thumb_url
+			, contents_master.UCM_UCT_CODE										AS ucm_uct_code
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_LIMIT_AGE										AS ucm_limit_age
+			, contents_master.UCM_UCS_CODE										AS ucm_ucs_code
+			, contents_master.UCM_SERIES_NO										AS ucm_series_no
+			, contents_master.UCM_INTRO											AS ucm_intro
+			, IFNULL(library.UME_CODE, '')										AS ume_code
+			, contents_master.UCM_WEBDRM2_YN									AS ucm_webdrm_yn
+			, (SELECT COUNT(UME_CODE) FROM TBL_MEMBER_LIBRARY_BOOK 
+        		WHERE UME_UCM_CODE = contents_master.UCM_CODE AND UME_READ_STATUS = 'R' AND UME_STATUS = 'A') AS ucm_read_count
+			<!-- , (SELECT COUNT(UCM_CODE) FROM TBL_CONTENTS_MASTER WHERE ucm_ucs_code != '' 
+														AND UCM_UCS_CODE = contents_master.UCM_UCS_CODE 
+														AND UCM_STATUS = 'S'
+														AND UCM_SVRYN = 'Y' )	AS ucm_series_count -->
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		LEFT OUTER JOIN
+			TBL_CATEGORY_MASTER category_master
+		ON
+			contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		LEFT OUTER JOIN TBL_MEMBER_LIBRARY_BOOK library 
+		ON 
+			library.UME_UCM_CODE = contents_master.UCM_CODE 
+			AND library.UME_UM_CODE = #{um_code}
+			AND library.UME_STATUS = 'A'
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if> 
+		LEFT OUTER JOIN (
+			SELECT UCE_UCM_CODE
+			 FROM TBL_CONTENTS_EXCLUDE
+			 WHERE UCE_UIS_CODE = #{uis_code}
+			) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			1 = 1
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='uct_type != null and uct_type != ""'>
+			<if test='uct_type != null and uct_type != ""'>
+				AND category_master.UCT_TYPE = #{uct_type}
+			</if>
+			<choose>
+			    <when test="uct_code != null and uct_code != '' and uct_code == uct_parent">
+			        AND contents_master.UCM_MAIN_CODE = LEFT(#{uct_code}, 8)
+			    </when>
+			    <when test="uct_code != null and uct_code != '' and uct_code != uct_parent">
+			        AND contents_master.UCM_UCT_CODE = #{uct_code}
+			    </when>
+			</choose>
+		</if>
+		AND
+			contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		AND V.uce_ucm_code is null
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		AND
+			category_master.UCT_TYPE != 'C'
+		ORDER BY
+		<choose>
+		  <when test="sortField1 == 'ucm_regdate'">
+		    contents_master.UCM_REGDATE DESC
+		  </when>
+		  <when test="sortField1 == 'ucm_ebook_pubdate'">
+		    contents_master.ucm_ebook_pubdate DESC, contents_master.UCM_REGDATE DESC
+		  </when>
+		  <when test="sortField1 == 'ucm_download_count'">
+		    contents_master.ucm_download_count DESC, contents_master.UCM_REGDATE DESC
+		  </when>
+		  <when test="sortField1 == 'ucm_title'">
+		    contents_master.ucm_title ASC
+		  </when>
+		  <otherwise>
+		    contents_master.UCM_REGDATE DESC
+		  </otherwise>
+		</choose>
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<select id="popularList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT 
+			  contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_EBOOK_ISBN									AS ucm_ebook_isbn
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_SUB_TITLE										AS ucm_sub_title
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_PUBLISHER										AS ucp_brand
+			, DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y-%m-%d')		AS ucm_ebook_pubdate
+			, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+			, contents_master.UCM_THUMB_URL										AS ucm_thumb_url
+			, contents_master.UCM_UCT_CODE										AS ucm_uct_code
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_LIMIT_AGE										AS ucm_limit_age
+			, contents_master.UCM_UCS_CODE										AS ucm_ucs_code
+			, contents_master.UCM_SERIES_NO										AS ucm_series_no
+			, contents_master.UCM_READ_COUNT									AS ucm_read_count
+		    , contents_master.UCM_INTRO											AS ucm_intro
+		    , contents_master.UCM_WEBDRM2_YN									AS ucm_webdrm_yn
+			<!--  , (SELECT COUNT(UCM_CODE) FROM TBL_CONTENTS_MASTER WHERE ucm_ucs_code != '' 
+														AND UCM_UCS_CODE = contents_master.UCM_UCS_CODE 
+														AND UCM_STATUS = 'S'
+														AND UCM_SVRYN = 'Y' )	AS ucm_series_count-->
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		LEFT OUTER JOIN
+			TBL_CATEGORY_MASTER category_master
+		ON
+			contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		
+		WHERE
+			1 = 1
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='uct_type != null and uct_type != ""'>
+			<if test='uct_type != null and uct_type != ""'>
+				AND category_master.UCT_TYPE = #{uct_type}
+			</if>
+			<if test='uct_code != null and uct_code != ""'>
+				AND contents_master.UCM_UCT_CODE LIKE CONCAT(LEFT(#{uct_code}, 8), '%')
+			</if>
+		</if>
+		AND	contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		AND V.uce_ucm_code is null
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		ORDER BY contents_master.UCM_READBOOK_COUNT DESC
+		LIMIT 100
+	</select>
+	
+	<select id="popularList_v2" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+		      contents_master.UCM_CODE                         AS ucm_code
+		    , contents_master.UCM_EBOOK_ISBN                   AS ucm_ebook_isbn
+		    , contents_master.UCM_TITLE                        AS ucm_title
+		    , contents_master.UCM_SUB_TITLE                    AS ucm_sub_title
+		    , contents_master.UCM_WRITER                       AS ucm_writer
+		    , contents_master.UCM_PUBLISHER                    AS ucp_brand
+		    , DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y-%m-%d') AS ucm_ebook_pubdate
+		    , contents_master.UCM_THUMB_URL                    AS ucm_cover_url
+		    , contents_master.UCM_UCT_CODE                     AS ucm_uct_code
+		    , contents_master.UCM_FILE_TYPE                    AS ucm_file_type
+		    , contents_master.UCM_LIMIT_AGE                    AS ucm_limit_age
+		    , contents_master.UCM_UCS_CODE                     AS ucm_ucs_code
+		    , contents_master.UCM_SERIES_NO                    AS ucm_series_no
+		    , contents_master.UCM_INTRO							AS ucm_intro
+		    , IFNULL(library.UME_CODE, '')						AS ume_code
+		    , contents_master.UCM_WEBDRM2_YN					AS ucm_webdrm_yn
+		    , (SELECT COUNT(UME_CODE) FROM TBL_MEMBER_LIBRARY_BOOK 
+        		WHERE UME_UCM_CODE = contents_master.UCM_CODE AND UME_READ_STATUS = 'R' AND UME_STATUS = 'A') AS ucm_read_count
+		    , ROUND((
+		          (agg.read_cnt * 0.35)
+		        + ((agg.read_time / 3600) * 0.10)
+		        + (agg.read_percent * 0.20)
+		        + (agg.order_cnt * 0.35)
+		      ) / 100, 2) AS score
+		
+		FROM (
+		    SELECT
+		        tdpl.ucm_code,
+		        SUM(tdpl.read_cnt)     AS read_cnt,
+		        SUM(tdpl.read_time)    AS read_time,
+		        AVG(tdpl.read_percent) AS read_percent,
+		        SUM(tdpl.order_cnt)    AS order_cnt
+		    FROM TBL_DAILY_POPULAR_LOG tdpl
+		    WHERE
+		        <choose>
+				  <when test='searchName2 == "D"'>
+				    tdpl.LOG_YMD <![CDATA[ >= ]]> DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+		        	AND tdpl.LOG_YMD <![CDATA[ < ]]> CURDATE()
+				  </when>
+				  <when test='searchName2 == "W"'>
+				    tdpl.LOG_YMD <![CDATA[ >= ]]> DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+		        	AND tdpl.LOG_YMD <![CDATA[ < ]]> CURDATE()
+				  </when>
+				 <when test='searchName2 == "M"'>
+				    tdpl.LOG_YMD <![CDATA[ >= ]]> DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+		        	AND tdpl.LOG_YMD <![CDATA[ < ]]> CURDATE()
+				  </when>
+				  <otherwise>
+				    tdpl.LOG_YMD <![CDATA[ >= ]]> DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+		        	AND tdpl.LOG_YMD <![CDATA[ < ]]> CURDATE()
+				  </otherwise>
+				</choose>
+				<if test='searchName3 == "MY"'>
+				 	AND tdpl.UIS_CODE = #{uis_code}
+				 </if>
+		    GROUP BY
+		        tdpl.ucm_code
+		) agg
+		JOIN 
+			TBL_CONTENTS_MASTER contents_master
+		ON
+			contents_master.ucm_code = agg.ucm_code
+		LEFT OUTER JOIN
+			TBL_CATEGORY_MASTER category_master
+		ON
+			contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		LEFT OUTER JOIN TBL_MEMBER_LIBRARY_BOOK library 
+		ON 
+			library.UME_UCM_CODE = contents_master.UCM_CODE AND library.UME_UM_CODE = #{um_code} AND library.UME_STATUS = 'A'
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		
+		WHERE
+			1 = 1
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='uct_type != null and uct_type != ""'>
+			<if test='uct_type != null and uct_type != ""'>
+				AND category_master.UCT_TYPE = #{uct_type}
+			</if>
+			<if test='uct_code != null and uct_code != ""'>
+				<choose>
+				    <when test="uct_code != null and uct_code != '' and uct_code == uct_parent">
+				        AND contents_master.UCM_MAIN_CODE = LEFT(#{uct_code}, 8)
+				    </when>
+				    <when test="uct_code != null and uct_code != '' and uct_code != uct_parent">
+				        AND contents_master.UCM_UCT_CODE = #{uct_code}
+				    </when>
+				</choose>
+			</if>
+		</if>
+		AND	contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		AND V.uce_ucm_code is null
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		ORDER BY score DESC
+		LIMIT 100
+	</select>
+	
+	<select id="bestPopularList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT 
+			  contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_EBOOK_ISBN									AS ucm_ebook_isbn
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_SUB_TITLE										AS ucm_sub_title
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_PUBLISHER										AS ucp_brand
+			, DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y-%m-%d')		AS ucm_ebook_pubdate
+			, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+			, contents_master.UCM_UCT_CODE										AS ucm_uct_code
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_LIMIT_AGE										AS ucm_limit_age
+			, contents_master.UCM_UCS_CODE										AS ucm_ucs_code
+			, contents_master.UCM_SERIES_NO										AS ucm_series_no
+			, contents_master.UCM_READ_COUNT									AS ucm_read_count
+		    , contents_master.UCM_INTRO											AS ucm_intro
+		    , contents_master.UCM_WEBDRM2_YN									AS ucm_webdrm_yn
+			<!--  , (SELECT COUNT(UCM_CODE) FROM TBL_CONTENTS_MASTER WHERE ucm_ucs_code != '' 
+														AND UCM_UCS_CODE = contents_master.UCM_UCS_CODE 
+														AND UCM_STATUS = 'S'
+														AND UCM_SVRYN = 'Y' )	AS ucm_series_count-->
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		LEFT OUTER JOIN
+			TBL_CATEGORY_MASTER category_master
+		ON
+			contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		
+		WHERE
+			1 = 1
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='uct_type != null and uct_type != ""'>
+			<if test='uct_type != null and uct_type != ""'>
+				AND category_master.UCT_TYPE = #{uct_type}
+			</if>
+			<if test='uct_code != null and uct_code != ""'>
+				AND contents_master.UCM_UCT_CODE LIKE CONCAT(LEFT(#{uct_code}, 8), '%')
+			</if>
+		</if>
+		AND	contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		AND V.uce_ucm_code is null
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		ORDER BY contents_master.UCM_READBOOK_COUNT DESC
+		LIMIT 3
+	</select>
+	
+	<select id="bestPopularList_v2" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+		      contents_master.UCM_CODE                         AS ucm_code
+		    , contents_master.UCM_EBOOK_ISBN                   AS ucm_ebook_isbn
+		    , contents_master.UCM_TITLE                        AS ucm_title
+		    , contents_master.UCM_SUB_TITLE                    AS ucm_sub_title
+		    , contents_master.UCM_WRITER                       AS ucm_writer
+		    , contents_master.UCM_PUBLISHER                    AS ucp_brand
+		    , DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y-%m-%d') AS ucm_ebook_pubdate
+		    , contents_master.UCM_THUMB_URL                    AS ucm_cover_url
+		    , contents_master.UCM_UCT_CODE                     AS ucm_uct_code
+		    , contents_master.UCM_FILE_TYPE                    AS ucm_file_type
+		    , contents_master.UCM_LIMIT_AGE                    AS ucm_limit_age
+		    , contents_master.UCM_UCS_CODE                     AS ucm_ucs_code
+		    , contents_master.UCM_SERIES_NO                    AS ucm_series_no
+		    , contents_master.UCM_INTRO							AS ucm_intro
+		    , IFNULL(library.UME_CODE, '')						AS ume_code
+		    , contents_master.UCM_WEBDRM2_YN					AS ucm_webdrm_yn
+		    , (SELECT COUNT(UME_CODE) FROM TBL_MEMBER_LIBRARY_BOOK 
+        		WHERE UME_UCM_CODE = contents_master.UCM_CODE AND UME_READ_STATUS = 'R' AND UME_STATUS = 'A') AS ucm_read_count
+		    , ROUND((
+		          (agg.read_cnt * 0.35)
+		        + ((agg.read_time / 3600) * 0.10)
+		        + (agg.read_percent * 0.20)
+		        + (agg.order_cnt * 0.35)
+		      ) / 100, 2) AS score
+		
+		FROM (
+		    SELECT
+		        tdpl.ucm_code,
+		        SUM(tdpl.read_cnt)     AS read_cnt,
+		        SUM(tdpl.read_time)    AS read_time,
+		        AVG(tdpl.read_percent) AS read_percent,
+		        SUM(tdpl.order_cnt)    AS order_cnt
+		    FROM TBL_DAILY_POPULAR_LOG tdpl
+		    WHERE
+		        <choose>
+				  <when test='searchName2 == "D"'>
+				    tdpl.LOG_YMD <![CDATA[ >= ]]> DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+		        	AND tdpl.LOG_YMD <![CDATA[ < ]]> CURDATE()
+				  </when>
+				
+				  <when test='searchName2 == "W"'>
+				    tdpl.LOG_YMD <![CDATA[ >= ]]> DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+		        	AND tdpl.LOG_YMD <![CDATA[ < ]]> CURDATE()
+				  </when>
+				
+				 <when test='searchName2 == "M"'>
+				    tdpl.LOG_YMD <![CDATA[ >= ]]> DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+		        	AND tdpl.LOG_YMD <![CDATA[ < ]]> CURDATE()
+				  </when>
+				
+				  <otherwise>
+				    tdpl.LOG_YMD <![CDATA[ >= ]]> DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+		        	AND tdpl.LOG_YMD <![CDATA[ < ]]> CURDATE()
+				  </otherwise>
+				</choose>
+				 <if test='searchName3 == "MY"'>
+				 	AND tdpl.UIS_CODE = #{uis_code}
+				 </if>
+		    GROUP BY
+	        tdpl.ucm_code
+		) agg
+		JOIN TBL_CONTENTS_MASTER contents_master
+		    ON contents_master.UCM_CODE = agg.ucm_code
+		LEFT OUTER JOIN
+			TBL_CATEGORY_MASTER category_master
+		ON
+			contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		LEFT OUTER JOIN TBL_MEMBER_LIBRARY_BOOK library 
+		ON 
+			library.UME_UCM_CODE = contents_master.UCM_CODE 
+				AND library.UME_UM_CODE = #{um_code} 
+				AND library.UME_STATUS = 'A'
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			1 = 1
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='uct_type != null and uct_type != ""'>
+			<if test='uct_type != null and uct_type != ""'>
+				AND category_master.UCT_TYPE = #{uct_type}
+			</if>
+			<if test='uct_code != null and uct_code != ""'>
+				<choose>
+				    <when test="uct_code != null and uct_code != '' and uct_code == uct_parent">
+				        AND contents_master.UCM_MAIN_CODE = LEFT(#{uct_code}, 8)
+				    </when>
+				    <when test="uct_code != null and uct_code != '' and uct_code != uct_parent">
+				        AND contents_master.UCM_UCT_CODE = #{uct_code}
+				    </when>
+				</choose>
+			</if>
+		</if>
+		AND	contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		AND V.uce_ucm_code is null
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		ORDER BY score DESC
+		LIMIT 3
+	</select>
+
+	<select id="searchPopularList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+		      contents_master.UCM_CODE                         AS ucm_code
+		    , contents_master.UCM_EBOOK_ISBN                   AS ucm_ebook_isbn
+		    , contents_master.UCM_TITLE                        AS ucm_title
+		    , contents_master.UCM_SUB_TITLE                    AS ucm_sub_title
+		    , contents_master.UCM_WRITER                       AS ucm_writer
+		    , contents_master.UCM_PUBLISHER                    AS ucp_brand
+		    , DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y-%m-%d') AS ucm_ebook_pubdate
+		    , contents_master.UCM_THUMB_URL                    AS ucm_cover_url
+		    , contents_master.UCM_UCT_CODE                     AS ucm_uct_code
+		    , contents_master.UCM_FILE_TYPE                    AS ucm_file_type
+		    , contents_master.UCM_LIMIT_AGE                    AS ucm_limit_age
+		    , contents_master.UCM_UCS_CODE                     AS ucm_ucs_code
+		    , contents_master.UCM_SERIES_NO                    AS ucm_series_no
+		    , contents_master.UCM_INTRO							AS ucm_intro
+		    , IFNULL(library.UME_CODE, '')						AS ume_code
+		    , contents_master.UCM_WEBDRM2_YN					AS ucm_webdrm_yn
+		    , (SELECT COUNT(UME_CODE) FROM TBL_MEMBER_LIBRARY_BOOK
+		    		WHERE UME_UCM_CODE = contents_master.UCM_CODE AND UME_READ_STATUS = 'R' AND UME_STATUS = 'A') AS ucm_read_count
+		    , ROUND((
+		          (agg.read_cnt * 0.35)
+		        + ((agg.read_time / 3600) * 0.10)
+		        + (agg.read_percent * 0.20)
+		        + (agg.order_cnt * 0.35)
+		      ) / 100, 2) AS score
+		
+		FROM (
+		    SELECT
+		        tdpl.ucm_code,
+		        SUM(tdpl.read_cnt)     AS read_cnt,
+		        SUM(tdpl.read_time)    AS read_time,
+		        AVG(tdpl.read_percent) AS read_percent,
+		        SUM(tdpl.order_cnt)    AS order_cnt
+		    FROM TBL_DAILY_POPULAR_LOG tdpl
+		    WHERE
+			    tdpl.LOG_YMD <![CDATA[ >= ]]> DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+				AND tdpl.LOG_YMD <![CDATA[ < ]]> CURDATE()
+		    GROUP BY
+		        tdpl.ucm_code
+		) agg
+		JOIN
+			TBL_CONTENTS_MASTER contents_master
+		ON
+			contents_master.ucm_code = agg.ucm_code
+		LEFT OUTER JOIN
+			TBL_CATEGORY_MASTER category_master
+		ON
+			contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		LEFT OUTER JOIN TBL_MEMBER_LIBRARY_BOOK library
+		ON
+			library.UME_UCM_CODE = contents_master.UCM_CODE
+				AND library.UME_UM_CODE = #{um_code}
+				AND library.UME_STATUS = 'A'
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		
+		WHERE
+			1 = 1
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		AND	contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		AND V.uce_ucm_code is null
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		ORDER BY score DESC
+		LIMIT #{limit_count}
+	</select>
+	
+	<select id="categoryListCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(contents_master.UCM_CODE) AS count
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		LEFT OUTER JOIN
+			TBL_CATEGORY_MASTER category_master
+		ON
+			contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		LEFT OUTER JOIN
+			TBL_CP_MASTER cp_master
+		ON
+			contents_master.UCM_UCP_CODE = cp_master.UCP_CODE
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		
+		WHERE
+			1 = 1
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		
+		<if test='uct_type != null and uct_type != ""'>
+			<if test='uct_type != null and uct_type != ""'>
+				AND category_master.UCT_TYPE = #{uct_type}
+			</if>
+			<if test="uct_code != null and uct_code != ''">
+				<choose>
+				    <when test="uct_code != null and uct_code != '' and uct_code == uct_parent">
+				        AND contents_master.UCM_MAIN_CODE = LEFT(#{uct_code}, 8)
+				    </when>
+				    <when test="uct_code != null and uct_code != '' and uct_code != uct_parent">
+				        AND contents_master.UCM_UCT_CODE = #{uct_code}
+				    </when>
+				</choose>
+			</if>
+		</if>
+		AND
+			contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		AND V.uce_ucm_code is null
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if> 
+		AND
+			category_master.UCT_TYPE != 'C'
+	</select>
+	
+	<select id="totalBookCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(UCM_CODE)															AS totalBookCount
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		
+		WHERE
+			1 = 1
+			AND
+				UCM_STATUS = 'S'
+			AND 
+				UCM_SVRYN = 'Y'
+			AND V.uce_ucm_code is null
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+			AND	UCM_COPY_BOOK_FLAG = 'N'
+		</if> 
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+	</select>
+	
+	<select id="categoryList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_EBOOK_ISBN									AS ucm_ebook_isbn
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_SUB_TITLE										AS ucm_sub_title
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_PUBLISHER										AS ucp_brand
+			, DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y.%m.%d')		AS ucm_ebook_pubdate
+			, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+			, contents_master.UCM_UCT_CODE										AS ucm_uct_code
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_LIMIT_AGE										AS ucm_limit_age
+			, contents_master.UCM_UCS_CODE										AS ucm_ucs_code
+			, contents_master.UCM_SERIES_NO										AS ucm_series_no
+			, contents_master.UCM_INTRO											AS ucm_intro
+			, IFNULL(library.UME_CODE, '')										AS ume_code
+			, contents_master.UCM_WEBDRM2_YN									AS ucm_webdrm_yn
+			, (SELECT COUNT(UME_CODE) FROM TBL_MEMBER_LIBRARY_BOOK 
+        		WHERE UME_UCM_CODE = contents_master.UCM_CODE AND UME_READ_STATUS = 'R' AND UME_STATUS = 'A') AS ucm_read_count
+			<!--  , (SELECT COUNT(UCM_CODE) FROM TBL_CONTENTS_MASTER WHERE ucm_ucs_code != ''
+														AND UCM_UCS_CODE = contents_master.UCM_UCS_CODE
+														AND UCM_STATUS = 'S'
+														AND UCM_SVRYN = 'Y' )	AS ucm_series_count-->
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		LEFT OUTER JOIN
+			TBL_CATEGORY_MASTER category_master
+		ON
+			contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		LEFT OUTER JOIN TBL_MEMBER_LIBRARY_BOOK library 
+		ON 
+			library.UME_UCM_CODE = contents_master.UCM_CODE 
+				AND library.UME_UM_CODE = #{um_code} 
+				AND library.UME_STATUS = 'A'
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+
+		WHERE
+			1 = 1
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='uct_type != null and uct_type != ""'>
+			<if test='uct_type != null and uct_type != ""'>
+				AND category_master.UCT_TYPE = #{uct_type}
+			</if>
+			<if test='uct_type != null and uct_type != ""'>
+				<if test="uct_code != null and uct_code != ''">
+				    <choose>
+					    <when test="uct_code != null and uct_code != '' and uct_code == uct_parent">
+					        AND contents_master.UCM_MAIN_CODE = LEFT(#{uct_code}, 8)
+					    </when>
+					    <when test="uct_code != null and uct_code != '' and uct_code != uct_parent">
+					        AND contents_master.UCM_UCT_CODE = #{uct_code}
+					    </when>
+					</choose>
+				</if>
+			</if>
+		</if>
+		AND
+			contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		AND V.uce_ucm_code is null
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		AND
+			category_master.UCT_TYPE != 'C'
+		ORDER BY
+		<choose>
+		  <when test="sortField1 == 'ucm_regdate'">
+		    contents_master.UCM_REGDATE DESC
+		  </when>
+		  <when test="sortField1 == 'ucm_ebook_pubdate'">
+		    contents_master.ucm_ebook_pubdate DESC, contents_master.UCM_REGDATE DESC
+		  </when>
+		  <when test="sortField1 == 'ucm_download_count'">
+		    contents_master.ucm_download_count DESC, contents_master.UCM_REGDATE DESC
+		  </when>
+		  <when test="sortField1 == 'ucm_title'">
+		    contents_master.ucm_title ASC
+		  </when>
+		  <otherwise>
+		    contents_master.ucm_ebook_pubdate DESC
+		  </otherwise>
+		</choose>
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<select id="noticeListCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(notice.UN_NO) AS count
+		FROM
+			TBL_NOTICE notice
+		WHERE
+			1 = 1
+		AND notice.UN_NOTICE_TYPE = 'N'
+		AND
+		(
+				notice.UN_UIS_CODE = #{uis_code}
+			OR
+				notice.UN_UIS_CODE = ''
+		)
+	</select>
+	
+	<select id="noticeList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT 
+			  notice.UN_NO										AS un_no
+			, notice.UN_TITLE									AS un_title
+			, notice.UN_UIS_CODE								AS un_uis_code
+			, notice.UN_CONTENT									AS un_content
+			, notice.UN_AM_USERID								AS un_am_userid
+			, DATE_FORMAT(notice.UN_REGDATE, '%Y.%m.%d')		AS un_regdate
+		FROM
+			TBL_NOTICE notice
+		WHERE
+			1 = 1
+		AND notice.UN_NOTICE_TYPE = 'N'
+		AND notice.UN_USEYN = 'N'
+		AND
+		(
+				notice.UN_UIS_CODE = #{uis_code}
+			OR
+				notice.UN_UIS_CODE = ''
+		)
+		ORDER BY
+			notice.UN_REGDATE DESC
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<select id="tosInfo" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT 
+			UTS_CONTENT				AS uts_content
+		FROM
+			TBL_TOS
+		WHERE
+			UTS_TYPE = 'M'
+		ORDER BY
+			UTS_NO DESC
+		LIMIT 1
+	</select>
+	
+	<select id="policyInfo" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT 
+			UPP_CONTENT				AS upp_content
+		FROM
+			TBL_PRIVACY_POLICY
+		WHERE
+			UPP_TYPE = 'M'
+		ORDER BY
+			UPP_NO DESC
+		LIMIT 1
+	</select>
+	
+	<select id="bookSearchListCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(contents_master.UCM_CODE) AS count
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		<if test='uct_code != null and uct_code != ""'>
+		JOIN
+			TBL_CATEGORY_MASTER category_master
+		ON
+			category_master.UCT_CODE = contents_master.UCM_UCT_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		
+		WHERE
+			1 = 1
+		AND contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		AND V.uce_ucm_code is null
+		<if test='uct_code != null and uct_code != ""'>
+		AND LEFT(category_master.UCT_CODE,8) = LEFT(#{uct_code},8)
+		</if>
+		<if test='uct_type != null and uct_type != "" and uct_type == "E"'>
+		AND contents_master.ucm_file_type in ('EPUB','PDF')
+		</if>
+		<if test='uct_type != null and uct_type != "" and uct_type == "A"'>
+		AND contents_master.ucm_file_type in ('AUDIO')
+		</if>
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='uis_ucp_code == null or uis_ucp_code == ""'>
+			AND contents_master.UCM_UCP_CODE NOT IN ('UCP0000000425','UCP0000000013')
+		</if>
+		<if test='sortField == null or sortField == ""'>
+		AND (
+			REPLACE(contents_master.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			OR 
+			REPLACE(contents_master.UCM_WRITER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			OR
+			REPLACE(contents_master.UCM_PUBLISHER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			)
+		</if>
+		<if test='sortField != null and sortField == "all"'>
+		AND (
+			REPLACE(contents_master.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			OR 
+			REPLACE(contents_master.UCM_WRITER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			OR
+			REPLACE(contents_master.UCM_PUBLISHER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			)
+		</if>
+		<if test='sortField != null and sortField == "title"'>
+		AND (
+			REPLACE(contents_master.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			)
+		</if>
+		<if test='sortField != null and sortField == "writer"'>
+		AND (
+			REPLACE(contents_master.UCM_WRITER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			)
+		</if>
+		<if test='sortField != null and sortField == "publisher"'>
+		AND (
+		    REPLACE(contents_master.UCM_PUBLISHER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			)
+		</if>
+	</select>
+	
+	<select id="bookSearchList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT 
+			  contents_master.UCM_CODE											AS ucm_code,
+			  contents_master.UCM_EBOOK_ISBN									AS ucm_ebook_isbn,
+			  contents_master.UCM_TITLE										AS ucm_title,
+			  contents_master.UCM_SUB_TITLE									AS ucm_sub_title,
+			  contents_master.UCM_WRITER										AS ucm_writer,
+			  contents_master.UCM_PUBLISHER									AS ucp_brand,
+			  DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y.%m.%d')		AS ucm_ebook_pubdate,
+			  contents_master.UCM_THUMB_URL									AS ucm_cover_url,
+			  contents_master.UCM_UCT_CODE										AS ucm_uct_code,
+			  contents_master.UCM_FILE_TYPE									AS ucm_file_type,
+			  contents_master.UCM_LIMIT_AGE									AS ucm_limit_age,
+			  contents_master.UCM_UCS_CODE										AS ucm_ucs_code,
+			  contents_master.UCM_SERIES_NO									AS ucm_series_no,
+			  (SELECT COUNT(UCM_CODE)
+			    FROM TBL_CONTENTS_MASTER
+			    WHERE ucm_ucs_code != ''
+			      AND UCM_UCS_CODE = contents_master.UCM_UCS_CODE
+				  AND UCM_STATUS = 'S'
+				  AND UCM_SVRYN = 'Y' ) AS ucm_series_count,
+			  <if test='sortField == null or sortField == ""'>
+			  LOCATE(#{searchName}, REPLACE(contents_master.UCM_TITLE, ' ', '')) AS relevance_score,
+			  </if>
+			  <if test='sortField != null and sortField == "all"'>
+			  LOCATE(#{searchName}, REPLACE(contents_master.UCM_TITLE, ' ', '')) AS relevance_score,
+			  </if>
+			  <if test='sortField != null and sortField == "title"'>
+			  LOCATE(#{searchName}, REPLACE(contents_master.UCM_TITLE, ' ', '')) AS relevance_score,
+			  </if>
+			  <if test='sortField != null and sortField == "writer"'>
+			  LOCATE(#{searchName}, REPLACE(contents_master.UCM_WRITER, ' ', '')) AS relevance_score,
+			  </if>
+			  <if test='sortField != null and sortField == "publisher"'>
+			  LOCATE(#{searchName}, REPLACE(contents_master.UCM_PUBLISHER, ' ', '')) AS relevance_score,
+			  </if>
+			-- 우선순위 계산
+    	CASE 
+        WHEN REPLACE(contents_master.UCM_TITLE, ' ', '') COLLATE utf8_general_ci LIKE CONCAT('%', '한겨레', '%') THEN 1
+        WHEN REPLACE(contents_master.UCM_WRITER, ' ', '') COLLATE utf8_general_ci LIKE CONCAT('%', '한겨레', '%') THEN 2
+        WHEN REPLACE(contents_master.UCM_PUBLISHER, ' ', '') COLLATE utf8_general_ci LIKE CONCAT('%', '한겨레', '%') THEN 3
+        ELSE 4
+    END AS search_priority,
+	    contents_master.UCM_INTRO										AS ucm_intro,
+		contents_master.UCM_WEBDRM2_YN									AS ucm_webdrm_yn,
+	    member_library_book.ume_code									AS ume_code,
+			(SELECT COUNT(UME_CODE) FROM TBL_MEMBER_LIBRARY_BOOK 
+	       		WHERE UME_UCM_CODE = contents_master.UCM_CODE AND UME_READ_STATUS = 'R' AND UME_STATUS = 'A') AS ucm_read_count
+		FROM TBL_CONTENTS_MASTER contents_master
+		LEFT OUTER JOIN
+			TBL_MEMBER_LIBRARY_BOOK member_library_book
+		ON
+			member_library_book.UME_UCM_CODE = contents_master.UCM_CODE
+			AND member_library_book.UME_STATUS = 'A' 
+			AND member_library_book.UME_UM_CODE = #{um_code}
+		<if test='uis_return_flag == "Y"'>
+		JOIN TBL_RETURN_CONTENTS return_contents
+		    ON contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		<if test='uct_code != null and uct_code != ""'>
+		JOIN
+			TBL_CATEGORY_MASTER category_master
+		ON
+			category_master.UCT_CODE = contents_master.UCM_UCT_CODE
+		</if>
+		LEFT OUTER JOIN (SELECT UCE_UCM_CODE
+		 				 FROM TBL_CONTENTS_EXCLUDE
+		 				 WHERE UCE_UIS_CODE = #{uis_code}
+						) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE 1 = 1
+			AND contents_master.UCM_STATUS = 'S'
+			AND contents_master.UCM_SVRYN = 'Y'
+			AND V.uce_ucm_code is null
+		<if test='uct_code != null and uct_code != ""'>
+			AND LEFT(category_master.UCT_CODE,8) = LEFT(#{uct_code},8)
+		</if>
+		<if test='uct_type != null and uct_type != "" and uct_type == "E"'>
+			AND contents_master.ucm_file_type in ('EPUB','PDF')
+		</if>
+		<if test='uct_type != null and uct_type != "" and uct_type == "A"'>
+			AND contents_master.ucm_file_type in ('AUDIO')
+		</if>
+		<if test='uis_return_flag == "Y"'>
+			AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+			AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		
+		<if test='uis_ucp_code == null or uis_ucp_code == ""'>
+			AND contents_master.UCM_UCP_CODE NOT IN ('UCP0000000425','UCP0000000013')
+		</if><if test='sortField == null or sortField == ""'>
+		AND (
+			REPLACE(contents_master.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			OR
+			REPLACE(contents_master.UCM_WRITER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			OR
+			REPLACE(contents_master.UCM_PUBLISHER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			)
+		ORDER BY 
+		search_priority ASC,
+		relevance_score ASC,
+		contents_master.UCM_EBOOK_PUBDATE DESC
+		</if>
+		<if test='sortField != null and sortField == "all"'>
+		AND (
+			REPLACE(contents_master.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			OR
+			REPLACE(contents_master.UCM_WRITER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			OR
+			REPLACE(contents_master.UCM_PUBLISHER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			)
+		ORDER BY 
+		search_priority ASC, -- 우선순위별 정렬
+		relevance_score ASC, -- 추가적으로 relevance_score로 정렬
+		contents_master.UCM_EBOOK_PUBDATE DESC -- 마지막으로 제목 정렬
+		</if>
+		<if test='sortField != null and sortField == "title"'>
+		AND (
+			REPLACE(contents_master.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			)
+		ORDER BY 
+		search_priority ASC, -- 우선순위별 정렬
+		relevance_score ASC, -- 추가적으로 relevance_score로 정렬
+		contents_master.UCM_EBOOK_PUBDATE DESC -- 마지막으로 제목 정렬
+		</if>
+		<if test='sortField != null and sortField == "writer"'>
+		AND (
+			REPLACE(contents_master.UCM_WRITER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			)
+		ORDER BY 
+		search_priority ASC, -- 우선순위별 정렬
+		relevance_score ASC, -- 추가적으로 relevance_score로 정렬
+		contents_master.UCM_EBOOK_PUBDATE DESC -- 마지막으로 제목 정렬
+		</if>
+		<if test='sortField != null and sortField == "publisher"'>
+		AND (
+		    REPLACE(contents_master.UCM_PUBLISHER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			)
+		ORDER BY 
+		search_priority ASC, -- 우선순위별 정렬
+		relevance_score ASC, -- 추가적으로 relevance_score로 정렬
+		contents_master.UCM_EBOOK_PUBDATE DESC -- 마지막으로 제목 정렬
+		</if>
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+
+	<select id="bookSolrSearchList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+		contents_master.UCM_CODE											AS ucm_code,
+		contents_master.UCM_EBOOK_ISBN									AS ucm_ebook_isbn,
+		contents_master.UCM_TITLE										AS ucm_title,
+		contents_master.UCM_SUB_TITLE									AS ucm_sub_title,
+		contents_master.UCM_WRITER										AS ucm_writer,
+		contents_master.UCM_PUBLISHER									AS ucp_brand,
+		DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y.%m.%d')		AS ucm_ebook_pubdate,
+		contents_master.UCM_THUMB_URL									AS ucm_cover_url,
+		contents_master.UCM_UCT_CODE									AS ucm_uct_code,
+		contents_master.UCM_FILE_TYPE									AS ucm_file_type,
+		contents_master.UCM_LIMIT_AGE									AS ucm_limit_age,
+		contents_master.UCM_UCS_CODE									AS ucm_ucs_code,
+		contents_master.UCM_SERIES_NO									AS ucm_series_no,
+		contents_master.UCM_INTRO										AS ucm_intro,
+		contents_master.UCM_WEBDRM2_YN									AS ucm_webdrm_yn,
+		member_library_book.ume_code									AS ume_code,
+		(SELECT COUNT(UME_CODE) FROM TBL_MEMBER_LIBRARY_BOOK 
+       		WHERE UME_UCM_CODE = contents_master.UCM_CODE AND UME_READ_STATUS = 'R' AND UME_STATUS = 'A') AS ucm_read_count
+		FROM TBL_CONTENTS_MASTER contents_master
+		LEFT OUTER JOIN
+			TBL_MEMBER_LIBRARY_BOOK member_library_book
+		ON
+			member_library_book.UME_UCM_CODE = contents_master.UCM_CODE
+			AND member_library_book.UME_STATUS = 'A' 
+			AND member_library_book.UME_UM_CODE = #{um_code}
+		WHERE 1 = 1
+		<choose>
+			<when test='solrData != null and solrData.size() > 0'>
+				AND contents_master.UCM_CODE IN
+				<foreach item="item" collection="solrData" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</when>
+			<otherwise>
+				AND 1 = 0
+			</otherwise>
+		</choose>
+		order by 
+		<choose>
+			<when test='sortFieldLibrary != null and sortFieldLibrary == "ucm_readbook_count" '>
+				contents_master.ucm_readbook_count desc
+			</when>
+			<when test='sortFieldLibrary != null and sortFieldLibrary == "ucm_regdate" '>
+				contents_master.ucm_regdate desc 
+			</when>
+			<when test='sortFieldLibrary != null and sortFieldLibrary == "ucm_ebook_pubdate" '>
+				contents_master.ucm_ebook_pubdate desc 
+			</when>
+			<otherwise>
+				contents_master.ucm_readbook_count desc
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="readSearchListCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT
+			COUNT(A.UME_CODE) AS count
+		FROM(
+			SELECT
+				member_library_book.UME_CODE AS UME_CODE
+			FROM
+				TBL_MEMBER_LIBRARY_BOOK member_library_book
+			LEFT OUTER JOIN
+				TBL_MEMBER_LIBRARY member_library
+			ON
+				member_library.UML_CODE = member_library_book.UME_UML_CODE
+			LEFT OUTER JOIN
+				TBL_CONTENTS_MASTER contents_master
+			ON
+				member_library_book.UME_UCM_CODE = contents_master.UCM_CODE
+			<if test='uis_return_flag == "Y"'>
+			JOIN
+				TBL_RETURN_CONTENTS return_contents
+			ON
+				contents_master.UCM_CODE = return_contents.URC_UCM_CODE 
+				AND return_contents.URC_UCM_CODE = member_library_book.UME_UCM_CODE
+			</if>
+			LEFT OUTER JOIN (
+				SELECT UCE_UCM_CODE
+				 FROM TBL_CONTENTS_EXCLUDE
+				 WHERE UCE_UIS_CODE = #{uis_code}
+				) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+			WHERE
+				member_library.UML_TYPE = 'D'
+			AND
+				member_library_book.UME_STATUS = 'A'
+			AND
+				contents_master.UCM_SVRYN = 'Y'
+			AND
+				contents_master.UCM_STATUS = 'S'
+			AND V.uce_ucm_code is null
+			<if test='uis_return_flag == "Y"'>
+			AND	return_contents.URC_UIS_CODE = #{uis_code}
+			</if>
+			<if test='uis_copy_book_flag == "N"'>
+			AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+			</if>
+			<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+				AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+			</if>
+			<if test='uis_ucp_code == null or uis_ucp_code == ""'>
+				AND contents_master.UCM_UCP_CODE NOT IN ('UCP0000000425','UCP0000000013')
+			</if>
+			AND (
+				REPLACE(contents_master.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+		        OR REPLACE(contents_master.UCM_WRITER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+		        OR REPLACE(contents_master.UCM_PUBLISHER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			)
+			group by member_library_book.UME_UCM_CODE
+		) A
+	</select>
+	
+	<select id="readSearchList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_EBOOK_ISBN									AS ucm_ebook_isbn
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_SUB_TITLE										AS ucm_sub_title
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_PUBLISHER										AS ucp_brand
+			, DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y.%m.%d')		AS ucm_ebook_pubdate
+			, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+			, contents_master.UCM_UCT_CODE										AS ucm_uct_code
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_LIMIT_AGE										AS ucm_limit_age
+			, contents_master.UCM_UCS_CODE										AS ucm_ucs_code
+			, contents_master.UCM_SERIES_NO										AS ucm_series_no
+			, contents_master.UCM_SERIES_NO										AS ucm_series_no
+			, (SELECT COUNT(UCM_CODE) FROM TBL_CONTENTS_MASTER WHERE ucm_ucs_code != '' 
+														AND UCM_UCS_CODE = contents_master.UCM_UCS_CODE 
+														AND UCM_STATUS = 'S'
+														AND UCM_SVRYN = 'Y' ) AS ucm_series_count
+		FROM
+			TBL_MEMBER_LIBRARY_BOOK member_library_book
+		LEFT OUTER JOIN
+			TBL_MEMBER_LIBRARY member_library
+		ON
+			member_library.UML_CODE = member_library_book.UME_UML_CODE
+		LEFT OUTER JOIN
+			TBL_CONTENTS_MASTER contents_master
+		ON
+			member_library_book.UME_UCM_CODE = contents_master.UCM_CODE
+		<if test='uis_return_flag == "Y"'>
+			JOIN
+				TBL_RETURN_CONTENTS return_contents
+			ON
+				contents_master.UCM_CODE = return_contents.URC_UCM_CODE 
+				AND return_contents.URC_UCM_CODE = member_library_book.UME_UCM_CODE
+			</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			member_library.UML_TYPE = 'D'
+		AND
+			member_library_book.UME_STATUS = 'A'
+		AND
+			contents_master.UCM_SVRYN = 'Y'
+		AND
+			contents_master.UCM_STATUS = 'S'
+		AND V.uce_ucm_code is null
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if>
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='uis_ucp_code == null or uis_ucp_code == ""'>
+			AND contents_master.UCM_UCP_CODE NOT IN ('UCP0000000425','UCP0000000013')
+		</if>
+		AND (
+			REPLACE(contents_master.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+		    OR REPLACE(contents_master.UCM_WRITER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+		    OR REPLACE(contents_master.UCM_PUBLISHER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+		)
+		group by member_library_book.UME_UCM_CODE
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<select id="reportSearchListCount" parameterType="frontCmVO" resultType="java.lang.Integer">
+		SELECT
+			COUNT(A.UBR_CODE) AS COUNT
+		FROM(
+			SELECT 
+				COUNT(book_report.UBR_CODE) AS UBR_CODE
+			FROM
+				TBL_BOOK_REPORT book_report
+			LEFT OUTER JOIN
+				TBL_CONTENTS_MASTER contents_master
+			ON
+				book_report.UBR_UCM_CODE = contents_master.UCM_CODE
+			<if test='uis_return_flag == "Y"'>
+			JOIN
+				TBL_RETURN_CONTENTS return_contents
+			ON
+				contents_master.UCM_CODE = return_contents.URC_UCM_CODE 
+				AND return_contents.URC_UCM_CODE = book_report.UBR_UCM_CODE
+			</if>
+			LEFT OUTER JOIN (
+				SELECT UCE_UCM_CODE
+				 FROM TBL_CONTENTS_EXCLUDE
+				 WHERE UCE_UIS_CODE = #{uis_code}
+				) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+					
+			WHERE
+				1 = 1
+			AND
+				contents_master.UCM_STATUS = 'S'
+			AND contents_master.UCM_SVRYN = 'Y'
+			AND V.uce_ucm_code is null
+			<if test='uis_return_flag == "Y"'>
+			AND	return_contents.URC_UIS_CODE = #{uis_code}
+			</if>
+			<if test='uis_copy_book_flag == "N"'>
+			AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+			</if>
+			<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+			</if>
+			<if test='uis_ucp_code == null or uis_ucp_code == ""'>
+				AND contents_master.UCM_UCP_CODE NOT IN ('UCP0000000425','UCP0000000013')
+			</if>
+			AND (book_report.UBR_IS_OPEN = 'Y' OR (book_report.UBR_IS_OPEN ='N' AND book_report.UBR_UIS_CODE = #{uis_code}))
+			AND (
+				REPLACE(book_report.UBR_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+				OR REPLACE(contents_master.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+		        OR REPLACE(contents_master.UCM_WRITER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+		        OR REPLACE(contents_master.UCM_PUBLISHER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			)
+			GROUP BY book_report.UBR_UCM_CODE
+		) A
+	</select>
+	
+	<select id="reportSearchList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  count(book_report.UBR_CODE)										AS book_report_count
+			, book_report.UBR_CODE												AS ubr_code
+			, book_report.UBR_TITLE												AS ubr_title
+			, contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_EBOOK_ISBN									AS ucm_ebook_isbn
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_SUB_TITLE										AS ucm_sub_title
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_PUBLISHER										AS ucp_brand
+			, DATE_FORMAT(contents_master.UCM_EBOOK_PUBDATE, '%Y.%m.%d')		AS ucm_ebook_pubdate
+			, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+			, contents_master.UCM_UCT_CODE										AS ucm_uct_code
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_LIMIT_AGE										AS ucm_limit_age
+			, contents_master.UCM_UCS_CODE										AS ucm_ucs_code
+			, contents_master.UCM_SERIES_NO										AS ucm_series_no
+			, contents_master.UCM_SERIES_NO										AS ucm_series_no
+			, (SELECT COUNT(UCM_CODE) FROM TBL_CONTENTS_MASTER WHERE ucm_ucs_code != '' 
+														AND UCM_UCS_CODE = contents_master.UCM_UCS_CODE 
+														AND UCM_STATUS = 'S'
+														AND UCM_SVRYN = 'Y' ) AS ucm_series_count
+		FROM
+			TBL_BOOK_REPORT book_report
+		LEFT OUTER JOIN
+			TBL_CONTENTS_MASTER contents_master
+		ON
+			book_report.UBR_UCM_CODE = contents_master.UCM_CODE
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE 
+			AND return_contents.URC_UCM_CODE = book_report.UBR_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+			1 = 1
+		AND
+			contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		AND V.uce_ucm_code is null
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+		AND	contents_master.UCM_COPY_BOOK_FLAG = 'N'
+		</if> 
+		AND (book_report.UBR_IS_OPEN = 'Y' OR (book_report.UBR_IS_OPEN ='N' AND book_report.UBR_UIS_CODE = #{uis_code}))
+		<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+			AND contents_master.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='uis_ucp_code == null or uis_ucp_code == ""'>
+			AND contents_master.UCM_UCP_CODE NOT IN ('UCP0000000425','UCP0000000013')
+		</if>
+		AND (
+			REPLACE(book_report.UBR_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+			OR REPLACE(contents_master.UCM_TITLE,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+		    OR REPLACE(contents_master.UCM_WRITER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+		    OR REPLACE(contents_master.UCM_PUBLISHER,' ','') COLLATE utf8_general_ci LIKE CONCAT('%', #{searchName}, '%')
+		)
+		GROUP BY book_report.UBR_UCM_CODE
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<insert id="insertBookLikeComment" parameterType="frontCmVO">
+		INSERT INTO TBL_CONTENTS_LIKE_COMMENT
+		(
+			UCLC_CODE,									UCLC_UCM_CODE,
+			UCLC_UM_CODE,		UCLC_TYPE
+		)
+		VALUES
+		(
+			CONCAT('UCLC',LPAD(#{uclc_code},18,'0')),	#{uclc_ucm_code},
+			#{um_code},			'Y'
+		)
+	</insert>
+	
+	<delete id="deleteBookLikeComment" parameterType="frontCmVO">
+		DELETE FROM TBL_CONTENTS_LIKE_COMMENT
+		WHERE
+			UCLC_CODE = #{uclc_code}
+	</delete>
+	
+	<select id="selectBookLikeComment" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			  UCLC_CODE										AS uclc_code
+			, UCLC_UCM_CODE									AS uclc_ucm_code
+			, UCLC_UM_CODE									AS uclc_um_code
+			, UCLC_TYPE										AS uclc_type
+			, DATE_FORMAT(UCLC_REGDATE, '%Y.%m.%d %H:%i')	AS uclc_regdate
+		FROM
+			TBL_CONTENTS_LIKE_COMMENT
+		WHERE
+			UCLC_UCM_CODE = #{uclc_ucm_code}
+		AND
+			UCLC_UM_CODE = #{um_code}
+	</select>
+	
+	
+	<select id="maxLibraryBookCount" parameterType="frontMemberLibraryVO" resultType="java.lang.Integer">
+		SELECT
+			 COUNT(UME_CODE)
+		FROM
+			TBL_MEMBER_LIBRARY_BOOK
+		WHERE
+			UME_UM_CODE = #{uml_um_code}
+		AND
+			UME_UCM_CODE NOT IN (#{ume_ucm_code})
+		AND 
+			UME_STATUS = 'A'
+		AND
+			DATE(UME_INPUT_DATE) = DATE(NOW());
+	</select>
+	
+	<select id="todayBookExist" parameterType="frontMemberLibraryVO" resultType="java.lang.Integer">
+		SELECT
+			 COUNT(UME_CODE)
+		FROM
+			TBL_MEMBER_LIBRARY_BOOK
+		WHERE
+			UME_UM_CODE = #{uml_um_code}
+		AND
+			UME_UCM_CODE = #{ume_ucm_code}
+		AND 
+			UME_STATUS = 'A'
+		AND
+			DATE(UME_INPUT_DATE) = DATE(NOW());
+	</select>
+	
+	<select id="dailyLibraryLimit" parameterType="frontMemberLibraryVO" resultType="java.lang.Integer">
+		SELECT
+			 UIS_MAX_LIBRARY_IN_BOOK
+		FROM
+			TBL_INSTITUTION_MASTER
+		WHERE
+			UIS_CODE 			= #{uis_code}
+	</select>
+	
+	<insert id="insertLibraryHistory" parameterType="frontMemberLibraryVO">
+		INSERT INTO TBL_MEMBER_LIBRARY_BOOK_HISTORY
+		(
+			UMEH_CODE, UMEH_UML_CODE, UMEH_UM_CODE, UMEH_UCM_CODE, 
+			UMEH_UDR_CODE, UMEH_SEQ, UMEH_LAST_READ_PERCENT, UMEH_LAST_READ_IDX, 
+			UMEH_LAST_READ_POSITION, UMEH_WEB_LAST_READ_PERCENT, 
+			UMEH_WEB_LAST_READ_IDX, UMEH_WEB_LAST_READ_POSITION, 
+			UMEH_LAST_READ_DATE, UMEH_FINISHREAD_COUNT, UMEH_FINISHREAD_DATE, 
+			UMEH_READ_STATUS, UMEH_ISLOCK, UMEH_PASSWORD, UMEH_STATUS, UMEH_ISDOWNLOAD, 
+			UMEH_DOWNLOAD_DATE, UMEH_RATE, UMEH_RATE_MEMO, UMEH_MOD_DATE, 
+			UMEH_INPUT_DATE, UMEH_REGDATE, UMEH_UMD_UID, UMEH_HISTORYDATE
+		)
+		(SELECT *, NOW() FROM TBL_MEMBER_LIBRARY_BOOK
+        WHERE
+			UME_UM_CODE = #{uml_um_code}
+		AND
+
+			UME_UCM_CODE = #{ume_ucm_code}
+		)
+	</insert>
+
+	<insert id="insertLibraryArrayHistory" parameterType="frontMemberLibraryVO">
+		INSERT INTO TBL_MEMBER_LIBRARY_BOOK_HISTORY
+		(
+			UMEH_CODE, UMEH_UML_CODE, UMEH_UM_CODE, UMEH_UCM_CODE, 
+			UMEH_UDR_CODE, UMEH_SEQ, UMEH_LAST_READ_PERCENT, UMEH_LAST_READ_IDX, 
+			UMEH_LAST_READ_POSITION, UMEH_WEB_LAST_READ_PERCENT, 
+			UMEH_WEB_LAST_READ_IDX, UMEH_WEB_LAST_READ_POSITION, 
+			UMEH_LAST_READ_DATE, UMEH_FINISHREAD_COUNT, UMEH_FINISHREAD_DATE, 
+			UMEH_READ_STATUS, UMEH_ISLOCK, UMEH_PASSWORD, UMEH_STATUS, UMEH_ISDOWNLOAD, 
+			UMEH_DOWNLOAD_DATE, UMEH_RATE, UMEH_RATE_MEMO, UMEH_MOD_DATE, 
+			UMEH_INPUT_DATE, UMEH_REGDATE, UMEH_UMD_UID, UMEH_HISTORYDATE
+		)
+		(SELECT *, NOW() FROM TBL_MEMBER_LIBRARY_BOOK
+        WHERE
+			UME_UM_CODE = #{uml_um_code}
+		AND
+			UME_CODE IN
+			<foreach item="item" index="index" collection="ume_codes" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		)
+	</insert>
+	<select id="selectUmeCode" parameterType="frontMemberLibraryVO" resultType="frontMemberLibraryVO">
+		SELECT
+			 UME_CODE			AS ume_code
+		FROM
+			TBL_MEMBER_LIBRARY_BOOK
+		WHERE
+			UME_UM_CODE = #{uml_um_code}
+		AND
+			UME_UCM_CODE = #{ume_ucm_code}
+	</select>
+	<select id="eventListCount" parameterType="frontEventVO" resultType="Integer">
+		SELECT
+			COUNT(UEM_CODE)			AS count
+		FROM
+			TBL_EVENT_MASTER event_master
+		LEFT OUTER JOIN (
+        SELECT UEE_UEM_CODE
+		FROM TBL_EVENT_EXCLUDE
+		WHERE UEE_UIS_CODE = #{uis_code} AND UEE_DEL_YN = 'N'
+        ) V ON V.UEE_UEM_CODE = event_master.UEM_CODE
+		WHERE
+			V.UEE_UEM_CODE is null
+		AND
+			UEM_DISPLAY_STARTDATE <![CDATA[ <= ]]> NOW()
+		AND
+		(
+			UEM_UIS_CODE IS NULL
+		OR
+			UEM_UIS_CODE = #{uis_code}
+		)
+	</select>
+	<select id="validEventList" parameterType="frontEventVO" resultType="frontEventVO">
+		SELECT
+			UEM_CODE													AS uem_code
+			, UEM_TITLE													AS uem_title
+			, UEM_THUMBNAIL_IMAGE										AS uem_thumbnail_image
+			, UEM_URL													AS uem_url
+			, DATE_FORMAT(UEM_DISPLAY_STARTDATE, '%Y-%m-%d')			AS uem_display_startdate
+			, DATE_FORMAT(UEM_DISPLAY_ENDDATE, '%Y-%m-%d')				AS uem_display_enddate
+			, UEM_UIS_USERID											AS uem_uis_userid
+			, UEM_USEYN													AS uem_useyn
+			, UEM_TYPE													AS uem_type
+			, UEM_DISPLAY_NUMBER										AS uem_display_number
+			, DATE_FORMAT(UEM_REGDATE, '%Y-%m-%d')						AS uem_regdate
+			, TIMESTAMPDIFF(DAY,DATE_FORMAT(NOW(), '%Y-%m-%d'),DATE_FORMAT(UEM_DISPLAY_ENDDATE, '%Y-%m-%d'))			
+																		AS date_diff
+		FROM
+			TBL_EVENT_MASTER event_master
+			
+		LEFT OUTER JOIN (
+        SELECT UEE_UEM_CODE
+		FROM TBL_EVENT_EXCLUDE
+		WHERE UEE_UIS_CODE = #{uis_code} AND UEE_DEL_YN = 'N'
+        ) V ON V.UEE_UEM_CODE = event_master.UEM_CODE
+		WHERE V.UEE_UEM_CODE is null
+		AND UEM_DISPLAY_STARTDATE <![CDATA[ <= ]]> NOW()
+		AND UEM_USEYN = 'Y'
+		AND	( UEM_UIS_CODE IS NULL OR UEM_UIS_CODE = #{uis_code} )
+		AND STR_TO_DATE(UEM_DISPLAY_ENDDATE, '%Y-%m-%d %H:%i:%s') <![CDATA[ >= ]]> NOW()
+		ORDER BY UEM_DISPLAY_NUMBER ASC
+		<if test='mobileYn == "" or mobileYn == "N"'>
+			LIMIT #{pagenum}, #{pageSize}
+		</if>
+	</select>
+	
+	<select id="endEventList" parameterType="frontEventVO" resultType="frontEventVO">
+		SELECT
+			UEM_CODE													AS uem_code
+			, UEM_TITLE													AS uem_title
+			, UEM_THUMBNAIL_IMAGE										AS uem_thumbnail_image
+			, UEM_URL													AS uem_url
+			, DATE_FORMAT(UEM_DISPLAY_STARTDATE, '%Y-%m-%d')			AS uem_display_startdate
+			, DATE_FORMAT(UEM_DISPLAY_ENDDATE, '%Y-%m-%d')				AS uem_display_enddate
+			, UEM_UIS_USERID											AS uem_uis_userid
+			, UEM_USEYN													AS uem_useyn
+			, UEM_TYPE													AS uem_type
+			, UEM_DISPLAY_NUMBER										AS uem_display_number
+			, DATE_FORMAT(UEM_REGDATE, '%Y-%m-%d')						AS uem_regdate
+			, TIMESTAMPDIFF(DAY,DATE_FORMAT(NOW(), '%Y-%m-%d'),DATE_FORMAT(UEM_DISPLAY_ENDDATE, '%Y-%m-%d'))			
+																		AS date_diff
+		FROM
+			TBL_EVENT_MASTER event_master
+			
+		LEFT OUTER JOIN (
+        SELECT UEE_UEM_CODE
+		FROM TBL_EVENT_EXCLUDE
+		WHERE UEE_UIS_CODE = #{uis_code} AND UEE_DEL_YN = 'N'
+        ) V ON V.UEE_UEM_CODE = event_master.UEM_CODE
+		WHERE
+			V.UEE_UEM_CODE is null
+		AND
+			UEM_DISPLAY_STARTDATE <![CDATA[ <= ]]> NOW()
+		AND
+		(
+			UEM_UIS_CODE IS NULL
+		OR
+			UEM_UIS_CODE = #{uis_code}
+		)
+		AND 
+			STR_TO_DATE(UEM_DISPLAY_ENDDATE, '%Y-%m-%d %H:%i:%s') <![CDATA[ < ]]> NOW()
+		AND UEM_USEYN = 'Y'
+		ORDER BY UEM_DISPLAY_NUMBER ASC
+		<if test='mobileYn == "" or mobileYn == "N"'>
+			LIMIT #{pagenum}, #{pageSize}
+		</if>
+	</select>
+	<select id="selectEventDetail" parameterType="frontEventVO" resultType="frontEventVO">
+		SELECT
+			UEM_CODE													AS uem_code
+			, UEM_UIS_CODE												AS uem_uis_code
+			, UEM_TITLE													AS uem_title
+			, UEM_WEB_DETAIL_IMAGE										AS uem_web_detail_image
+			, UEM_MOBILE_DETAIL_IMAGE									AS uem_mobile_detail_image
+			, UEM_A_WEB_DETAIL_IMAGE									AS uem_a_web_detail_image
+			, UEM_A_MOBILE_DETAIL_IMAGE									AS uem_a_mobile_detail_image
+			, UEM_WEB_NOTICE_IMAGE										AS uem_web_notice_image
+			, UEM_MOBILE_NOTICE_IMAGE									AS uem_mobile_notice_image
+			, DATE_FORMAT(UEM_DISPLAY_STARTDATE, '%Y-%m-%d')			AS uem_display_startdate
+			, DATE_FORMAT(UEM_DISPLAY_ENDDATE, '%Y-%m-%d')				AS uem_display_enddate
+			, UEM_USEYN													AS uem_useyn
+			, UEM_TYPE													AS uem_type
+			, UEM_URL													AS uem_url
+			, DATE_FORMAT(UEM_REGDATE, '%Y-%m-%d')						AS uem_regdate
+			, TIMESTAMPDIFF(DAY,DATE_FORMAT(NOW(), '%Y-%m-%d'),DATE_FORMAT(UEM_DISPLAY_ENDDATE, '%Y-%m-%d'))			
+																		AS date_diff
+			, (SELECT UM_USERID FROM TBL_B2B_MEMBER_MASTER WHERE UM_CODE = #{um_code})	AS um_userid
+			, (SELECT UIS_COMPANY_FLAG FROM TBL_INSTITUTION_MASTER WHERE UIS_CODE = #{uis_code})	AS uis_company_flag
+			, UEM_WEB_BUTTON AS uem_web_button
+			, UEM_MOBILE_BUTTON AS uem_mobile_button
+			, UEM_BOOK_YN	AS uem_book_yn
+			, UEM_BOOK_LINK	AS uem_book_link
+		FROM
+			TBL_EVENT_MASTER
+		WHERE
+			UEM_CODE = #{uem_code}
+		<if test="existUis == 1">
+		AND
+			UEM_UIS_CODE = #{uis_code}
+		</if>
+		AND
+			UEM_DISPLAY_STARTDATE <![CDATA[ <= ]]> NOW()
+		
+			
+	</select>
+	<select id="eventUisExist" parameterType="frontEventVO" resultType="int">
+		SELECT
+			count(UEM_UIS_CODE)
+		FROM
+			TBL_EVENT_MASTER
+		WHERE
+			UEM_CODE = #{uem_code}
+	</select>
+	
+	<select id="eventApplyExist" parameterType="frontEventVO" resultType="Integer">
+		SELECT
+			count(UEMC_CODE)
+		FROM
+			TBL_EVENT_COMMENT
+		WHERE
+			UEMC_UEM_CODE = #{uem_code}
+		AND
+			UEMC_UM_CODE = #{um_code}
+	</select>
+	
+	<select id="eventCommentListCount" parameterType="frontEventVO" resultType="Integer">
+		SELECT
+			COUNT(UEMC_CODE)			AS count
+		FROM
+			TBL_EVENT_COMMENT
+		WHERE 
+			UEMC_UEM_CODE = #{uem_code}
+	</select>
+	
+	<select id="eventCommentList" parameterType="frontEventVO" resultType="frontEventVO">
+		SELECT
+			UEMC_CODE													AS uemc_code
+			, UEMC_UM_CODE												AS uemc_um_code
+			, UEMC_UM_USERID											AS uemc_um_userid
+			, UEMC_COMMENT												AS uemc_comment
+			, DATE_FORMAT(UEMC_REGDATE, '%Y-%m-%d')						AS uemc_regdate
+		FROM
+			TBL_EVENT_COMMENT AS comment
+		WHERE 
+			UEMC_UEM_CODE = #{uem_code}
+		ORDER BY comment.UEMC_REGDATE desc
+		LIMIT #{pagenum}, #{pageSize}
+		
+	</select>
+	
+	<select id="eventMyCommentListCount" parameterType="frontEventVO" resultType="Integer">
+		SELECT
+			COUNT(UEMC_CODE)			AS count
+		FROM
+			TBL_EVENT_COMMENT
+		WHERE 
+			UEMC_UEM_CODE = #{uem_code}
+		AND
+			UEMC_UM_CODE = #{um_code}
+	</select>
+	
+	<select id="eventMyCommentList" parameterType="frontEventVO" resultType="frontEventVO">
+		SELECT
+			UEMC_CODE													AS uemc_code
+			, UEMC_UM_CODE												AS uemc_um_code
+			, UEMC_UM_USERID											AS uemc_um_userid
+			, UEMC_COMMENT												AS uemc_comment
+			, DATE_FORMAT(UEMC_REGDATE, '%Y-%m-%d')						AS uemc_regdate
+		FROM
+			TBL_EVENT_COMMENT	AS comment
+		WHERE 
+			UEMC_UEM_CODE = #{uem_code}
+		AND
+			UEMC_UM_CODE = #{um_code}
+		ORDER BY comment.UEMC_REGDATE desc
+		
+	</select>
+	
+	<insert id="insertEventComment" parameterType="frontEventVO">
+		INSERT INTO TBL_EVENT_COMMENT
+		    		(UEMC_CODE
+					,UEMC_UEM_CODE
+					,UEMC_UIS_CODE
+					,UEMC_UM_CODE
+					,UEMC_UM_USERID
+					,UEMC_UM_PHONE
+					,UEMC_UM_NAME
+					,UEMC_COMMENT
+					,UEMC_APPLY_YN)
+			VALUES (CONCAT('UEMC',LPAD(#{uemc_code},14,'0'))
+					,#{uem_code}
+					,#{uis_code}
+				   	,#{um_code}
+					,#{um_userid}
+					,#{uemc_um_phone}
+					,#{uemc_um_name}
+					,#{uemc_comment}
+					,#{uemc_apply_yn}
+		)
+	</insert>
+	
+	<delete id="deleteEventComment" parameterType="frontEventVO">
+		DELETE FROM TBL_EVENT_COMMENT
+		WHERE
+			UEMC_CODE = #{uemc_code}
+		AND
+			UEMC_UIS_CODE = #{uis_code}
+		AND
+			UEMC_UM_CODE = #{um_code}
+	</delete>
+	
+	<update id="updateEventComment" parameterType="frontEventVO">
+		UPDATE 
+			TBL_EVENT_COMMENT
+		SET
+			UEMC_COMMENT = #{uemc_comment}
+		WHERE
+			UEMC_CODE = #{uemc_code}
+		AND
+			UEMC_UIS_CODE = #{uis_code}
+		AND
+			UEMC_UM_CODE = #{um_code}
+	</update>
+	
+	<select id="eventBookCount" parameterType="frontEventBookVO" resultType="Integer">
+		SELECT 
+		  count(*) as count
+		FROM
+			TBL_EVENT_CONTENT event_content
+		INNER JOIN
+			TBL_CONTENTS_MASTER contents_master
+		ON
+			event_content.UEC_UCM_CODE = contents_master.UCM_CODE 
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+		V.uce_ucm_code is null
+		AND event_content.UEC_UEM_CODE = #{uem_code}
+		AND contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+	</select>
+	
+	<select id="eventBookList" parameterType="frontEventBookVO" resultType="frontEventBookVO">
+		SELECT 
+		  contents_master.UCM_CODE											AS ucm_code
+		, contents_master.UCM_EBOOK_ISBN									AS ucm_ebook_isbn
+		, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+		, contents_master.UCM_TITLE											AS ucm_title
+		, contents_master.UCM_SUB_TITLE										AS ucm_sub_title
+		, contents_master.UCM_UCP_CODE										AS ucm_ucp_code
+		, contents_master.UCM_WRITER										AS ucm_writer
+		, contents_master.UCM_THUMB_URL										AS ucm_cover_url
+		, contents_master.UCM_PUBLISHER										AS ucm_publisher
+		, contents_master.UCM_LIMIT_AGE										AS ucm_limit_age
+		, IFNULL((select ume_finishread_count from TBL_MEMBER_LIBRARY_BOOK tmlb 
+			where tmlb.ume_ucm_code = event_content.uec_ucm_code and tmlb.ume_um_code = #{um_code} limit 1),0) as ume_finishread_count
+		, IFNULL((select ubr_code from TBL_BOOK_REPORT tbr 
+			where tbr.ubr_ucm_code = event_content.uec_ucm_code and tbr.ubr_um_code = #{um_code} limit 1),'') as ubr_code
+		FROM
+			TBL_EVENT_CONTENT event_content
+		INNER JOIN
+			TBL_CONTENTS_MASTER contents_master
+		ON
+			event_content.UEC_UCM_CODE = contents_master.UCM_CODE 
+		<if test='uis_return_flag == "Y"'>
+		JOIN
+			TBL_RETURN_CONTENTS return_contents
+		ON
+			contents_master.UCM_CODE = return_contents.URC_UCM_CODE
+		</if>
+		LEFT OUTER JOIN (
+		SELECT UCE_UCM_CODE
+		 FROM TBL_CONTENTS_EXCLUDE
+		 WHERE UCE_UIS_CODE = #{uis_code}
+		) V ON V.UCE_UCM_CODE = contents_master.UCM_CODE
+		WHERE
+		V.uce_ucm_code is null
+		AND event_content.UEC_UEM_CODE = #{uem_code}
+		AND contents_master.UCM_STATUS = 'S'
+		AND contents_master.UCM_SVRYN = 'Y'
+		<if test='uis_return_flag == "Y"'>
+		AND	return_contents.URC_UIS_CODE = #{uis_code}
+		</if>
+		ORDER BY event_content.uec_no asc
+		LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<select id="isContentExcludeExists" parameterType="map" resultType="int">
+	  SELECT COUNT(*)
+	  FROM TBL_CONTENTS_EXCLUDE
+	  WHERE UCE_UIS_CODE = #{uisCode}
+	    AND UCE_UCM_CODE = #{ucmCode}
+	</select>
+	
+	<select id="bookEventList" parameterType="frontCmVO" resultType="frontEventVO">
+	 SELECT 
+		UEM_CODE													AS uem_code
+		, UEM_TITLE													AS uem_title
+		, UEM_THUMBNAIL_IMAGE										AS uem_thumbnail_image
+		, UEM_URL													AS uem_url
+		, DATE_FORMAT(UEM_DISPLAY_STARTDATE, '%Y-%m-%d')			AS uem_display_startdate
+		, DATE_FORMAT(UEM_DISPLAY_ENDDATE, '%Y-%m-%d')				AS uem_display_enddate
+		, UEM_UIS_USERID											AS uem_uis_userid
+		, UEM_USEYN													AS uem_useyn
+		, UEM_TYPE													AS uem_type
+		, UEM_DISPLAY_NUMBER										AS uem_display_number
+		, DATE_FORMAT(UEM_REGDATE, '%Y-%m-%d')						AS uem_regdate
+		, TIMESTAMPDIFF(DAY,DATE_FORMAT(NOW(), '%Y-%m-%d'),DATE_FORMAT(UEM_DISPLAY_ENDDATE, '%Y-%m-%d'))			
+																	AS date_diff 
+	FROM
+	TBL_EVENT_MASTER event_master
+	INNER JOIN TBL_EVENT_CONTENT event_content
+		ON event_master.UEM_CODE = event_content.UEC_UEM_CODE
+	LEFT OUTER JOIN (
+		SELECT UEE_UEM_CODE
+		FROM TBL_EVENT_EXCLUDE
+		WHERE UEE_UIS_CODE =  #{uis_code} AND UEE_DEL_YN = 'N'
+	) V ON V.UEE_UEM_CODE = event_master.UEM_CODE
+	WHERE
+		V.UEE_UEM_CODE is null 
+		AND event_content.UEC_UCM_CODE = #{ucm_code}
+	    AND event_master.UEM_DISPLAY_STARTDATE <![CDATA[ <= ]]> NOW()
+	    AND event_master.UEM_DISPLAY_ENDDATE <![CDATA[ >= ]]> NOW()
+		AND event_master.UEM_USEYN = 'Y'
+		AND event_master.UEM_BOOK_YN = 'Y'
+		AND	( event_master.UEM_UIS_CODE IS NULL OR event_master.UEM_UIS_CODE =  #{uis_code} )
+	ORDER BY event_master.UEM_DISPLAY_NUMBER ASC;	
+	
+	</select>
+	
+	<select id="bookDetailCuration" parameterType="frontCmVO" resultType="frontRecommendGroupVO">
+		SELECT 
+			library_master.uil_code				AS	uil_code
+		    , library_master.uil_name			AS	uil_name
+			, inst_master.UIS_USE_ADULT_BOOK 	AS	uis_use_adult_book
+			,( SELECT COUNT(A.UIE_UIL_CODE) AS uie_uis_count
+				FROM TBL_INSTITUTION_LIBRARY_EBOOK A
+				WHERE library_master.UIL_CODE = A.UIE_UIL_CODE ) AS book_count
+		FROM TBL_INSTITUTION_LIBRARY_MASTER library_master 
+		LEFT OUTER JOIN TBL_INSTITUTION_LIBRARY_EBOOK library_ebook ON library_master.UIL_CODE = library_ebook.UIE_UIL_CODE
+		LEFT OUTER JOIN TBL_INSTITUTION_MASTER inst_master ON inst_master.uis_code = library_master.uil_uis_code
+		WHERE 	
+		    library_ebook.UIE_UCM_CODE = #{ucm_code} -- 상품코드 
+		    <if test='uis_common_book_flag == "Y"'>
+		    AND library_master.UIL_UIS_CODE in (#{uis_code},'') -- 큐레이션 공통 포함  
+		    AND NOT EXISTS ( SELECT 1
+								FROM TBL_INSTITUTION_LIBRARY_EXCLUDE sub_exclude
+								WHERE sub_exclude.UILE_UIL_CODE = library_master.UIL_CODE
+									AND sub_exclude.UILE_UIS_CODE = #{uis_code} -- 공통 큐레이션 제외기관 제외 
+							)
+		    </if>
+		    <if test='uis_common_book_flag == "N"'>
+		    AND library_master.UIL_UIS_CODE in (#{uis_code}) -- 큐레이션 단독인 경우  
+		    </if>
+			AND library_master.UIL_DISPLAY_STARTDATE <![CDATA[ <= ]]> CURRENT_TIMESTAMP
+			AND library_master.UIL_DISPLAY_ENDDATE  <![CDATA[ >= ]]> CURRENT_TIMESTAMP 
+		    <if test='uis_copy_book_flag  == "N"'>
+		    AND library_master.UIL_CODE NOT IN ('UIL0000000115') -- 해당 UIL_CODE 는 선착순 도서 큐레이션으로 사용안하므로 제외 
+		    </if>
+		    ORDER BY library_master.uil_regdate desc
+		limit 1;
+	</select>
+	
+	<select id="validEventList_search" parameterType="frontCmVO" resultType="frontEventVO">
+		SELECT
+			UEM_CODE													AS uem_code
+			, UEM_TITLE													AS uem_title
+			, UEM_THUMBNAIL_IMAGE										AS uem_thumbnail_image
+			, UEM_URL													AS uem_url
+			, DATE_FORMAT(UEM_DISPLAY_STARTDATE, '%Y-%m-%d')			AS uem_display_startdate
+			, DATE_FORMAT(UEM_DISPLAY_ENDDATE, '%Y-%m-%d')				AS uem_display_enddate
+			, UEM_UIS_USERID											AS uem_uis_userid
+			, UEM_USEYN													AS uem_useyn
+			, UEM_TYPE													AS uem_type
+			, UEM_DISPLAY_NUMBER										AS uem_display_number
+			, DATE_FORMAT(UEM_REGDATE, '%Y-%m-%d')						AS uem_regdate
+			, TIMESTAMPDIFF(DAY,DATE_FORMAT(NOW(), '%Y-%m-%d'),DATE_FORMAT(UEM_DISPLAY_ENDDATE, '%Y-%m-%d'))			
+																		AS date_diff
+		FROM
+			TBL_EVENT_MASTER event_master
+		LEFT OUTER JOIN (
+	        SELECT UEE_UEM_CODE
+			FROM TBL_EVENT_EXCLUDE
+			WHERE UEE_UIS_CODE = #{uis_code} AND UEE_DEL_YN = 'N'
+        ) V ON V.UEE_UEM_CODE = event_master.UEM_CODE
+		WHERE V.UEE_UEM_CODE is null
+		AND UEM_DISPLAY_STARTDATE <![CDATA[ <= ]]> NOW()
+		AND UEM_USEYN = 'Y'
+		AND	( UEM_UIS_CODE IS NULL OR UEM_UIS_CODE = #{uis_code} )
+		AND STR_TO_DATE(UEM_DISPLAY_ENDDATE, '%Y-%m-%d %H:%i:%s') <![CDATA[ >= ]]> NOW()
+		ORDER BY UEM_DISPLAY_NUMBER ASC
+	</select>
+	
+	<select id="selectCategoryList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			UCT_CODE AS uct_code,
+			UCT_PARENT AS uct_parent,
+			UCT_NAME AS uct_name,
+			UCT_DEPTH AS uct_depth,
+			UCT_TYPE AS uct_type,
+			UCT_PRIORTY AS uct_priorty,
+			UCT_UCP_CODE AS uct_ucp_code
+		FROM TBL_CATEGORY_MASTER
+		WHERE UCT_TYPE != 'C' AND UCT_DEPTH = 0
+		<if test="uct_code != null and uct_code != ''">
+			UNION
+			SELECT UCT_CODE, UCT_PARENT, UCT_NAME, UCT_DEPTH, UCT_TYPE, UCT_PRIORTY, UCT_UCP_CODE
+			FROM TBL_CATEGORY_MASTER
+			WHERE UCT_PARENT = (SELECT UCT_PARENT FROM TBL_CATEGORY_MASTER WHERE UCT_CODE = #{uct_code})
+		</if>
+		ORDER BY UCT_CODE, UCT_PRIORTY ASC
+	</select>
+	
+	<select id="selectCategoryList_v2" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT  
+			DISTINCT category.UCT_CODE														AS uct_code,
+		    category.UCT_PARENT																AS uct_parent,
+		    category.UCT_NAME																	AS uct_name,
+		    category.UCT_DEPTH																	AS uct_depth,
+		    category.UCT_TYPE																	AS uct_type,
+		    category.UCT_PRIORTY																AS uct_priorty
+		FROM TBL_CATEGORY_MASTER category
+		WHERE category.UCT_DEPTH = 0
+		  AND category.UCT_TYPE = #{uct_type}
+		  AND EXISTS (
+		      SELECT 1
+		      FROM TBL_CONTENTS_MASTER content
+		  <if test='uis_return_flag == "Y"'>     
+		      INNER JOIN TBL_RETURN_CONTENTS rc
+		          ON rc.URC_UCM_CODE = content.UCM_CODE
+		         AND rc.URC_UIS_CODE = #{uis_code}
+		 </if>       
+		      WHERE content.UCM_MAIN_CODE = category.UCT_MAIN_CODE
+		        AND content.UCM_STATUS = 'S'
+		        AND content.UCM_SVRYN  = 'Y'
+		 <if test='uis_ucp_code != null and uis_ucp_code != ""'>
+				AND content.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+				AND	content.UCM_COPY_BOOK_FLAG = 'N'
+		</if>       
+		        AND NOT EXISTS (
+		            SELECT 1
+		            FROM TBL_CONTENTS_EXCLUDE e
+		            WHERE e.UCE_UCM_CODE = content.UCM_CODE
+		              AND e.UCE_UIS_CODE = #{uis_code}
+		        )
+		  )
+		<if test='uct_code == null or uct_code == ""'>
+		ORDER BY category.UCT_CODE, category.UCT_PRIORTY ASC
+		</if>
+		<if test='uct_parent != null and uct_parent != ""'>
+			UNION
+			
+			SELECT  
+				DISTINCT category.UCT_CODE													AS uct_code,
+			    category.UCT_PARENT															AS uct_parent,
+			    category.UCT_NAME																AS uct_name,
+			    category.UCT_DEPTH																AS uct_depth,
+			    category.UCT_TYPE																AS uct_type,
+			    category.UCT_PRIORTY															AS uct_priorty
+			FROM TBL_CATEGORY_MASTER category
+			WHERE category.UCT_DEPTH = 1
+			  AND category.UCT_TYPE = #{uct_type}
+			  AND category.UCT_PARENT = #{uct_parent}
+			  AND EXISTS (
+			      SELECT 1
+			      FROM TBL_CONTENTS_MASTER content
+			 <if test='uis_return_flag == "Y"'>     
+			      INNER JOIN TBL_RETURN_CONTENTS rc
+			          ON rc.URC_UCM_CODE = content.UCM_CODE
+			         AND rc.URC_UIS_CODE = #{uis_code}
+			 </if>     
+			      WHERE content.UCM_UCT_CODE = category.UCT_CODE
+			        AND content.UCM_STATUS = 'S'
+			        AND content.UCM_SVRYN  = 'Y'
+			 <if test='uis_ucp_code != null and uis_ucp_code != ""'>
+					AND content.UCM_UCP_CODE = #{uis_ucp_code}
+			</if>
+			<if test='uis_copy_book_flag == "N"'>
+					AND	content.UCM_COPY_BOOK_FLAG = 'N'
+			</if>   
+			        AND NOT EXISTS (
+			            SELECT 1
+			            FROM TBL_CONTENTS_EXCLUDE e
+			            WHERE e.UCE_UCM_CODE = content.UCM_CODE
+			              AND e.UCE_UIS_CODE = #{uis_code}
+			        )
+			  )
+			ORDER BY UCT_CODE, UCT_PRIORTY ASC
+		</if>
+	</select>
+	
+	<select id="selectAvailableCategoryTypes" parameterType="frontCmVO" resultType="String">
+		SELECT  
+			DISTINCT category.UCT_TYPE
+		FROM TBL_CATEGORY_MASTER category
+		WHERE category.UCT_DEPTH = 0
+		  AND category.UCT_TYPE IN ('E','A')
+		  AND EXISTS (
+		      SELECT 1
+		      FROM TBL_CONTENTS_MASTER content
+		  <if test='uis_return_flag == "Y"'>     
+		      INNER JOIN TBL_RETURN_CONTENTS rc
+		          ON rc.URC_UCM_CODE = content.UCM_CODE
+		         AND rc.URC_UIS_CODE = #{uis_code}
+		 </if>
+		      WHERE content.UCM_MAIN_CODE = category.UCT_MAIN_CODE
+		        AND content.UCM_STATUS = 'S'
+		        AND content.UCM_SVRYN  = 'Y'
+		 <if test='uis_ucp_code != null and uis_ucp_code != ""'>
+				AND content.UCM_UCP_CODE = #{uis_ucp_code}
+		</if>
+		<if test='uis_copy_book_flag == "N"'>
+				AND	content.UCM_COPY_BOOK_FLAG = 'N'
+		</if>   
+		        AND NOT EXISTS (
+		            SELECT 1
+		            FROM TBL_CONTENTS_EXCLUDE e
+		            WHERE e.UCE_UCM_CODE = content.UCM_CODE 
+		              AND e.UCE_UIS_CODE = #{uis_code}
+		        )
+		  );
+	</select>
+
+</mapper>

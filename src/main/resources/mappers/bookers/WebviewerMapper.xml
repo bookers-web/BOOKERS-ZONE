@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="life.bks.zone.mapper.bookers.WebviewerMapper">
+
+    <resultMap id="webviewerBookMap" type="life.bks.zone.domain.WebviewerBook">
+        <result property="ucmCode" column="UCM_CODE"/>
+        <result property="ucpCode" column="UCM_UCP_CODE"/>
+        <result property="title" column="UCM_TITLE"/>
+        <result property="writer" column="UCM_WRITER"/>
+        <result property="publisher" column="UCM_PUBLISHER"/>
+        <result property="coverUrl" column="UCM_COVER_URL"/>
+        <result property="fileType" column="UCM_FILE_TYPE"/>
+        <result property="umlCode" column="UML_CODE"/>
+        <result property="umeCode" column="UME_CODE"/>
+        <result property="lastStatus" column="UME_STATUS"/>
+    </resultMap>
+
+    <update id="getSequence" parameterType="life.bks.zone.domain.WebviewerBook">
+        <selectKey keyProperty="seqCurrval" resultType="java.lang.Integer" order="BEFORE">
+            SELECT MAX(SEQ_CURRVAL)+1
+            FROM TBL_SEQUENCES
+            WHERE SEQ_NAME = #{seqName}
+            FOR UPDATE
+        </selectKey>
+        UPDATE TBL_SEQUENCES
+        SET SEQ_CURRVAL = #{seqCurrval}
+        WHERE SEQ_NAME = #{seqName}
+    </update>
+
+    <select id="selectBookDetail" resultMap="webviewerBookMap">
+        SELECT
+            UCM_CODE,
+            UCM_UCP_CODE,
+            UCM_TITLE,
+            UCM_WRITER,
+            UCM_PUBLISHER,
+            UCM_COVER_URL,
+            UCM_FILE_TYPE
+        FROM TBL_CONTENTS_MASTER
+        WHERE UCM_CODE = #{ucmCode}
+          AND UCM_WEBDRM2_YN = 'Y'
+    </select>
+
+    <select id="countMemberLibrary" resultType="java.lang.Integer">
+        SELECT COUNT(UML_CODE)
+        FROM TBL_MEMBER_LIBRARY
+        WHERE UML_UM_CODE = #{umCode}
+    </select>
+
+    <select id="callGetLicense" statementType="CALLABLE" parameterType="java.util.HashMap">
+        { call sp_GetLicense( #{I_UCM_CODE, mode=IN, jdbcType=VARCHAR},
+        #{I_UIS_CODE, mode=IN, jdbcType=VARCHAR}, #{I_UM_CODE, mode=IN, jdbcType=VARCHAR},
+        #{I_UMD_CODE, mode=IN, jdbcType=VARCHAR}, #{I_ORDER_TYPE, mode=IN, jdbcType=CHAR},
+        #{O_ORDER_CODE, mode=OUT, jdbcType=VARCHAR, javaType=java.lang.String},
+        #{O_PRODUCT_CODE, mode=OUT, jdbcType=VARCHAR, javaType=java.lang.String},
+        #{O_STARTDATE, mode=OUT, jdbcType=VARCHAR, javaType=java.lang.String},
+        #{O_ENDDATE, mode=OUT, jdbcType=VARCHAR, javaType=java.lang.String},
+        #{O_DRMTYPE, mode=OUT, jdbcType=CHAR, javaType=java.lang.String},
+        #{RESULT, mode=OUT, jdbcType=INTEGER, javaType=java.lang.Integer}) }
+    </select>
+
+    <insert id="insertLibrary" parameterType="life.bks.zone.domain.WebviewerBook">
+        INSERT INTO TBL_MEMBER_LIBRARY
+            (
+                UML_CODE, UML_UM_CODE, UML_NAME
+            )
+        VALUES
+            (
+                CONCAT('UML',LPAD(#{umlCode},10,'0')), #{umCode}, '내서재'
+            )
+    </insert>
+
+    <insert id="insertLibraryBook" parameterType="life.bks.zone.domain.WebviewerBook">
+        INSERT INTO TBL_MEMBER_LIBRARY_BOOK
+            (
+                UME_CODE,
+                UME_UML_CODE,
+                UME_UM_CODE,
+                UME_UCM_CODE,
+                UME_ISDOWNLOAD,
+                UME_INPUT_DATE
+            )
+        VALUES
+            (
+                CONCAT('UME',substring(#{ucmCode}, 4, 13),substring(#{umCode}, 3, 13), LPAD(#{umeCode},19,'0')),
+                CONCAT('UML',LPAD(#{umlCode},10,'0')),
+                #{umCode},
+                #{ucmCode},
+                'Y',
+                CURRENT_TIMESTAMP
+            )
+    </insert>
+
+    <insert id="insertOnlyLibraryBook" parameterType="life.bks.zone.domain.WebviewerBook">
+        INSERT INTO TBL_MEMBER_LIBRARY_BOOK
+            (
+                UME_CODE,
+                UME_UML_CODE,
+                UME_UM_CODE,
+                UME_UCM_CODE,
+                UME_ISDOWNLOAD,
+                UME_INPUT_DATE
+            )
+        VALUES
+            (
+                CONCAT('UME', substring(#{ucmCode}, 4, 13), substring(#{umCode}, 3, 13), LPAD(#{umeCode},19,'0')),
+                #{umeUmlCode},
+                #{umCode},
+                #{ucmCode},
+                'Y',
+                CURRENT_TIMESTAMP
+            )
+    </insert>
+
+    <update id="updateReadCount">
+        UPDATE TBL_CONTENTS_MASTER
+        SET UCM_READBOOK_COUNT = IFNULL(UCM_READBOOK_COUNT, 0) + 1
+        WHERE UCM_CODE = #{ucmCode}
+    </update>
+
+    <select id="webviewerCheckStatus" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+        SELECT COUNT(UML_CODE)
+        FROM TBL_MEMBER_LIBRARY
+        WHERE UML_UM_CODE = #{umCode}
+    </select>
+
+    <update id="webviewerChangeDownloadStatus" parameterType="java.util.HashMap">
+        UPDATE TBL_MEMBER_LIBRARY_BOOK
+        SET
+            UME_ISDOWNLOAD = 'Y',
+            UME_MOD_DATE = CURRENT_TIMESTAMP,
+            UME_INPUT_DATE = CURRENT_TIMESTAMP
+        WHERE UME_UM_CODE = #{umCode}
+          AND UME_UCM_CODE = #{ucmCode}
+    </update>
+
+    <select id="countMemberLibraryBook" resultType="java.lang.Integer">
+        SELECT COUNT(UME_CODE)
+        FROM TBL_MEMBER_LIBRARY_BOOK
+        WHERE UME_UML_CODE = #{umlCode}
+          AND UME_UCM_CODE = #{ucmCode}
+    </select>
+
+    <select id="selectMemberLibrary" resultMap="webviewerBookMap">
+        SELECT UML_CODE
+        FROM TBL_MEMBER_LIBRARY
+        WHERE UML_UM_CODE = #{umCode}
+        LIMIT 1
+    </select>
+
+    <update id="updateLibraryBookStatus" parameterType="life.bks.zone.domain.WebviewerBook">
+        UPDATE TBL_MEMBER_LIBRARY_BOOK
+        SET
+            UME_STATUS = #{umeStatus},
+            UME_MOD_DATE = CURRENT_TIMESTAMP
+            <if test='umeStatus == "A"'>
+                , UME_ISDOWNLOAD = 'Y'
+            </if>
+            <if test='lastStatus == "D" and umeCode != ""'>
+                , UME_INPUT_DATE = CURRENT_TIMESTAMP
+            </if>
+        WHERE UME_CODE = #{umeCode}
+          AND UME_UCM_CODE = #{ucmCode}
+    </update>
+
+    <select id="selectMemberLibraryBook" resultMap="webviewerBookMap">
+        SELECT UME_CODE, UME_STATUS
+        FROM TBL_MEMBER_LIBRARY_BOOK
+        WHERE UME_UM_CODE = #{umCode}
+          AND UME_UCM_CODE = #{ucmCode}
+        LIMIT 1
+    </select>
+
+    <select id="maxLibraryBookCount" parameterType="life.bks.zone.domain.WebviewerBook" resultType="java.lang.Integer">
+        SELECT COUNT(UME_CODE)
+        FROM TBL_MEMBER_LIBRARY_BOOK
+        WHERE UME_UM_CODE = #{umCode}
+          AND UME_UCM_CODE NOT IN (#{ucmCode})
+          AND UME_STATUS = 'A'
+          AND DATE(UME_INPUT_DATE) = DATE(NOW())
+    </select>
+
+    <select id="todayBookExist" parameterType="life.bks.zone.domain.WebviewerBook" resultType="java.lang.Integer">
+        SELECT COUNT(UME_CODE)
+        FROM TBL_MEMBER_LIBRARY_BOOK
+        WHERE UME_UM_CODE = #{umCode}
+          AND UME_UCM_CODE = #{ucmCode}
+          AND UME_STATUS = 'A'
+          AND DATE(UME_INPUT_DATE) = DATE(NOW())
+    </select>
+
+    <select id="dailyLibraryLimit" parameterType="life.bks.zone.domain.WebviewerBook" resultType="java.lang.Integer">
+        SELECT UIS_MAX_LIBRARY_IN_BOOK
+        FROM TBL_INSTITUTION_MASTER
+        WHERE UIS_CODE = #{uisCode}
+    </select>
+
+    <insert id="insertLibraryHistory" parameterType="life.bks.zone.domain.WebviewerBook">
+        INSERT INTO TBL_MEMBER_LIBRARY_BOOK_HISTORY
+        (
+            UMEH_CODE, UMEH_UML_CODE, UMEH_UM_CODE, UMEH_UCM_CODE,
+            UMEH_UDR_CODE, UMEH_SEQ, UMEH_LAST_READ_PERCENT, UMEH_LAST_READ_IDX,
+            UMEH_LAST_READ_POSITION, UMEH_WEB_LAST_READ_PERCENT,
+            UMEH_WEB_LAST_READ_IDX, UMEH_WEB_LAST_READ_POSITION,
+            UMEH_LAST_READ_DATE, UMEH_FINISHREAD_COUNT, UMEH_FINISHREAD_DATE,
+            UMEH_READ_STATUS, UMEH_ISLOCK, UMEH_PASSWORD, UMEH_STATUS, UMEH_ISDOWNLOAD,
+            UMEH_DOWNLOAD_DATE, UMEH_RATE, UMEH_RATE_MEMO, UMEH_MOD_DATE,
+            UMEH_INPUT_DATE, UMEH_REGDATE, UMEH_UMD_UID, UMEH_HISTORYDATE
+        )
+        (SELECT *, NOW()
+         FROM TBL_MEMBER_LIBRARY_BOOK
+         WHERE UME_UM_CODE = #{umCode}
+           AND UME_UCM_CODE = #{ucmCode})
+    </insert>
+
+</mapper>

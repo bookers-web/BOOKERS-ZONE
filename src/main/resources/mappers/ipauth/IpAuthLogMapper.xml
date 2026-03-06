@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="life.bks.zone.mapper.IpAuthLogMapper">
+    
+    <resultMap id="ipAuthLogMap" type="life.bks.zone.domain.IpAuthLog">
+        <id property="id" column="id"/>
+        <result property="sessionId" column="session_id"/>
+        <result property="uisCode" column="uis_code"/>
+        <result property="clientIp" column="client_ip"/>
+        <result property="action" column="action"/>
+        <result property="bookId" column="book_id"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+    
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO TBL_IP_AUTH_LOG (session_id, uis_code, client_ip, action, book_id, created_at)
+        VALUES (#{sessionId}, #{uisCode}, #{clientIp}, #{action}, #{bookId}, NOW())
+    </insert>
+    
+    <select id="selectBySessionId" resultMap="ipAuthLogMap">
+        SELECT id, session_id, uis_code, client_ip, action, book_id, created_at
+        FROM TBL_IP_AUTH_LOG
+        WHERE session_id = #{sessionId}
+        ORDER BY created_at DESC
+    </select>
+    
+    <select id="selectByUisCode" resultMap="ipAuthLogMap">
+        SELECT id, session_id, uis_code, client_ip, action, book_id, created_at
+        FROM TBL_IP_AUTH_LOG
+        WHERE uis_code = #{uisCode}
+        AND created_at BETWEEN #{startDate} AND #{endDate}
+        ORDER BY created_at DESC
+    </select>
+    
+    <delete id="deleteOldLogs">
+        DELETE FROM TBL_IP_AUTH_LOG WHERE created_at &lt; #{threshold}
+    </delete>
+    
+</mapper>

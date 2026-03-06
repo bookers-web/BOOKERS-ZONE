@@ -1,0 +1,70 @@
+@charset "utf8";
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Pretendard';
+  src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+}
+
+/*공통*/
+h1,ul,li,p, h1, h2, h3, h4, h5,h6 {padding: 0; margin: 0;}
+ul, li {list-style: none;}
+fieldset {border: 0; padding: 0; margin: 0;}
+
+html, body  {width: 100%; height: 100%; font-family:'Pretendard'; margin: 0}
+img {image-rendering : -webkit-optimize-contrast; }
+
+
+.Wrap       {width: 100%; min-height: 100%; background: url("../images/geumcheon/pc/form_bg.png") no-repeat #E9F0F5 top; line-height: 140%; }
+.formContentsWrap {width: 680px; margin: 0 auto; text-align:center; }
+.topbg      {width: 100%; height:110px; background: url("../images/geumcheon/pc/form_bg2.png") no-repeat; background-position:0 0 ;}
+.bodybg     {width: 100%; background: url("../images/geumcheon/pc/form_bg2_body.png") repeat-y;}
+.title      {padding: 35px 0 0 0; width: 100%; text-align: center;}
+.bodybg section {width: 480px; margin: 0 auto;}
+.form_infoBox  {width: 480px; padding: 40px 0 0 0; text-align: left; font-size: 15px; color: #121212;}
+.infoDate    {width: 100%; margin: 25px 0 0 0;}
+.infoDate li {font-weight: 600; padding:0 0 5px 14px; background: url("../images/geumcheon/pc/bullet_cyan.png") no-repeat 0 8px; }
+.info_txt     {padding: 15px 0 0 0 ;}
+.require      {display: inline-block; color: #F01A95; padding-right:4px;}
+.line         {width: 100%; height: 3px; background: #295B8D; margin: 40px 0; border: none;}
+.formArea     {width: 100%; text-align: left;}
+.formArea h4  {font-size: 22px; color: #121212; font-weight: 600; padding-bottom: 30px;}
+.formArea h5  {font-size: 16px; color: #555; font-weight: 500;}
+.agreeArea    {font-size: 14px; color: #555; letter-spacing:-0.5px; padding:15px 0 12px; }
+.agree_Radio  {width: 100%; display: flex; }
+.agree_Radio label {font-size: 15px; color:#121212;}
+.agree_Radio label span {vertical-align: middle; display: inline-block; padding-left: 3px;}
+[type="checkbox"] { vertical-align:middle; appearance:none; border:1px solid #A0A0A0; border-radius:50%; width:21px; height:21px; }
+[type="checkbox"]:checked {border: 6px solid #121212;}
+[type="checkbox"]:focus-visible {outline-offset: max(2px, 0.1em); outline:max(1px, 0.1em) dotted #a0a0a0; }
+.inputArea      {width: 100%;}
+.inputArea .item, .t_thanks {font-size: 16px; font-weight: 600; line-height: 160%; padding-bottom: 20px; display: block; margin-bottom: 30px;}
+.inputArea .item p {padding-bottom: 20px;}
+.inputArea p .item_sub {display: inline-block; font-size: 14px; color: #555; font-weight: 400; line-height: 150%;}
+.txt            {width: 340px; height: 41px; border: 1px solid #B2B2B2;  padding: 3px 0 0 10px; font-size:18px; color:#121212 }
+.btnArea      {padding:0 0 50px 0; text-align: center;}
+.btn_send     {width: 300px; height: 52px; border: 1px solid #129CAD; background: #26C6DA; border-radius: 30px; margin: 0 auto; font-size: 19px; font-weight: 600; color: #fff; cursor: pointer;}
+.bottombg      {width: 100%; height:50px; background: url("../images/geumcheon/pc/form_bg2.png") no-repeat; background-position:0 bottom ;}
+
+.complate     { padding: 72px 0 110px 0; line-height:150%; font-weight:500; font-size:22px; }
+.complate img {margin-bottom: 20px;}
+
+footer        {width: 100%; text-align: center; padding: 40px 0; color: #6A6A6A; font-size: 13px;}

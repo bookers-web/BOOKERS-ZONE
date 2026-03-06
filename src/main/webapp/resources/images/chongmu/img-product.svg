@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="766" height="318" viewBox="0 0 766 318">
+    <path data-name="사각형 2416" d="M75.5 0h224A75.5 75.5 0 0 1 375 75.5V151H75.5A75.5 75.5 0 0 1 0 75.5 75.5 75.5 0 0 1 75.5 0z" style="fill:#b26535"/>
+    <path data-name="사각형 2417" d="M75.5 0h224A75.5 75.5 0 0 1 375 75.5a75.5 75.5 0 0 1-75.5 75.5H0V75.5A75.5 75.5 0 0 1 75.5 0z" transform="translate(391)" style="fill:#fce5d7"/>
+    <path data-name="사각형 2414" d="M75.5 0H375v75.5a75.5 75.5 0 0 1-75.5 75.5h-224A75.5 75.5 0 0 1 0 75.5 75.5 75.5 0 0 1 75.5 0z" transform="translate(0 167)" style="fill:#fce5d7"/>
+    <path data-name="사각형 2415" d="M0 0h299.5A75.5 75.5 0 0 1 375 75.5a75.5 75.5 0 0 1-75.5 75.5h-224A75.5 75.5 0 0 1 0 75.5V0z" transform="translate(391 167)" style="fill:#b26535"/>
+    <path data-name="패스 16065" d="M72 0A72 72 0 1 1 0 72 72 72 0 0 1 72 0z" transform="translate(310.795 85.794)" style="fill:#f60"/>
+    <text transform="translate(385 168)" style="font-family:Pretendard-SemiBold,Pretendard;font-weight:600;font-size:25px;fill:#fff"><tspan x="-43.232" y="0">기대효과</tspan></text>
+    <g data-name="타원 280" transform="translate(316.421 91.421)" style="stroke:#fff;stroke-width:2px;fill:none">
+        <circle cx="66.5" cy="66.5" r="66.5" style="stroke:none"/>
+        <circle cx="66.5" cy="66.5" r="65.5" style="fill:none"/>
+    </g>
+    <text transform="translate(71 52.41)" style="font-size:23px;font-family:Pretendard-SemiBold,Pretendard;font-weight:600;fill:#fff"><tspan x="0" y="0">예산절감</tspan></text>
+    <text data-name="독서교육과 연계" transform="translate(466 219.646)" style="font-size:23px;font-family:Pretendard-SemiBold,Pretendard;font-weight:600;fill:#fff"><tspan x="0" y="0">독서교육과 연계</tspan></text>
+    <text data-name="안정적인 신간 확보" transform="translate(163 219.646)" style="font-size:23px;font-family:Pretendard-SemiBold,Pretendard;font-weight:600"><tspan x="-85.011" y="0">안정적인 신간 확보</tspan></text>
+    <text data-name="이용자 만족도 증대" transform="translate(558 52.16)" style="font-size:23px;font-family:Pretendard-SemiBold,Pretendard;font-weight:600"><tspan x="-85.011" y="0">이용자 만족도 증대</tspan></text>
+    <text data-name="불필요한 예산 절감 효과" transform="translate(71 65.91)" style="font-size:19px;font-family:Pretendard-Regular,Pretendard;letter-spacing:-.03em;fill:#efefef"><tspan x="0" y="18" xml:space="preserve">불필요한 예산  절감 효과</tspan></text>
+    <text data-name="독서 시간/ 독서 감상문 등 다양한 부가서비스로 독서교육과 연계한 관리 가능" transform="translate(466 238.646)" style="font-size:19px;font-family:Pretendard-Regular,Pretendard;letter-spacing:-.03em;fill:#efefef"><tspan x="0" y="18">독서 시간/ 독서 감상문 등 다양한 부가</tspan><tspan x="0" y="43">서비스로 독서교육과 연계한 관리 가능</tspan></text>
+    <text data-name="매주 신간 업데이트 (월 1,000여종 예정)" transform="translate(71 238.646)" style="fill:#555;font-size:19px;font-family:Pretendard-Regular,Pretendard;letter-spacing:-.03em"><tspan x="0" y="18">매주 신간 업데이트</tspan><tspan x="0" y="44">(월 1,000여종 예정)</tspan></text>
+    <text data-name="주기적 신간 업데이트와 서비스와 동시에 11만권이 넘는 장서 확보" transform="translate(466 67.805)" style="fill:#555;font-size:19px;font-family:Pretendard-Regular,Pretendard;letter-spacing:-.03em"><tspan x="0" y="18">주기적 신간 업데이트와 서비스와 동</tspan><tspan x="0" y="44" xml:space="preserve">시에  11만권이 넘는 장서 확보 </tspan></text>
+</svg>

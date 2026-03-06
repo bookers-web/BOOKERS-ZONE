@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="life.bks.zone.mapper.bookers.B2bMemberMapper">
+    
+    <resultMap id="b2bMemberMap" type="life.bks.zone.domain.B2bMember">
+        <result property="umCode" column="UM_CODE"/>
+        <result property="umUserid" column="UM_USERID"/>
+        <result property="umPwd" column="UM_PWD"/>
+        <result property="umUisCode" column="UM_UIS_CODE"/>
+        <result property="umRegType" column="UM_REG_TYPE"/>
+        <result property="umRegUserid" column="UM_REG_USERID"/>
+        <result property="umUseyn" column="UM_USEYN"/>
+        <result property="umRegdate" column="UM_REGDATE"/>
+    </resultMap>
+    
+    <insert id="insertMember">
+        INSERT INTO TBL_B2B_MEMBER_MASTER (UM_CODE, UM_USERID, UM_PWD, UM_UIS_CODE, UM_REG_TYPE, UM_NAME, UM_REG_USERID, UM_USEYN)
+        VALUES (CONCAT('UM',LPAD(#{umCode},11,'0')), #{umUserid}, PASSWORD(#{umUserid}), #{umUisCode}, #{umRegType}, #{umName}, #{umRegUserid}, #{umUseyn})
+    </insert>
+    
+    <select id="selectByUserid" resultMap="b2bMemberMap">
+        SELECT UM_CODE, UM_USERID, UM_PWD, UM_UIS_CODE, UM_REG_TYPE, UM_REG_USERID, UM_USEYN, UM_REGDATE
+        FROM TBL_B2B_MEMBER_MASTER
+        WHERE UM_USERID = #{umUserid}
+    </select>
+    
+    <update id="getSequence" parameterType="life.bks.zone.domain.B2bMember">
+        <selectKey keyProperty="seqCurrval" resultType="java.lang.Integer" order="BEFORE">
+            SELECT MAX(SEQ_CURRVAL)+1
+            FROM TBL_SEQUENCES
+            WHERE SEQ_NAME = #{seqName}
+            FOR UPDATE
+        </selectKey>
+        UPDATE TBL_SEQUENCES
+        SET SEQ_CURRVAL = #{seqCurrval}
+        WHERE SEQ_NAME = #{seqName}
+    </update>
+
+    <select id="selectByUisCodeAndUserid" resultMap="b2bMemberMap">
+        SELECT UM_CODE, UM_USERID, UM_PWD, UM_UIS_CODE, UM_REG_TYPE, UM_REG_USERID, UM_USEYN, UM_REGDATE
+        FROM TBL_B2B_MEMBER_MASTER
+        WHERE UM_UIS_CODE = #{umUisCode}
+        AND UM_USERID = #{umUserid}
+    </select>
+    
+</mapper>

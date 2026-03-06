@@ -1,0 +1,172 @@
+
+
+@media all and (min-width:280px) {
+   .headWrap{
+      width:92%;  padding: 38px 0 20px;  text-align: left; position: relative; margin: 0 auto;
+    }
+    .title_con  { font-size: 38px; font-weight: 800; color: #000; text-align: left; }
+    .headbg       { width: 100%; margin:14px auto 0 ; position: relative;}
+    .headbg .subtitle_con {font-size: 19px; color: #555; z-index: 9999999;}
+    .service_Area {  width: 100%; margin: 20px auto 0;  }
+    .service_Area li {padding: 23px 0; border-radius: 19px; box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.2); color: #fff; margin-bottom: 24px; text-align: left; position: relative; z-index: 10; }
+    .service_Area .service01 { border: solid 1px #26c6da; background-color: #26c6da; z-index: 10; margin-top: 20px;}
+    .service_Area .service02 { border: solid 1px #14b0c3; background-color: #14b0c3;z-index: 10;}
+    .service_Area .service03 { border: solid 1px #294a88; background-color: #294a88; z-index: 10;}
+    .service_Area .service01 p, .service_Area .service02 p, .service_Area .service03 p { width: 70%; margin-left: 6%; }
+    .service_Area .service01 p.txt, .service_Area .service02 p.txt, .service_Area .service03 p.txt {font-size: 22px; line-height: 130%; font-weight: 500; letter-spacing: -0.4px; text-align: left; font-weight: bold;}
+    .img_service  {width: 124px; height: 208px; background: url('/images/marketing/con_head_img_m@3x.jpg') no-repeat; position: absolute; top: -80px; right: 0; z-index: 1; background-size: cover;  background-position: center;}
+    .service_bg01 {width: 50px; height: 39px; background: url('/images/marketing/ic_con_service_01.png') no-repeat; position: absolute; bottom: 0; right: 3%;}
+    .service_bg02 {width: 50px; height: 48px; background: url('/images/marketing/ic_con_service_02.png') no-repeat; position: absolute; bottom: 0; right: 3%}
+    .service_bg03 {width: 50px; height: 48px; background: url('/images/marketing/ic_con_service_03.png') no-repeat; position: absolute; bottom: 0; right: 3%}
+
+    .scondWrap    {width: 100%; height: 44vh; background: url('/images/marketing/bg_curation.png') repeat-x center; background-size: cover; background-position: center; text-align: center;}
+    .t_small      {font-size: 17px; color: #33517b; letter-spacing: -0.4px; font-weight: bold; padding-top: 8%;}
+    .curation_txt  {margin: 19px 0 28px; font-size: 30px; font-weight: bold; color: #fff; line-height: 1.4; }
+    .t_subtitle   {font-size: 25px; color: #33517b; font-weight: bold;}
+    .title_bookcuration {margin: 10px 0 0 0;}
+    .title_bookcuration img {width: 30vh;}
+
+    .thirdWrap    { height: auto; padding: 11% 0; text-align: center; display: block; }
+    .title_info   {width: 96%; height: 68px; margin: 0 auto; padding-bottom: 19px; background: url('/images/marketing/title_info_m.png') no-repeat center; background-size:contain;   }
+    .title_info p {z-index: 9999;}
+    
+    .summary_info {width: 64%; margin: 0 auto; font-size: 16px; line-height: 140%; color: #555;}
+    .thirdBox     {width: 90%; margin: 6% auto 0;}
+    .infoBox      {width: 100%; height: auto; border-radius: 24px; border: 1px solid #26c6da; overflow: hidden; display: block;}
+    .infoBox dl   {padding: 14px 29px; }
+    .infoBox dl dt, .infoBox dl dd {border-bottom: 1px solid #e5e5e5; padding-top: 14px; padding-bottom: 14px; font-size: 17px;  float: left;font-weight: bold; line-height: 160%; text-align: left; }
+    .infoBox dl dd:last-child {border-bottom: none; margin-bottom: 14px;} 
+    .infoBox dl dt {color: #26C6DA; width: 74px;}
+    .infoBox dl dt.item01 { background: url('/images/marketing/ic_site.svg') no-repeat 0 6px; padding-left: 55px;}
+    .infoBox dl dt.item02 { background: url('/images/marketing/ic_mail.svg') no-repeat 0 6px; padding-left: 55px; }
+    .infoBox dl dt.item03 { background: url('/images/marketing/ic_mail.svg') no-repeat 0 6px; padding-left: 55px;border-bottom: none 0;}
+    .infoBox dl dd {color: #000; width: 50%;}
+    .qrcodeBox    {width: 100%; height: auto; margin: 11% auto 0;}
+    .qrcodeBox .subtitle_qr {width: 100%; height: 25px; font-size: 22px; letter-spacing: -0.4px; color: #000; margin-bottom: 22px; font-weight: bold;}
+    .qrcodeBox .ios { margin-right: 30px;} 
+    .qrcodeBox .ios, .qrcodeBox .android {margin-bottom: 12px; display: inline-block;}
+    .qrcodeBox .qr_phrase {font-size: 16px; color: #898989; letter-spacing: -0.3px;}
+
+    .fourthWrap   {width: 100%; height: 32vh; background-color: #b9d8f0; opacity: 0.8;}
+    .curation_bottom {width: 100%; height: 32vh; background: url('/images/marketing/curation_bottom.png') no-repeat; background-size: cover; background-position: center; }
+
+    .clear        {clear: both;}
+  }
+  @media (min-width:744px) {
+    .headWrap{
+      width:100%;  padding: 98px 0;  text-align: center; 
+    }
+    .title_con { font-size: 44px; font-weight: 800; color: #000; text-align: center; }
+    .headbg       { width: 92%; margin:14px auto 0 ; position: relative;}
+    .headbg .subtitle_con {font-size: 23px; color: #555; text-align: center;}
+    .service_Area {  width: 83%; margin: 50px 0 0 18%; }
+    .service_Area li {padding: 28px 0; border-radius: 19px; box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.2); color: #fff; margin-bottom: 28px; text-align: left; position: relative; z-index: 1; }
+    .service_Area .service01 { border: solid 1px #26c6da; background-color: #26c6da; }
+    .service_Area .service02 { border: solid 1px #14b0c3; background-color: #14b0c3;}
+    .service_Area .service03 { border: solid 1px #294a88; background-color: #294a88; }
+    .service_Area .service01 p, .service_Area .service02 p, .service_Area .service03 p { width: 70%; margin-left: 21%; }
+    .service_Area .service01 p.txt, .service_Area .service02 p.txt, .service_Area .service03 p.txt { 
+      font-size: 26px; font-weight: 500; letter-spacing: -0.4px; text-align: left; font-weight: bold;
+    }
+    .img_service  {width: 249px; height: 434px; background: url('/images/marketing/con_head_img_pad.png') no-repeat; position: absolute; top: 32px; left: 0; z-index: 90;background-size: cover;  background-position: center;}
+    .service_bg01 {width: 50px; height: 39px; background: url('/images/marketing/ic_con_service_01.png') no-repeat; position: absolute; bottom: 0; right: 3%;}
+    .service_bg02 {width: 50px; height: 48px; background: url('/images/marketing/ic_con_service_02.png') no-repeat; position: absolute; bottom: 0; right: 3%}
+    .service_bg03 {width: 50px; height: 48px; background: url('/images/marketing/ic_con_service_03.png') no-repeat; position: absolute; bottom: 0; right: 3%}
+
+
+    .scondWrap    {width: 100%; background: url('/images/marketing/bg_curation.png') repeat-x center; text-align: center;}
+    .scondImg     {width: 100%; margin: 0 auto; height: 100%; position: relative;}
+    .scondImg .img02 {width: 213px; height: 195px; background: url('/images/marketing/con_curation_img02.png') no-repeat; position: absolute; bottom: 0; right: 0;}
+    .t_small      {font-size: 22px; color: #33517b; letter-spacing: -0.4px; font-weight: bold; padding-top: 6.5%;}
+    .curation_txt  {margin: 19px 0 39px; font-size: 44px; font-weight: bold; color: #fff; line-height: 1.4; }
+    .t_subtitle   {font-size: 26px; color: #33517b;font-weight: bold;}
+    .title_bookcuration {margin: 10px 0 0 0;}
+
+    .thirdWrap    {width: 100%; height: 386px; padding: 56px 0; text-align: center; }
+    .title_info   {width: 680px; height: 43px; margin: 0 auto; padding-bottom: 19px; background: url('/images/marketing/title_info.png') no-repeat center;}
+    .title_info p {z-index: 2;}
+    
+    .summary_info {width:  90%; margin-top: 12px; font-size: 22px; color: #555;}
+    .thirdBox     {width: 735px; margin: 46px auto 0;}
+    .infoBox      {width: 370px; height: 220px; border-radius: 24px; border: 1px solid #26c6da; float: left;}
+    .infoBox dl   {padding: 17px 29px; }
+    .infoBox dl dt, .infoBox dl dd {border-bottom: 1px solid #e5e5e5; padding-top: 14px; padding-bottom: 14px; font-size: 19px;  float: left; font-weight: bold; line-height: 180%; text-align: left; }
+    .infoBox dl dd:last-child {border-bottom: none;} 
+    .infoBox dl dt {color: #26C6DA; width: 80px;}
+    .infoBox dl dt.item01 { background: url('/images/marketing/ic_site.svg') no-repeat 0 10px; padding-left: 60px;}
+    .infoBox dl dt.item02 { background: url('/images/marketing/ic_mail.svg') no-repeat 0 10px; padding-left: 60px; }
+    .infoBox dl dt.item03 { background: url('/images/marketing/ic_mail.svg') no-repeat 0 10px; padding-left: 60px;border-bottom: none 0;}
+    .infoBox dl dd {color: #000; width: 53%;}
+    .qrcodeBox    {width: 259px; height: auto; float: right; margin: 0 auto;}
+    .qrcodeBox .subtitle_qr {width: 100%; height: 25px; font-size: 22px; letter-spacing: -0.4px; color: #000; margin-bottom: 22px; font-weight: bold;}
+    .qrcodeBox .ios {float: left; margin-right: 44px;} 
+    .qrcodeBox .ios, .qrcodeBox .android {margin-bottom: 12px;}
+    .qrcodeBox .qr_phrase {font-size: 16px; color: #898989; letter-spacing: -0.6px;}
+  
+    .fourthWrap   {width: 100%; height: 40vh; background-color: #b9d8f0; opacity: 0.8;}
+    .curation_bottom {width: 90%; height: 40vh; background: url('/images/marketing/curation_bottom.png') no-repeat; background-size: cover;  background-position: center; margin: 0 auto; }
+
+
+  }
+
+  @media (min-width:960px) {
+    .headWrap 	{
+      width:100%; height: 54vh; padding: 90px 0 110px;text-align: center; margin-bottom: 4%;
+    }
+    .title_con 	  { font-size: 50px; font-weight: 800; color: #000; text-align: center; }
+    .headbg 	    { width: 860px; margin:18px auto 0 ; position: relative;}
+    .headbg .subtitle_con {font-size: 24px; color: #555; text-align: center;}
+    .service_Area {  width: 700px; margin: 60px 0 0 180px; }
+    .service_Area li {padding: 28px 0; border-radius: 19px; box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.2); color: #fff; margin-bottom: 28px; text-align: left; position: relative; z-index: 1; }
+    .service_Area .service01 { border: solid 1px #26c6da; background-color: #26c6da; }
+    .service_Area .service02 { border: solid 1px #14b0c3; background-color: #14b0c3;}
+    .service_Area .service03 { border: solid 1px #294a88; background-color: #294a88; }
+    .service_Area .service01 p, .service_Area .service02 p, .service_Area .service03 p { width: 70%; margin-left: 120px; }
+    .service_Area .service01 p.txt, .service_Area .service02 p.txt, .service_Area .service03 p.txt {font-size: 29px; font-weight: 500; letter-spacing: -0.4px; text-align: left; font-weight: bold;}
+    .img_service  {width: 282px; height: 476px; background: url('/images/marketing/con_head_img01.png') no-repeat; position: absolute; top: 36px; left: 0; z-index: 90;}
+    /*.img_service  {width: 282px; height: 476px; background: url('/images/marketing/con_head_img01.png') no-repeat; position: absolute; top: 0; left: 20px; z-index: 10;}*/
+    .service_bg01 {width: 50px; height: 39px; background: url('/images/marketing/ic_con_service_01.png') no-repeat; position: absolute; bottom: 0; right: 39px;}
+    .service_bg02 {width: 50px; height: 48px; background: url('/images/marketing/ic_con_service_02.png') no-repeat; position: absolute; bottom: 0; right: 35px;}
+    .service_bg03 {width: 50px; height: 48px; background: url('/images/marketing/ic_con_service_03.png') no-repeat; position: absolute; bottom: 0; right: 35px;}
+
+
+    .scondWrap    {width: 100%; height: 479px; background: url('/images/marketing/bg_curation.png') repeat-x center; text-align: center;}
+    .scondImg     {width: 820px; margin: 0 auto; height: 100%; position: relative;}
+    .scondImg .img01 {width: 186px; height: 176px; background: url('/images/marketing/con_curation_img01.png') no-repeat; position: absolute; bottom: 0; left: 0;}
+    .scondImg .img02 {width: 213px; height: 195px; background: url('/images/marketing/con_curation_img02.png') no-repeat; position: absolute; bottom: 0; right: 0;}
+    .t_small      {font-size: 22px; color: #33517b; letter-spacing: -0.4px; font-weight: bold; padding-top: 78px;}
+    .curation_txt  {margin: 19px 0 39px; font-size: 44px; font-weight: bold; color: #fff; line-height: 1.4; }
+    .t_subtitle   {font-size: 26px; color: #33517b; font-weight: bold; }
+    .title_bookcuration {margin: 10px 0 0 0;}
+
+    .thirdWrap    {width: 100%; height: 356px; padding: 56px 0; text-align: center; }
+    .title_info   {width: 680px; height: 43px; margin: 0 auto; padding-bottom: 19px; background: url('/images/marketing/title_info.png') no-repeat center;}
+    .title_info p {z-index: 2;}
+    /*.title_info .highlight {width: 256px; height: 19px; position: absolute; top: 12px; right: 0; background: url('/images/marketing/con_bg_txt_highlight2.png') no-repeat; z-index: 30;}
+    .title_info span.hight {position: relative; display: inline-block; box-shadow: inset 0 -15px #FFD84B;}*/
+    .summary_info {font-size: 20px; color: #555;}
+    .thirdBox     {width: 735px; margin: 46px auto 0;}
+    .infoBox      {width: 370px; height: 220px; border-radius: 24px; border: 1px solid #26c6da; float: left;}
+    .infoBox dl   {padding: 17px 29px; }
+    .infoBox dl dt, .infoBox dl dd {border-bottom: 1px solid #e5e5e5; padding-top: 14px; padding-bottom: 14px; font-size: 19px;  float: left;font-weight: bold; line-height: 180%; text-align: left; }
+    .infoBox dl dd:last-child {border-bottom: none;} 
+    .infoBox dl dt {color: #26C6DA; width: 80px;}
+    .infoBox dl dt.item01 { background: url('/images/marketing/ic_site.svg') no-repeat 0 10px; padding-left: 60px;}
+    .infoBox dl dt.item02 { background: url('/images/marketing/ic_mail.svg') no-repeat 0 10px; padding-left: 60px; }
+    .infoBox dl dt.item03 { background: url('/images/marketing/ic_mail.svg') no-repeat 0 10px; padding-left: 60px;border-bottom: none 0;}
+    .infoBox dl dd {color: #000; width: 53%;}
+    .qrcodeBox    {width: 259px; height: auto; float: right; margin: 0 auto;}
+    .qrcodeBox .subtitle_qr {width: 100%; height: 25px; font-size: 22px; letter-spacing: -0.4px; color: #000; margin-bottom: 22px; font-weight: bold;}
+    .qrcodeBox .ios {float: left; margin-right: 44px;} 
+    .qrcodeBox .ios, .qrcodeBox .android {margin-bottom: 12px;}
+    .qrcodeBox .qr_phrase {font-size: 16px; color: #898989; letter-spacing: -0.6px;}
+
+
+
+    .fourthWrap   {width: 100%; height: 613px; background-color: #b9d8f0; opacity: 0.8;}
+    .curation_bottom {width: 920px; height: 613px; background: url('/images/marketing/curation_bottom.png') no-repeat; margin: 0 auto; }
+
+
+
+
+  }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+	version="2.0">
+
+	<description>Bookers Function (JSTL 1.1 core library 기반)</description>
+	<display-name>Bookers Function JSTL core</display-name>
+	<tlib-version>1.1</tlib-version>
+    <short-name>bcf</short-name>
+    <uri>/WEB-INF/tld/bookersFunctions</uri>
+	<function>
+		<name>fileSizeToStr</name>
+		<function-class>life.bks.zone.util.JSTLUtil</function-class>
+		<function-signature>String fileSizeToReadable(int)</function-signature>
+	</function>
+
+	<!-- FormatTextCount -->
+	<function>
+		<name>textCountToStr</name>
+		<function-class>life.bks.zone.util.JSTLUtil</function-class>
+		<function-signature>String FormatTextCount(long)</function-signature>
+	</function>
+	
+	<!-- toHtml -->
+	<function>
+		<name>toHtml</name>
+		<function-class>life.bks.zone.util.JSTLUtil</function-class>
+		<function-signature>String toHtml(java.lang.String)</function-signature>
+	</function>
+	
+	<!-- fromHtml -->
+	<function>
+		<name>fromHtml</name>
+		<function-class>life.bks.zone.util.JSTLUtil</function-class>
+		<function-signature>String fromHtml(java.lang.String)</function-signature>
+	</function>
+</taglib>

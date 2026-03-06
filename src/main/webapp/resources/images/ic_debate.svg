@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 23 23">
+    <defs>
+        <clipPath id="xj6tvzscza">
+            <path data-name="사각형 1915" transform="translate(.15 -.355)" style="fill:#121212" d="M0 0h12v10H0z"/>
+        </clipPath>
+        <clipPath id="9fnznm1u8b">
+            <path data-name="사각형 1915" transform="translate(0 -.355)" style="fill:#121212" d="M0 0h12v10H0z"/>
+        </clipPath>
+    </defs>
+    <g data-name="그룹 2926" transform="translate(-1335 -577.906)">
+        <g data-name="그룹 2923">
+            <g data-name="그룹 2519">
+                <g data-name="그룹 2518" transform="translate(1345.85 591.261)" style="clip-path:url(#xj6tvzscza)">
+                    <path data-name="패스 2001" d="M798 420.611a.574.574 0 0 1-.574.574h-6.889a.574.574 0 0 1-.574-.574 3.444 3.444 0 0 1 3.444-3.444h1.148a3.444 3.444 0 0 1 3.445 3.444zM793.98 412a2.3 2.3 0 1 0 2.3 2.3 2.3 2.3 0 0 0-2.3-2.3z" transform="translate(-788.268 -411.671)" style="fill:#121212"/>
+                </g>
+            </g>
+        </g>
+        <g data-name="그룹 2924">
+            <g data-name="그룹 2519">
+                <g data-name="그룹 2518" transform="translate(1335 591.261)" style="clip-path:url(#9fnznm1u8b)">
+                    <path data-name="패스 2001" d="M798 420.611a.574.574 0 0 1-.574.574h-6.889a.574.574 0 0 1-.574-.574 3.444 3.444 0 0 1 3.444-3.444h1.148a3.444 3.444 0 0 1 3.445 3.444zM793.98 412a2.3 2.3 0 1 0 2.3 2.3 2.3 2.3 0 0 0-2.3-2.3z" transform="translate(-788.268 -411.671)" style="fill:#121212"/>
+                </g>
+            </g>
+        </g>
+        <rect data-name="사각형 2378" width="23" height="10" rx="5" transform="translate(1335 577.906)" style="fill:#121212"/>
+        <path data-name="다각형 7" d="M2.27.277a.3.3 0 0 1 .461 0L4.59 2.508A.3.3 0 0 1 4.359 3H.641a.3.3 0 0 1-.23-.492z" transform="rotate(180 677 294.953)" style="fill:#121212"/>
+        <path data-name="다각형 8" d="M1.75.374a.3.3 0 0 1 .5 0l1.439 2.16a.3.3 0 0 1-.25.466H.561a.3.3 0 0 1-.25-.466z" transform="rotate(180 671.5 294.953)" style="fill:#121212"/>
+        <g data-name="그룹 2925" transform="translate(1341.028 581.617)">
+            <circle data-name="타원 280" cx="1" cy="1" r="1" transform="translate(-.028 .289)" style="fill:#fff"/>
+            <circle data-name="타원 281" cx="1" cy="1" r="1" transform="translate(4.972 .289)" style="fill:#fff"/>
+            <circle data-name="타원 282" cx="1" cy="1" r="1" transform="translate(9.972 .289)" style="fill:#fff"/>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,51 @@
+@charset "utf8";
+
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css');
+
+@font-face {
+     font-family: 'SCore-3L';
+     src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-3Light.woff') format('woff');
+     font-weight: normal;
+     font-style: normal;
+}
+
+img {image-rendering: -moz-crisp-edges; image-rendering: -o-crisp-edges; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor; -ms-transform: translateZ(0); -moz-transform: translateZ(0); -transform: translateZ(0);
+    -webkit-transform: translateZ(0); transform: translateZ(0);}
+
+h1,h2,h3,h4,h5,h6, p 	{margin:0; padding:0 }
+
+body                    {font-family: 'Pretendard';  box-sizing: content-box; box-sizing: border-box; line-height: 110%; background: #57758c;}
+button                  {border: none; overflow: visible; white-space: nowrap; vertical-align: middle;}
+ul,li                   {list-style: none;}
+form                    {display: contents;}
+fieldset {border: 0; padding: 0; margin: 0;}
+input::placeholder, input:-ms-input-placeholder {color: #e0e0e0;}
+input                  {-webkit-appearance: none;-webkit-border-radius: 0;} /* 사파리에서 ios의 기본 os 디자인 스타일 삭제 */
+button                  {cursor: pointer;}
+
+
+
+.wrap                   {width:590px; margin:45px auto 0 ; height: auto; text-align:center; }
+.headTxt                {width: 100%; color: #fff; }
+.headTxt img            {width: 212px; height: 45px; display: block; margin: 0 auto;}
+.joinForm               {width: 580px; margin: 32px auto 0; background:#fff; border: solid 1px #3c4a55; box-shadow:0 0 12px 0 rgba(32, 47, 59, 0.3); padding:32px 0; }
+.inputArea              {Width:380px; margin: 0 auto;}
+.inputArea .item        {width: 100%; display: block; text-align: left; font-size: 16px; color: #000;}
+.inputArea .inp, .inp_read{width: 100%; height: 45px; margin:6px 0 18px 0; border: 1px solid #b2b2b2; border-radius: 5px; font-size: 16px; padding-left:14px; }
+.inp_read               {background: #f0f0f0; color: #000;}
+.mark_red               {color: #ff0000; font-weight: bold;}
+.inputArea .chk_item    {text-align: left; font-size: 16px; color: #000;}
+.chkArea                {width: 380px; margin: 0 auto; text-align: left;}
+.chkArea input[type="checkbox"]         {width: 24px; height: 24px; position:relative; vertical-align:middle; background:#fff; border:1px solid #b2b2b2; margin-right:10px; display: inline-flex;}
+.chkArea input[type="checkbox"]::before {content:""; position: absolute; top:5px; left:3px; width: 20px; height: 20px; background: url(../images/karmyreg/ic_chk.svg) no-repeat;}
+.chkArea input[type="checkbox"]:checked {background: #00428D; border-color: #00428D; color: #fff}
+.chkArea .chk_item      {display: inline-flex; text-align: left; vertical-align:middle;}
+.btnArea                {width: 380px; margin: 48px auto 20px;}
+.btnJoin                {width: 100%; height: 51px; text-align: center; border-radius: 25.5px; background: #00428d; color:#fff; font-size:17px; font-weight:600 }
+
+.complete               {width: 580px; margin: 28% auto 0; background:#fff; border: solid 1px #3c4a55; box-shadow:0 0 12px 0 rgba(32, 47, 59, 0.3); padding:32px 0; }
+.complete_txt           {width: 454px; margin: 0 auto; text-align: center;}
+.complete_txt img       {width: 82px; height: 72px; margin: 25px 0 16.5px;}
+.complete_txt .title    {width: 100%; font-weight: 600; font-size: 31px; color: #121212; line-height: 110%; padding-bottom: 13px;}
+.complete_txt .subtxt   {font-size: 20px; color:#404040; line-height:120%; padding-bottom: 28px;}

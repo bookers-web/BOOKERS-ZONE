@@ -1,0 +1,781 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="resources.mappers.bom.BomBoardMapper">
+	
+	<select id="listCount" parameterType="searchVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(notice.UN_NO) AS count
+		FROM
+			TBL_NOTICE notice
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			notice.UN_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			1 = 1
+		  	AND notice.UN_USEYN = 'N'
+		  	AND notice.UN_NOTICE_TYPE = 'N'
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND notice.UN_UIS_CODE  = #{searchUisCode} 
+		</if>
+		<if test='searchName != null and searchName != ""'>
+			AND institution_master.UIS_NAME LIKE CONCAT('%', #{searchName}, '%')
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND notice.UN_REGDATE <![CDATA[ >= ]]> STR_TO_DATE(#{searchStartDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND notice.UN_REGDATE <![CDATA[ <= ]]> STR_TO_DATE(#{searchEndDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+	</select>
+	
+	<select id="list" parameterType="searchVO" resultType="bomBoardVO">
+		SELECT 
+			  notice.UN_NO																	AS un_no
+			, notice.UN_TITLE																AS un_title
+			, notice.UN_UIS_CODE															AS un_uis_code
+			, institution_master.UIS_NAME													AS un_uis_name
+			, notice.UN_AM_USERID															AS un_am_userid
+			, DATE_FORMAT(notice.UN_REGDATE, '%Y-%m-%d %H:%i:%s')							AS un_regdate
+		FROM
+			TBL_NOTICE notice
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			notice.UN_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			1 = 1
+		  	AND notice.UN_USEYN = 'N'
+		  	AND notice.UN_NOTICE_TYPE = 'N'
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND notice.UN_UIS_CODE  = #{searchUisCode} 
+		</if>
+		<if test='searchName != null and searchName != ""'>
+			AND institution_master.UIS_NAME LIKE CONCAT('%', #{searchName}, '%')
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND notice.UN_REGDATE <![CDATA[ >= ]]> STR_TO_DATE(#{searchStartDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND notice.UN_REGDATE <![CDATA[ <= ]]> STR_TO_DATE(#{searchEndDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test='sortField1 != "" '>
+		ORDER BY notice.${sortField1}
+		</if>
+		<if test='sortField1 == "" '>
+		ORDER BY notice.UN_REGDATE DESC
+		</if>
+		 LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<select id="hopebooklistCount" parameterType="searchVO" resultType="java.lang.Integer">
+		SELECT COUNT(DISTINCT hope.UHP_EBOOK_ISBN) AS count
+        FROM TBL_HOPEBOOK_PROPOSAL hope
+        LEFT OUTER
+        	JOIN TBL_INSTITUTION_MASTER institution_master
+				ON hope.UHP_UIS_CODE = institution_master.UIS_CODE
+		WHERE 1 = 1
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND hope.UHP_UIS_CODE  = #{searchUisCode} 
+		</if>
+		<if test='searchName != null and searchName != ""'>
+			AND institution_master.UIS_NAME LIKE CONCAT('%', #{searchName}, '%')
+		</if>
+		<if test='searchName2 != null and searchName2 != ""'>
+			AND hope.UHP_TITLE LIKE CONCAT('%', #{searchName2}, '%')
+		</if>
+		<if test='status != null and status != ""'>
+			AND hope.UHP_STATE_FLAG = #{status}
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND STR_TO_DATE(hope.UHP_REGDATE, '%Y-%m-%d') <![CDATA[ >= ]]> STR_TO_DATE(#{searchStartDate}, '%Y-%m-%d')
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND STR_TO_DATE(hope.UHP_REGDATE, '%Y-%m-%d') <![CDATA[ <= ]]> STR_TO_DATE(#{searchEndDate}, '%Y-%m-%d')
+		</if>
+	</select>
+	
+	<select id="hopebooklist" parameterType="searchVO" resultType="bomBoardVO">
+		SELECT hope.UHP_CODE																										  AS h_uhp_code
+			 , institution_master.UIS_NAME																							  AS h_uis_name
+			 , CASE
+			     WHEN (SELECT COUNT(*) FROM TBL_INSTITUTION_CONTRACT WHERE uic_uis_code = institution_master.uis_code AND uic_complete_yn = 'N' LIMIT 1) = 0
+			         THEN 'Y'
+			     ELSE 'N'
+				END AS h_uis_complete_flag
+    		 , hope.UHP_UIS_CODE																									  AS h_uis_code
+    		 , member.UM_USERID																									  AS h_um_userid
+    		 , hope.UHP_TITLE																									  AS h_title
+    		 , hope.UHP_CONTENT																									  AS h_content
+    		 , hope.UHP_AUTHOR																									  AS h_author
+    		 , hope.UHP_PUBLISHER																								  AS h_publisher
+    		 , hope.UHP_PUBLISHDATE																								  AS h_publishdate
+    		 , hope.UHP_STATE_FLAG																								  AS h_state_flag
+			 , hope.UHP_EBOOK_ISBN                                                                                                 AS h_ebook_isbn
+    		 , hope.UHP_COVER_URL																								  AS h_cover_url
+    		 , hope.UHP_STATE_FLAG																								  AS h_state_flag
+    		 , hope.UHP_STATE_MESSAGE																							  AS h_state_message
+    		 , DATE_FORMAT(hope.UHP_REGDATE, '%Y-%m-%d %H:%i:%s')																  AS h_regdate
+    		 , COUNT(hope.UHP_EBOOK_ISBN)																						  AS h_book_count
+			 , hope.UHP_ISBN_TYPE																								  AS h_isbn_type
+		FROM TBL_HOPEBOOK_PROPOSAL hope
+			JOIN TBL_INSTITUTION_MASTER institution_master
+				ON hope.UHP_UIS_CODE = institution_master.UIS_CODE
+			JOIN TBL_B2B_MEMBER_MASTER member
+				ON member.UM_CODE = hope.UHP_UM_CODE
+		WHERE 1 = 1
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND hope.UHP_UIS_CODE  = #{searchUisCode}
+		</if>
+		<if test='searchName != null and searchName != ""'>
+			AND institution_master.UIS_NAME LIKE CONCAT('%', #{searchName}, '%')
+		</if>
+		<if test='searchName2 != null and searchName2 != ""'>
+			AND hope.UHP_TITLE LIKE CONCAT('%', #{searchName2}, '%')
+		</if>
+		<if test='status != null and status != ""'>
+			AND hope.UHP_STATE_FLAG = #{status}
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND STR_TO_DATE(hope.UHP_REGDATE, '%Y-%m-%d') <![CDATA[ >= ]]> STR_TO_DATE(#{searchStartDate}, '%Y-%m-%d')
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND STR_TO_DATE(hope.UHP_REGDATE, '%Y-%m-%d') <![CDATA[ <= ]]> STR_TO_DATE(#{searchEndDate}, '%Y-%m-%d')
+		</if>
+		GROUP BY hope.UHP_EBOOK_ISBN
+		<if test='sortField1 != "" '>
+		ORDER BY hope.${sortField1}
+		</if>
+		<if test='sortField1 == "" '>
+		ORDER BY hope.UHP_REGDATE DESC
+		</if>
+		<if test='excelYn == "" or excelYn == "N"'>
+			LIMIT #{pagenum}, #{pageSize}
+		</if>
+	</select>
+	
+	<select id="hopeselect" parameterType="bomBoardVO" resultType="bomBoardVO">
+		SELECT hope.UHP_CODE																										  AS h_uhp_code
+			, hope.UHP_COVER_URL																									  AS h_cover_url
+			, hope.UHP_TITLE																										  AS h_title
+			, hope.UHP_AUTHOR																										  AS h_author
+			, hope.UHP_PUBLISHER																									  AS h_publisher
+			, DATE_FORMAT(hope.UHP_PUBLISHDATE, '%Y-%m-%d')																		  	  AS h_publishdate
+			, hope.UHP_STATE_FLAG																									  AS h_state_flag
+			, hope.UHP_EBOOK_ISBN																									  AS h_ebook_isbn
+			, hope.UHP_STATE_MESSAGE																								  AS h_state_message
+		FROM TBL_HOPEBOOK_PROPOSAL hope
+		LEFT OUTER
+			JOIN TBL_INSTITUTION_MASTER institution_master
+				ON hope.UHP_UIS_CODE = institution_master.UIS_CODE
+		WHERE hope.UHP_EBOOK_ISBN = #{h_ebook_isbn}
+		<if test='h_uis_code != null and h_uis_code != ""'>
+			AND hope.UHP_UIS_CODE  = #{h_uis_code}
+		</if>
+		GROUP BY hope.UHP_EBOOK_ISBN
+	</select>
+
+	<select id="hopeSelectComments" parameterType="bomBoardVO" resultType="bomBoardVO">
+		SELECT hope.UHP_CODE																											  AS h_uhp_code
+			, hope.UHP_UIS_CODE																										  AS h_uis_code
+			, institution_master.UIS_NAME																							  AS h_uis_name
+			, member.UM_USERID																									  	  AS h_um_userid
+			, hope.UHP_CONTENT																										  AS h_content
+			, DATE_FORMAT(hope.UHP_REGDATE, '%Y-%m-%d')																				  AS h_regdate
+		FROM TBL_HOPEBOOK_PROPOSAL hope
+		LEFT OUTER
+			JOIN TBL_INSTITUTION_MASTER institution_master
+				ON hope.UHP_UIS_CODE = institution_master.UIS_CODE
+		LEFT OUTER
+			JOIN TBL_B2B_MEMBER_MASTER member
+				ON member.UM_CODE = hope.UHP_UM_CODE and institution_master.UIS_CODE = member.UM_UIS_CODE
+		WHERE hope.UHP_EBOOK_ISBN = #{h_ebook_isbn}
+		<if test='h_uis_code != null and h_uis_code != ""'>
+			AND institution_master.UIS_CODE = #{h_uis_code}
+		</if>
+	</select>
+
+	<select id="selectByUcmCodeAndIsbn" parameterType="bomBoardVO" resultType="bomBoardVO">
+		SELECT UCM_CODE       AS h_ucm_code
+			, UCM_EBOOK_ISBN AS h_ebook_isbn
+		FROM TBL_CONTENTS_MASTER
+		WHERE UCM_EBOOK_ISBN = #{h_ebook_isbn}
+	</select>
+
+	<update id="hopeUpdate" parameterType="bomBoardVO">
+		UPDATE TBL_HOPEBOOK_PROPOSAL
+		<trim prefix="SET" suffixOverrides=",">
+			UHP_STATE_FLAG	= #{h_state_flag},
+			UHP_STATE_MESSAGE = #{h_state_message},
+		<if test="h_ucm_code != null and h_ucm_code != ''">
+			UHP_UCM_CODE     = #{h_ucm_code},
+		</if>
+		<if test="h_isbn_type != null and h_isbn_type != ''">
+			UHP_EBOOK_ISBN   = #{h_new_ebook_isbn},
+			UHP_ISBN_TYPE    = #{h_isbn_type},
+		</if>
+		</trim>
+		WHERE UHP_EBOOK_ISBN =  #{h_ebook_isbn}
+	</update>
+	
+	<select id="select" parameterType="bomBoardVO" resultType="bomBoardVO">
+		SELECT
+			  notice.UN_NO															AS un_no
+			, notice.UN_TITLE														AS un_title
+			, notice.UN_UIS_CODE													AS un_uis_code
+			, notice.UN_CONTENT														AS un_content
+			, institution_master.UIS_NAME											AS un_uis_name
+			, notice.UN_DISPLAY_STARTDATE											AS un_display_startdate
+			, notice.UN_DISPLAY_ENDDATE												AS un_display_enddate
+		FROM
+			TBL_NOTICE notice
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			notice.UN_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			notice.UN_NO			= #{un_no}
+	</select>
+	
+	<insert id="insert" parameterType="bomBoardVO">
+		INSERT INTO TBL_NOTICE
+		(
+			UN_NO,			UN_TITLE,			UN_UIS_CODE,
+			UN_CONTENT,		UN_AM_USERID,		UN_NOTICE_TYPE,
+		 	UN_DISPLAY_STARTDATE, UN_DISPLAY_ENDDATE
+
+		)
+		VALUES
+		(
+			#{un_no},		#{un_title},		#{un_uis_code},
+			#{un_content},	#{un_am_userid},  'N',
+		 	CONCAT(#{un_display_startdate}, ' 00:00:00') ,CONCAT(#{un_display_enddate}, ' 23:59:59')
+		)
+	</insert>
+	
+	<update id="update" parameterType="bomBoardVO">
+	UPDATE TBL_NOTICE
+	SET
+		UN_TITLE							= #{un_title},
+		UN_UIS_CODE							= #{un_uis_code},
+		UN_CONTENT							= #{un_content},
+		UN_DISPLAY_STARTDATE				= CONCAT(#{un_display_startdate}, ' 00:00:00'),
+		UN_DISPLAY_ENDDATE 					= CONCAT(#{un_display_enddate}, ' 23:59:59')
+	WHERE
+		UN_NO = #{un_no}
+	</update>
+	
+	<update id="getSeqence" parameterType="commonVO" >
+		<selectKey keyProperty="seq_currval" resultType="java.lang.Integer" order="BEFORE">
+			SELECT
+				MAX(SEQ_CURRVAL)+1
+			FROM
+				TBL_SEQUENCES
+			WHERE
+				SEQ_NAME = #{seq_name}
+		</selectKey>
+		UPDATE TBL_SEQUENCES
+		SET
+			SEQ_CURRVAL = #{seq_currval}
+		WHERE
+			SEQ_NAME = #{seq_name}
+	</update>
+	
+	<select id="appnoticelistCount" parameterType="searchVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(appnotice.UAN_NO) AS count
+		FROM
+			TBL_APP_NOTICE appnotice
+		WHERE
+			1 = 1
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND appnotice.UAN_UIS_CODE  = '' 
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND appnotice.UAN_REGDATE <![CDATA[ >= ]]> STR_TO_DATE(#{searchStartDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND appnotice.UAN_REGDATE <![CDATA[ <= ]]> STR_TO_DATE(#{searchEndDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+	</select>
+	
+	<select id="appnoticelist" parameterType="searchVO" resultType="bomBoardVO">
+		SELECT 
+			  appnotice.UAN_NO																	AS uan_no
+			, appnotice.UAN_TITLE																AS uan_title
+			, appnotice.UAN_UIS_CODE															AS uan_uis_code
+			, appnotice.UAN_AM_USERID															AS uan_am_userid
+			, DATE_FORMAT(appnotice.UAN_REGDATE, '%Y-%m-%d %H:%i:%s')							AS uan_regdate
+			, DATE_FORMAT(appnotice.UAN_DISPLAY_STARTDATE, '%Y-%m-%d %H:%i')					AS uan_display_startdate
+			, DATE_FORMAT(appnotice.UAN_DISPLAY_ENDDATE, '%Y-%m-%d %H:%i')						AS uan_display_enddate
+			, appnotice.UAN_USEYN																AS uan_useyn
+		FROM
+			TBL_APP_NOTICE appnotice
+		
+		WHERE
+			1 = 1
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND 
+				( appnotice.UAN_UIS_CODE  = #{searchUisCode} 
+					OR
+				  appnotice.UAN_UIS_CODE = ''
+				)
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND appnotice.UAN_REGDATE <![CDATA[ >= ]]> STR_TO_DATE(#{searchStartDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND appnotice.UAN_REGDATE <![CDATA[ <= ]]> STR_TO_DATE(#{searchEndDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test='sortField1 != "" '>
+		ORDER BY appnotice.${sortField1}
+		</if>
+		<if test='sortField1 == "" '>
+		ORDER BY appnotice.UAN_REGDATE DESC
+		</if>
+		 LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<select id="appnoticeselect" parameterType="bomBoardVO" resultType="bomBoardVO">
+		SELECT
+			  appnotice.UAN_NO															AS uan_no
+			, appnotice.UAN_TITLE														AS uan_title
+			, appnotice.UAN_UIS_CODE													AS uan_uis_code
+			, appnotice.UAN_CONTENT														AS uan_content
+			, appnotice.UAN_MORE_URL													AS uan_more_url
+			, appnotice.UAN_DISPLAY_STARTDATE											AS uan_display_startdate
+			, appnotice.UAN_DISPLAY_ENDDATE												AS uan_display_enddate
+			, appnotice.UAN_USEYN														AS uan_useyn
+		FROM
+			TBL_APP_NOTICE appnotice
+		WHERE
+			appnotice.UAN_NO			= #{uan_no}
+	</select>
+	
+	<insert id="appnoticeinsert" parameterType="bomBoardVO">
+		INSERT INTO TBL_APP_NOTICE
+		(
+			UAN_NO,			UAN_TITLE,			UAN_UIS_CODE,
+			UAN_CONTENT,		UAN_AM_USERID, UAN_MORE_URL, UAN_DISPLAY_STARTDATE, UAN_DISPLAY_ENDDATE, UAN_USEYN 
+
+		)
+		VALUES
+		(
+			#{uan_no},		#{uan_title},		#{uan_uis_code},
+			#{uan_content},	#{uan_am_userid}, #{uan_more_url}, #{uan_display_startdate}, #{uan_display_enddate}, #{uan_useyn}
+		)
+	</insert>
+	
+	<update id="appnoticeupdate" parameterType="bomBoardVO">
+	UPDATE TBL_APP_NOTICE
+	SET
+		UAN_TITLE							= #{uan_title},
+		UAN_UIS_CODE						= #{uan_uis_code},
+		UAN_CONTENT							= #{uan_content},
+		UAN_MORE_URL						= #{uan_more_url},
+		UAN_DISPLAY_STARTDATE				= #{uan_display_startdate},
+		UAN_DISPLAY_ENDDATE					= #{uan_display_enddate},
+		UAN_USEYN							= #{uan_useyn}
+	WHERE
+		UAN_NO = #{uan_no}
+	</update>
+	
+	<select id="appbooklistCount" parameterType="searchVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(appbook.UAEB_NO) AS count
+		FROM
+			TBL_APP_NEWBOOK appbook
+		WHERE
+			1 = 1
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND appbook.UAEB_UIS_CODE  = '' 
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND appbook.UAEB_REGDATE <![CDATA[ >= ]]> STR_TO_DATE(#{searchStartDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND appbook.UAEB_REGDATE <![CDATA[ <= ]]> STR_TO_DATE(#{searchEndDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+	</select>
+	
+	<select id="appbooklist" parameterType="searchVO" resultType="bomBoardVO">
+		SELECT 
+			  appbook.UAEB_NO																AS uaeb_no
+			, appbook.UAEB_TITLE															AS uaeb_title
+			, appbook.UAEB_UIS_CODE															AS uaeb_uis_code
+			, appbook.UAEB_AM_USERID														AS uaeb_am_userid
+			, DATE_FORMAT(appbook.UAEB_REGDATE, '%Y-%m-%d %H:%i:%s')						AS uaeb_regdate
+			, DATE_FORMAT(appbook.UAEB_DISPLAY_STARTDATE, '%Y-%m-%d %H:%i')					AS uaeb_display_startdate
+			, DATE_FORMAT(appbook.UAEB_DISPLAY_ENDDATE, '%Y-%m-%d %H:%i')					AS uaeb_display_enddate
+			, appbook.UAEB_USEYN															AS uaeb_useyn
+		FROM
+			TBL_APP_NEWBOOK appbook
+		
+		WHERE
+			1 = 1
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND 
+				( appbook.UAEB_UIS_CODE  = #{searchUisCode} 
+					OR
+				  appbook.UAEB_UIS_CODE = ''
+				)
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND appbook.UAEB_REGDATE <![CDATA[ >= ]]> STR_TO_DATE(#{searchStartDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND appbook.UAEB_REGDATE <![CDATA[ <= ]]> STR_TO_DATE(#{searchEndDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test='sortField1 != "" '>
+		ORDER BY appbook.${sortField1}
+		</if>
+		<if test='sortField1 == "" '>
+		ORDER BY appbook.UAEB_REGDATE DESC
+		</if>
+		 LIMIT #{pagenum}, #{pageSize}
+	</select>
+	
+	<select id="appbookselect" parameterType="bomBoardVO" resultType="bomBoardVO">
+		SELECT
+			  appbook.UAEB_NO														AS uaeb_no
+			, appbook.UAEB_TITLE													AS uaeb_title
+			, appbook.UAEB_UIS_CODE													AS uaeb_uis_code
+			, appbook.UAEB_DISPLAY_STARTDATE										AS uaeb_display_startdate
+			, appbook.UAEB_DISPLAY_ENDDATE											AS uaeb_display_enddate
+			, appbook.UAEB_USEYN													AS uaeb_useyn
+		FROM
+			TBL_APP_NEWBOOK appbook
+		WHERE
+			appbook.UAEB_NO			= #{uaeb_no}
+	</select>
+	
+	<insert id="appbookinsert" parameterType="bomBoardVO">
+		INSERT INTO TBL_APP_NEWBOOK
+		(
+			UAEB_NO,			UAEB_TITLE,			UAEB_UIS_CODE,
+			UAEB_AM_USERID, UAEB_DISPLAY_STARTDATE, UAEB_DISPLAY_ENDDATE, UAEB_USEYN 
+
+		)
+		VALUES
+		(
+			#{uaeb_no},		#{uaeb_title},		#{uaeb_uis_code},
+			#{uaeb_am_userid}, #{uaeb_display_startdate}, #{uaeb_display_enddate}, #{uaeb_useyn}
+		)
+	</insert>
+	
+	<update id="appbookupdate" parameterType="bomBoardVO">
+	UPDATE TBL_APP_NEWBOOK
+	SET
+		UAEB_TITLE							= #{uaeb_title},
+		UAEB_UIS_CODE						= #{uaeb_uis_code},
+		UAEB_DISPLAY_STARTDATE				= #{uaeb_display_startdate},
+		UAEB_DISPLAY_ENDDATE				= #{uaeb_display_enddate},
+		UAEB_USEYN							= #{uaeb_useyn}
+	WHERE
+		UAEB_NO = #{uaeb_no}
+	</update>
+	
+	<delete id="appbookdelete" parameterType="bomBoardVO">
+		DELETE FROM
+			TBL_APP_NEWBOOK_LIST
+		WHERE
+			UAEBL_UAEB_NO = #{uaebl_uaeb_no}
+	</delete>
+	
+	<insert id="appbookinsertebook" parameterType="bomBoardVO">
+		INSERT INTO TBL_APP_NEWBOOK_LIST
+		(
+			UAEBL_UAEB_NO,								UAEBL_UCM_CODE
+			
+		)
+		VALUES
+		(
+			#{uaeb_no},		#{uaebl_ucm_code}
+		)
+	</insert>
+	
+	<insert id="appbookinsertebook2" parameterType="bomBoardVO">
+		INSERT INTO TBL_APP_NEWBOOK_LIST
+		(
+			UAEBL_UAEB_NO,								UAEBL_UCM_CODE
+			
+		)
+		VALUES
+		(
+			#{uaeb_no},		#{uaebl_ucm_code}
+		)
+	</insert>
+	
+	<select id="searchAppbook" parameterType="bomBoardVO" resultType="cmVO">
+		SELECT 
+			  contents_master.UCM_CODE											AS ucm_code
+			, contents_master.UCM_EBOOK_ISBN									AS ucm_ebook_isbn
+			, contents_master.UCM_FILE_TYPE										AS ucm_file_type
+			, contents_master.UCM_TITLE											AS ucm_title
+			, contents_master.UCM_SUB_TITLE										AS ucm_sub_title
+			, contents_master.UCM_UCP_CODE										AS ucm_ucp_code
+			, contents_master.UCM_WRITER										AS ucm_writer
+			, contents_master.UCM_PUBLISHER										AS ucm_publisher
+			, contents_master.UCM_COVER_URL										AS ucm_cover_url
+			, cp_master.UCP_NAME												AS ucp_name
+			, cp_master.UCP_CP_BRAND											AS ucp_cp_brand
+			, cp_master.UCP_BRAND												AS ucp_brand
+		FROM
+			TBL_CONTENTS_MASTER contents_master
+		LEFT OUTER JOIN
+			TBL_CP_MASTER cp_master
+		ON
+			contents_master.UCM_UCP_CODE = cp_master.UCP_CODE
+		WHERE
+			1 = 1
+		AND
+			contents_master.UCM_CODE IN (SELECT UAEBL_UCM_CODE FROM TBL_APP_NEWBOOK_LIST WHERE UAEBL_UAEB_NO = #{uaeb_no})
+	</select>
+	
+	<delete id="notUseFlag" parameterType="bomBoardVO">
+		DELETE FROM TBL_NOTICE
+		WHERE UN_UIS_CODE = #{searchUisCode} AND UN_NO in
+		<foreach item="item" index="index" collection="un_codes" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="deleteProc" parameterType="bomBoardVO">
+		UPDATE TBL_NOTICE
+		SET UN_USEYN = 'Y'
+		WHERE UN_NO in
+		<foreach item="item" index="index" collection="un_codes" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<select id="popupListCount" parameterType="searchVO" resultType="java.lang.Integer">
+		SELECT
+			COUNT(notice.UN_NO) AS count
+		FROM
+			TBL_NOTICE notice
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			notice.UN_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			1 = 1
+		  	AND notice.UN_USEYN = 'N'
+		  	AND notice.UN_NOTICE_TYPE = 'P'
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND notice.UN_UIS_CODE  = #{searchUisCode}
+		</if>
+		<if test='searchName != null and searchName != ""'>
+			AND institution_master.UIS_NAME LIKE CONCAT('%', #{searchName}, '%')
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND notice.UN_REGDATE <![CDATA[ >= ]]> STR_TO_DATE(#{searchStartDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND notice.UN_REGDATE <![CDATA[ <= ]]> STR_TO_DATE(#{searchEndDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+	</select>
+
+	<select id="popupList" parameterType="searchVO" resultType="bomBoardVO">
+		SELECT notice.UN_NO																	AS un_no
+			, notice.UN_TITLE																AS un_title
+			, notice.UN_UIS_CODE															AS un_uis_code
+			, institution_master.UIS_NAME													AS un_uis_name
+			, notice.UN_AM_USERID															AS un_am_userid
+			, DATE_FORMAT(notice.UN_REGDATE, '%Y-%m-%d %H:%i:%s') AS un_regdate
+			, notice.UN_DISPLAY_STARTDATE AS un_display_startdate
+			, notice.UN_DISPLAY_ENDDATE AS un_display_enddate
+		FROM
+			TBL_NOTICE notice
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			notice.UN_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			1 = 1
+		  	AND notice.UN_USEYN = 'N'
+		  	AND notice.UN_NOTICE_TYPE = 'P'
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND notice.UN_UIS_CODE  = #{searchUisCode}
+		</if>
+		<if test='searchName != null and searchName != ""'>
+			AND institution_master.UIS_NAME LIKE CONCAT('%', #{searchName}, '%')
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND notice.UN_REGDATE <![CDATA[ >= ]]> STR_TO_DATE(#{searchStartDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND notice.UN_REGDATE <![CDATA[ <= ]]> STR_TO_DATE(#{searchEndDate}, '%Y-%m-%d %H:%i:%s')
+		</if>
+		<if test='sortField1 != "" '>
+		ORDER BY notice.${sortField1}
+		</if>
+		<if test='sortField1 == "" '>
+		ORDER BY notice.UN_REGDATE DESC
+		</if>
+		 LIMIT #{pagenum}, #{pageSize}
+	</select>
+
+	<insert id="popupNoticeInsert" parameterType="bomBoardVO">
+	INSERT INTO TBL_NOTICE
+	(
+		UN_NO,			UN_TITLE,			UN_UIS_CODE,
+		UN_CONTENT,		UN_AM_USERID,		UN_NOTICE_TYPE,
+	 	UN_IMAGE_URL,	UN_DISPLAY_STARTDATE, UN_DISPLAY_ENDDATE,
+	 	UN_MESSAGE, UN_EXPIRY_DATE, UN_EVENT_URL
+
+	)
+	VALUES
+	(
+		#{un_no},		#{un_title},		#{un_uis_code},
+		#{un_content},	#{un_am_userid}, 	'P',
+		#{un_image_url}, CONCAT(#{un_display_startdate}, ' 00:00:00'), CONCAT(#{un_display_enddate}, ' 23:59:59'),
+	 	#{un_message}, 	#{un_expiry_date} ,#{un_event_option}
+	)
+	</insert>
+
+	<select id="getPopupNotice" parameterType="String" resultType="bomBoardVO">
+		SELECT notice.UN_NO AS un_no
+			, notice.UN_TITLE AS un_title
+			, notice.UN_UIS_CODE AS un_uis_code
+			, institution_master.UIS_NAME AS un_uis_name
+			, notice.UN_AM_USERID AS un_am_userid
+			, DATE_FORMAT(notice.UN_REGDATE, '%Y-%m-%d %H:%i:%s') AS un_regdate
+			, notice.UN_DISPLAY_STARTDATE AS un_display_startdate
+			, notice.UN_DISPLAY_ENDDATE AS un_display_enddate
+			, notice.UN_IMAGE_URL AS un_image_url
+			, notice.UN_MESSAGE AS un_message
+			, notice.UN_EXPIRY_DATE AS un_expiry_date
+			, notice.UN_EVENT_URL AS un_event_url
+		FROM
+			TBL_NOTICE notice
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			notice.UN_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			1 = 1
+		  	AND notice.UN_USEYN = 'N'
+		  	AND notice.UN_NOTICE_TYPE = 'P'
+			AND notice.UN_NO = #{un_no}
+	</select>
+
+	<select id="getNoticesByUisCode" parameterType="String" resultType="bomBoardVO">
+		SELECT notice.UN_NO AS un_no
+			, notice.UN_UIS_CODE AS un_uis_code
+			, '공지팝업' AS un_uis_name
+			, DATE_FORMAT(notice.UN_DISPLAY_STARTDATE, '%Y-%m-%d %H:%i:%s') AS un_display_startdate
+			, DATE_FORMAT(notice.UN_DISPLAY_ENDDATE, '%Y-%m-%d %H:%i:%s') AS un_display_enddate
+			, notice.UN_IMAGE_URL AS un_image_url
+			, notice.UN_MESSAGE AS un_message
+			, notice.UN_EXPIRY_DATE AS un_expiry_date
+			, notice.UN_EVENT_URL AS un_event_url
+		FROM
+			TBL_NOTICE notice
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			notice.UN_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			1 = 1
+		  	AND notice.UN_USEYN = 'N'
+		  	AND notice.UN_NOTICE_TYPE = 'P'
+			AND 
+			(
+			notice.UN_UIS_CODE is null or notice.UN_UIS_CODE = #{uis_code}
+			)
+			AND DATE_FORMAT(notice.UN_DISPLAY_STARTDATE, '%Y-%m-%d') <![CDATA[ <= ]]> DATE_FORMAT(CURDATE(), '%Y-%m-%d')
+			AND DATE_FORMAT(notice.UN_DISPLAY_ENDDATE, '%Y-%m-%d') <![CDATA[ >= ]]> DATE_FORMAT(CURDATE(), '%Y-%m-%d')
+		ORDER BY notice.UN_REGDATE DESC
+		Limit 2;
+	</select>
+
+	<update id="modifyPopupNotice" parameterType="bomBoardVO">
+	UPDATE TBL_NOTICE
+	SET
+		UN_UIS_CODE = #{un_uis_code},
+		UN_DISPLAY_STARTDATE = CONCAT(#{un_display_startdate}, ' 00:00:00'),
+		UN_DISPLAY_ENDDATE = CONCAT(#{un_display_enddate}, ' 23:59:59'),
+		UN_IMAGE_URL = #{un_image_url},
+		UN_MESSAGE = #{un_message},
+		UN_EXPIRY_DATE = #{un_expiry_date},
+		UN_AM_USERID = #{un_am_userid},
+		UN_EVENT_URL = #{un_event_option}
+	WHERE
+		UN_NO = #{un_no}
+	</update>
+	
+	<select id="getPopupNoticeDupleCheck" parameterType="String" resultType="int">
+		<![CDATA[
+		SELECT COUNT(*) AS duplicate_count
+		FROM TBL_NOTICE
+		WHERE UN_UIS_CODE = #{uis_code}
+			AND UN_DISPLAY_STARTDATE <= NOW()
+	  		AND UN_DISPLAY_ENDDATE >= NOW()
+	  		AND UN_NOTICE_TYPE = 'P'
+	  		AND UN_USEYN = 'N'
+		]]>
+	</select>
+
+	<select id="hopebooklistExcelDown" parameterType="searchVO" resultType="bomBoardVO">
+		SELECT GROUP_CONCAT(institution_master.UIS_NAME)                   AS h_uis_name
+			 , GROUP_CONCAT(institution_master.UIS_USEYN)				   AS h_uis_useyn
+			 , GROUP_CONCAT(member.UM_USERID)                              AS h_um_userid
+			 , DATE_FORMAT(hope.UHP_REGDATE, '%Y-%m-%d')                   AS h_regdate
+			 , hope.UHP_CONTENT                                            AS h_content
+			 , COUNT(hope.UHP_EBOOK_ISBN)                                  AS h_book_count
+			 , hope.UHP_EBOOK_ISBN                                         AS h_ebook_isbn
+			 , CASE
+			     	WHEN hope.UHP_ISBN_TYPE = 'E' THEN '전자책'
+					ELSE '종이책'
+			 END                                                           AS h_isbn_type
+			 , hope.UHP_TITLE                                              AS h_title
+			 , hope.UHP_AUTHOR                                             AS h_author
+			 , hope.UHP_PUBLISHER                                          AS h_publisher
+			 , DATE_FORMAT(hope.UHP_PUBLISHDATE, '%Y-%m-%d')               AS h_publishdate
+			 , CASE
+					WHEN hope.UHP_STATE_FLAG = 'F' THEN '수급실패'
+					WHEN hope.UHP_STATE_FLAG = 'Y' THEN '수급완료'
+					WHEN hope.UHP_STATE_FLAG = 'N' THEN '처리중'
+					ELSE ''
+			 END                                                            AS h_state_flag
+			, hope.UHP_STATE_MESSAGE                                        AS h_state_message
+		FROM TBL_HOPEBOOK_PROPOSAL hope
+			JOIN TBL_INSTITUTION_MASTER institution_master
+				ON hope.UHP_UIS_CODE = institution_master.UIS_CODE
+			JOIN TBL_B2B_MEMBER_MASTER member
+				ON member.UM_CODE = hope.UHP_UM_CODE
+		WHERE 1 = 1
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND hope.UHP_UIS_CODE  = #{searchUisCode}
+		</if>
+		<if test='searchName != null and searchName != ""'>
+			AND institution_master.UIS_NAME LIKE CONCAT('%', #{searchName}, '%')
+		</if>
+		<if test='searchName2 != null and searchName2 != ""'>
+			AND hope.UHP_TITLE LIKE CONCAT('%', #{searchName2}, '%')
+		</if>
+		<if test='status != null and status != ""'>
+			AND hope.UHP_STATE_FLAG = #{status}
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND STR_TO_DATE(hope.UHP_REGDATE, '%Y-%m-%d') <![CDATA[ >= ]]> STR_TO_DATE(#{searchStartDate}, '%Y-%m-%d')
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND STR_TO_DATE(hope.UHP_REGDATE, '%Y-%m-%d') <![CDATA[ <= ]]> STR_TO_DATE(#{searchEndDate}, '%Y-%m-%d')
+		</if>
+		GROUP BY hope.UHP_EBOOK_ISBN
+		<if test='sortField1 != "" '>
+		ORDER BY hope.${sortField1}
+		</if>
+		<if test='sortField1 == "" '>
+		ORDER BY hope.UHP_REGDATE DESC
+		</if>
+		<if test='excelYn == "" or excelYn == "N"'>
+			LIMIT #{pagenum}, #{pageSize}
+		</if>
+	</select>
+</mapper>

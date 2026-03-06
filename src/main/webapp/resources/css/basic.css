@@ -1,0 +1,101 @@
+@charset "utf8";
+
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/variable/pretendardvariable.css");
+
+
+
+html,body,div,span,object, h1,h2,h3,h4,h5,h6,p,blockquote,pre,article,aside,nav,section,summary,
+abbr,address,footer,header,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,
+dl,dt,dd,ol,ul,li,fieldset,form,label,legend,
+table,caption,tbody,tfoot,thead,tr,th,td,
+canvas,details,figcaption,figure,hgroup,mark,audio,iframe,video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent;
+  -webkit-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: content-box;
+}
+
+html, body {
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
+  "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+}
+
+caption{display: none;}
+
+label{margin: 0; padding: 0;}
+input[type="text"]{border: solid 1px #cccccc; -webkit-box-shadow: 0 0 0 1000px white inset;}
+
+/*input.date{-webkit-box-shadow: none;}*/
+
+input::placeholder{color: #999999;}
+input:-ms-input-placeholder{color: #999999;}
+input::-webkit-input-placeholder{color: #999999;}
+input::-moz-input-placeholder{color: #999999;}
+input[type="text"]:-ms-clear{display: none;}
+input:focus, button:focus, textarea:focus{outline: none;}
+
+button{border: none; overflow: visible; white-space: nowrap; vertical-align: middle;}
+
+button, html [type="button"], [type="submit"] {  }
+
+article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section {
+  display: block;
+}
+
+nav ul,li, dl, dt, dd {
+  list-style: none;
+}
+
+blockquote,q {
+  quotes: none;
+}
+
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: "";
+  content: none;
+}
+
+a {
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent;
+  text-decoration: none;
+  cursor: pointer;
+}
+button {cursor: pointer;}
+a:hover{
+  text-decoration: none;
+}
+a:active,
+a:hover {
+  outline: 0;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+img {transform: translateZ(0); image-rendering: -webkit-optimize-contrast; backface-visibility: hidden; }
+
+.blind { position:absolute; clip:rect(0 0 0 0); width:1px; height:1px; margin:-1px; overflow:hidden;  }
+.clear {clear:both;}
+.t_point  {color: #26c6da;}
+.dis_non  {display: none !important;}
+.t_gray    {color: #999;}
+.t_bold		{font-weight:bold; font-style:normal; overflow: hidden; margin: 0 10px; display: -webkit-box; -webkit-line-clamp: 2; text-overflow: ellipsis; -webkit-box-orient: vertical;}
+
+
+

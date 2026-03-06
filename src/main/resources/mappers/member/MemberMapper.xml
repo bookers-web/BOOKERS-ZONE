@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="resources.mappers.member.MemberMapper">
+
+	<update id="getSeqence" parameterType="commonVO" >
+		<selectKey keyProperty="seq_currval" resultType="java.lang.Integer" order="BEFORE">
+			SELECT
+				MAX(SEQ_CURRVAL)+1
+			FROM
+				TBL_SEQUENCES
+			WHERE
+				SEQ_NAME = #{seq_name}
+		</selectKey>
+		UPDATE TBL_SEQUENCES
+		SET
+			SEQ_CURRVAL = #{seq_currval}
+		WHERE
+			SEQ_NAME = #{seq_name}
+	</update>
+	
+	<select id="listCount" parameterType="searchVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(member_master.um_code) AS count
+		FROM TBL_B2B_MEMBER_MASTER member_master
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			member_master.UM_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			1 = 1
+		<if test='searchName != null and searchName != ""'>
+			AND institution_master.UIS_NAME LIKE CONCAT('%', #{searchName}, '%')
+		</if>
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND member_master.UM_UIS_CODE  = #{searchUisCode} 
+		</if>
+		<if test='searchUseYn != null and searchUseYn != ""'>
+			AND member_master.UM_USEYN	   = #{searchUseYn}
+		</if>
+		<if test='searchMemberGroup != null and searchMemberGroup != ""'>
+			AND member_master.UM_GROUP_CODE	= #{searchMemberGroup}
+		</if>
+		<if test='searchName2 != null and searchName2 != ""'>
+			AND
+			(
+					member_master.UM_USERID LIKE CONCAT('%', #{searchName2}, '%')
+				OR
+					member_master.UM_NAME LIKE CONCAT('%', #{searchName2}, '%')
+			)
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND member_master.UM_REGDATE <![CDATA[ >= ]]> #{searchStartDate}
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND member_master.UM_REGDATE <![CDATA[ <= ]]> #{searchEndDate}
+		</if>
+	</select>
+	
+	<select id="list" parameterType="memberVO" resultType="memberVO">
+		SELECT
+			  member_master.UM_CODE											AS um_code
+			, institution_master.UIS_NAME									AS uis_name
+			, member_master.UM_USERID										AS um_userid
+			, member_master.UM_NAME											AS um_name
+			, member_master.UM_USEYN										AS um_useyn
+			, (SELECT COUNT(UMD_CODE) FROM TBL_MEMBER_DEVICE WHERE UMD_UM_CODE = member_master.um_code ) AS device_count
+			, DATE_FORMAT(member_master.UM_REGDATE, '%Y-%m-%d %H:%i:%s')				AS um_regdate
+		FROM
+			TBL_B2B_MEMBER_MASTER member_master
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			member_master.UM_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			1 = 1
+		<if test='searchName != null and searchName != ""'>
+			AND institution_master.UIS_NAME LIKE CONCAT('%', #{searchName}, '%')
+		</if>
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND member_master.UM_UIS_CODE  = #{searchUisCode} 
+		</if>
+		<if test='searchUseYn != null and searchUseYn != ""'>
+			AND member_master.UM_USEYN	   = #{searchUseYn}
+		</if>
+		<if test='searchMemberGroup != null and searchMemberGroup != ""'>
+			AND member_master.UM_GROUP_CODE	= #{searchMemberGroup}
+		</if>
+		<if test='searchName2 != null and searchName2 != ""'>
+			AND
+			(
+					member_master.UM_USERID LIKE CONCAT('%', #{searchName2}, '%')
+				OR
+					member_master.UM_NAME LIKE CONCAT('%', #{searchName2}, '%')
+			)
+		</if>
+		<if test='searchStartDate != null and searchStartDate != ""'>
+			AND member_master.UM_REGDATE <![CDATA[ >= ]]> #{searchStartDate}
+		</if>
+		<if test='searchEndDate != null and searchEndDate != ""'>
+			AND member_master.UM_REGDATE <![CDATA[ <= ]]> #{searchEndDate}
+		</if>
+		<if test='sortField1 != "" '>
+		ORDER BY member_master.${sortField1}
+		</if>
+		<if test='sortField1 == "" '>
+		ORDER BY member_master.UM_REGDATE DESC
+		</if>
+		<if test='excelYn == "" or excelYn == "N"'>
+		 LIMIT #{pagenum}, #{pageSize}
+		 </if>
+	</select>
+	
+	<select id="select" parameterType="memberVO" resultType="memberVO">
+		SELECT
+			  member_master.UM_CODE											AS um_code
+			, institution_master.UIS_NAME									AS uis_name
+			, member_master.UM_USERID										AS um_userid
+			, member_master.UM_NAME											AS um_name
+			, member_master.UM_UIS_CODE										AS um_uis_code
+			, member_master.UM_REG_TYPE										AS um_reg_type
+			, member_master.UM_NAME											AS um_name
+			, member_master.UM_TEL											AS um_tel
+			, member_master.UM_EMAIL										AS um_email
+			, member_master.UM_MAX_DEVICE_COUNT								AS um_max_device_count
+			, member_master.UM_MAX_LIBRARY_IN_BOOK							AS um_max_library_in_book
+			, member_master.UM_FREE_ACCOUNT									AS um_free_account
+			, member_master.UM_USEYN										AS um_useyn
+		FROM
+			TBL_B2B_MEMBER_MASTER member_master
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			member_master.UM_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			member_master.UM_CODE = #{um_code}
+	</select>
+	
+	<insert id="insertMemberMaster" parameterType="memberVO">
+		INSERT INTO TBL_B2B_MEMBER_MASTER
+		(
+			UM_CODE,					UM_USERID,				UM_PWD,
+			UM_UIS_CODE,				
+		<if test='um_reg_type != null and um_reg_type != ""'>
+		    UM_REG_TYPE,  
+		</if>
+		<if test='um_name != null and um_name != ""'>
+		  	UM_NAME,
+		</if>
+		<if test='um_tel != null and um_tel != ""'>
+		  	UM_TEL, 
+		</if>
+		<if test='um_email != null and um_email != ""'>
+		  	UM_EMAIL,
+		</if>
+		<if test='um_max_device_count != null and um_max_device_count != 0'>
+		  	UM_MAX_DEVICE_COUNT,
+		</if>
+		<if test='um_max_library_in_book != null and um_max_library_in_book != 0'>
+		  	UM_MAX_LIBRARY_IN_BOOK,
+		</if>
+		<if test='um_free_account != null and um_free_account != ""'>
+		  	UM_FREE_ACCOUNT,
+		</if>
+			UM_REG_USERID,
+			UM_USEYN
+		)
+		VALUES
+		(
+			CONCAT('UM',LPAD(#{um_code},11,'0')),		#{um_userid},		PASSWORD(#{um_pwd}),
+			#{um_uis_code},				
+		<if test='um_reg_type != null and um_reg_type != ""'>
+			#{um_reg_type}, 
+		</if>
+		<if test='um_name != null and um_name != ""'>
+			#{um_name}, 
+		</if>
+		<if test='um_tel != null and um_tel != ""'>
+			 #{um_tel}, 
+		</if>
+		<if test='um_email != null and um_email != ""'>
+			 #{um_email}, 
+		</if>
+		<if test='um_max_device_count != null and um_max_device_count != 0'>
+			 #{um_max_device_count}, 
+		</if>
+		<if test='um_max_library_in_book != null and um_max_library_in_book != 0'>
+			 #{um_max_library_in_book}, 
+		</if>
+		<if test='um_free_account != null and um_free_account != ""'>
+			 #{um_free_account}, 
+		</if>
+			#{um_reg_userid},
+			#{um_useyn}
+		)
+	</insert>
+	
+	<update id="updateMemberMaster" parameterType="memberVO">
+		UPDATE TBL_B2B_MEMBER_MASTER
+		SET
+		<if test='um_pwd != null and um_pwd != ""'>
+			  UM_PWD					= PASSWORD(#{um_pwd}), 
+		</if>
+		<if test='um_reg_type != null and um_reg_type != ""'>
+			  UM_REG_TYPE				= #{um_reg_type}, 
+		</if>
+		<if test='um_name != null and um_name != ""'>
+			  UM_NAME					= #{um_name}, 
+		</if>
+		<if test='um_tel != null and um_tel != ""'>
+			  UM_TEL					= #{um_tel}, 
+		</if>
+		<if test='um_email != null and um_email != ""'>
+			  UM_EMAIL					= #{um_email}, 
+		</if>
+		<if test='um_max_device_count != null and um_max_device_count != 0'>
+			  UM_MAX_DEVICE_COUNT		= #{um_max_device_count}, 
+		</if>
+		<if test='um_max_library_in_book != null and um_max_library_in_book != 0'>
+			  UM_MAX_LIBRARY_IN_BOOK	= #{um_max_library_in_book}, 
+		</if>
+		<if test='um_free_account != null and um_free_account != ""'>
+			  UM_FREE_ACCOUNT			= #{um_free_account}, 
+		</if>
+		<if test='um_useyn != null and um_useyn != ""'>
+			  UM_USEYN					= #{um_useyn}, 
+		</if>
+			  UM_UPDATEDATE				= CURRENT_TIMESTAMP
+		WHERE
+			UM_CODE						= #{um_code}
+	</update>
+	
+	<select id="exist" parameterType="memberVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(UM_USERID)
+		FROM TBL_B2B_MEMBER_MASTER
+		WHERE
+			UM_UIS_CODE = #{um_uis_code}
+		AND 
+			UM_USERID			= #{um_userid}
+	</select>
+	
+	<update id="pwReset" parameterType="memberVO">
+		UPDATE TBL_B2B_MEMBER_MASTER SET UM_PWD = PASSWORD(UM_USERID),UM_PW_CHANGE = 'N' 
+		WHERE UM_CODE = #{um_code} AND UM_UIS_CODE = #{um_uis_code}
+	</update>
+	
+	<select id="memberDevicelist" parameterType="memberDeviceVO" resultType="memberDeviceVO">
+		SELECT
+			  @rownum := @rownum+1				AS rnum
+			, UMD_CODE							AS umd_code
+			, UMD_UM_CODE						AS umd_um_code
+			, UMD_UID							AS umd_uid
+			, UMD_NAME							AS umd_name
+			, UMD_OS							AS umd_os
+			, UMD_REGDATE						AS umd_regdate
+		FROM
+			TBL_MEMBER_DEVICE,(SELECT @rownum :=0) AS r
+		WHERE
+			UMD_UM_CODE			= #{umd_um_code}
+	</select>
+	
+	<delete id="deleteDevice" parameterType="memberDeviceVO">
+		DELETE FROM TBL_MEMBER_DEVICE
+		WHERE UMD_CODE = #{umd_code}
+	</delete>
+	
+	<select id="freeAccountCount" parameterType="searchVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(member_master.um_code) AS count
+		FROM TBL_B2B_MEMBER_MASTER member_master
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			member_master.UM_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			1 = 1
+		<if test='searchUisCode != null and searchUisCode != ""'>
+			AND member_master.UM_UIS_CODE  	= #{searchUisCode} 
+		</if>
+		<if test='searchExceptUserId != null and searchExceptUserId != ""'>
+			AND UM_USERID					!= #{searchExceptUserId}
+		</if>
+		<if test='searchUseYn != null and searchUseYn != ""'>
+			AND UM_USEYN					= #{searchUseYn}
+		</if>
+	</select>
+	
+	
+	<insert id="insertLog" parameterType="memberLogVO">
+		INSERT INTO TBL_MEMBER_ACCESSLOG
+		(
+			MAL_UM_CODE,		MAL_UM_USERID,		UMD_UID,
+			UMD_OS,				MAL_LOGIN_DATE,		MAL_LOGIN_IP
+		)
+		VALUES
+		(
+			#{mal_um_code},		#{mal_um_userid},	#{umd_uid},
+			#{umd_os},			CURRENT_TIMESTAMP,	#{mal_login_ip}
+		)
+	</insert>
+	
+	<select id="selectMember" parameterType="memberVO" resultType="memberVO">
+		SELECT
+			  member_master.UM_CODE											AS um_code
+			, institution_master.UIS_NAME									AS uis_name
+			, member_master.UM_USERID										AS um_userid
+			, member_master.UM_NAME											AS um_name
+			, member_master.UM_UIS_CODE										AS um_uis_code
+			, member_master.UM_REG_TYPE										AS um_reg_type
+			, member_master.UM_NAME											AS um_name
+			, member_master.UM_TEL											AS um_tel
+			, member_master.UM_EMAIL										AS um_email
+			, member_master.UM_MAX_DEVICE_COUNT								AS um_max_device_count
+			, member_master.UM_MAX_LIBRARY_IN_BOOK							AS um_max_library_in_book
+			, member_master.UM_FREE_ACCOUNT									AS um_free_account
+			, member_master.UM_USEYN										AS um_useyn
+			, member_master.UM_PW_CHANGE									AS um_pw_change
+			, IFNULL(institution_master.UIS_UCP_CODE, '')					AS uis_ucp_code
+			, institution_master.UIS_WEB_LOGO_URL							AS uis_web_logo_url
+			, institution_master.UIS_MOBILE_LOGO_URL						AS uis_mobile_logo_url
+			, institution_master.UIS_KEYCOLOR								AS uis_keycolor
+			, institution_master.UIS_COMMON_BOOK_FLAG						AS uis_common_book_flag
+			, institution_master.UIS_RETURN_FLAG							AS uis_return_flag
+			, institution_master.UIS_RETURN_UI_FLAG							AS uis_return_ui_flag
+			, institution_master.UIS_PW_FLAG								AS uis_pw_flag
+		FROM
+			TBL_B2B_MEMBER_MASTER member_master
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			member_master.UM_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			member_master.UM_UIS_CODE = #{um_uis_code}
+		AND
+			member_master.UM_USERID = #{um_userid}
+		AND
+			member_master.UM_PWD = PASSWORD(#{um_pwd})
+	</select>
+	
+	<select id="findDevice" parameterType="memberDeviceVO" resultType="memberDeviceVO">
+		SELECT
+			  UMD_CODE							AS umd_code
+			, UMD_UM_CODE						AS umd_um_code
+			, UMD_UID							AS umd_uid
+			, UMD_NAME							AS umd_name
+			, UMD_OS							AS umd_os
+			, UMD_REGDATE						AS umd_regdate
+		FROM
+			TBL_MEMBER_DEVICE
+		WHERE
+			1 = 1
+		<if test='umd_uid != null and umd_uid != ""'>
+			AND UMD_UID			= #{umd_uid}
+		</if>
+		<if test='umd_um_code != null and umd_um_code != ""'>
+			AND UMD_UM_CODE		= #{umd_um_code}
+		</if>
+		<if test='umd_code != null and umd_code != ""'>
+			AND UMD_CODE		= #{umd_code}
+		</if>
+			
+	</select>
+	
+	<select id="isAlive" parameterType="memberVO" resultType="java.lang.Integer">
+		SELECT
+			COUNT(member.UM_CODE)
+		FROM 
+			TBL_B2B_MEMBER_MASTER member
+		INNER JOIN 
+			TBL_INSTITUTION_MASTER ist
+		ON
+			member.UM_UIS_CODE = ist.UIS_CODE
+		WHERE
+			ist.UIS_USEYN = 'Y'
+		<if test='um_uis_code != null and um_uis_code != ""'>
+			AND UM_UIS_CODE			= #{um_uis_code}
+		</if> 
+		<if test='um_userid != null and um_userid != ""'>
+			AND UM_USERID			= #{um_userid}
+		</if>
+		AND member.UM_USEYN = 'Y'
+	</select>
+	
+	<select id="selectOrm" parameterType="memberVO" resultType="memberVO">
+		SELECT
+			UIS_AUTH_METHOD									AS uis_auth_method,
+			UIS_COMMON_BOOK_FLAG							AS uis_common_book_flag,
+			UIS_COPY_BOOK_FLAG								AS uis_copy_book_flag,
+			UIS_PREVIEW_FLAG								AS uis_preview_flag,
+			UIS_RETURN_FLAG									AS uis_return_flag,
+			UIS_RETURN_UI_FLAG								AS uis_return_ui_flag,
+			UIS_PW_FLAG												AS uis_pw_flag
+		FROM
+			TBL_INSTITUTION_MASTER
+		WHERE
+			UIS_CODE = #{um_uis_code} 
+
+	</select>
+	
+	<select id="selectUcpCode" parameterType="String" resultType="String">
+		SELECT IFNULL(UIS_UCP_CODE, '')
+		FROM TBL_INSTITUTION_MASTER
+		WHERE UIS_CODE = #{uisCode}
+	</select>
+		
+	<insert id="insertMemberSso" parameterType="java.util.HashMap">
+		INSERT INTO TBL_B2B_MEMBER_MASTER
+		(
+			UM_CODE,					UM_USERID,				UM_PWD,
+			UM_UIS_CODE,				UM_REG_TYPE,			UM_TEL, 			
+			UM_EMAIL,					UM_NAME,
+			UM_REG_USERID,				UM_USEYN
+			<if test='um_group_code != null and um_group_code != ""'>
+			, UM_GROUP_CODE
+			</if>
+			<if test='um_rank != null and um_rank != ""'>
+			, UM_RANK
+			</if>
+			<if test='um_group != null and um_group != ""'>
+			, UM_GROUP
+			</if>
+			<if test='um_free_account != null and um_free_account != ""'>
+			, UM_FREE_ACCOUNT
+			</if>
+			<if test='um_user_type != null and um_user_type != ""'>
+			, UM_USER_TYPE
+			</if>
+			<if test='um_school_grade != null and um_school_grade != ""'>
+			, UM_SCHOOL_GRADE
+			</if>
+			<if test='um_school_class != null and um_school_class != ""'>
+			, UM_SCHOOL_CLASS
+			</if>
+			
+		)
+		VALUES
+		(
+			CONCAT('UM',LPAD(#{um_code},11,'0')),		#{um_userid},		PASSWORD(#{um_pwd}),
+			#{um_uis_code}, 							'C',				'--', 				
+			'@',										#{um_name}, 
+			'admin',		 							'Y'
+			<if test='um_group_code != null and um_group_code != ""'>
+			, #{um_group_code}
+			</if>
+			<if test='um_rank != null and um_rank != ""'>
+			, #{um_rank}
+			</if>
+			<if test='um_group != null and um_group != ""'>
+			, #{um_group}
+			</if>
+			<if test='um_free_account != null and um_free_account != ""'>
+			, #{um_free_account}
+			</if>
+			<if test='um_user_type != null and um_user_type != ""'>
+			, #{um_user_type}
+			</if>
+			<if test='um_school_grade != null and um_school_grade != ""'>
+			, #{um_school_grade}
+			</if>
+			<if test='um_school_class != null and um_school_class != ""'>
+			, #{um_school_class}
+			</if>
+		)
+	</insert>
+	
+	<select id="existMember" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(UM_CODE)
+		FROM TBL_B2B_MEMBER_MASTER
+		WHERE
+			UM_UIS_CODE			= #{um_uis_code}
+		AND
+			UM_USERID			= #{um_userid}
+	</select>
+	
+	<select id="selectSsoMember" parameterType="memberVO" resultType="memberVO">
+		SELECT
+			  member_master.UM_CODE											AS um_code
+			, institution_master.UIS_NAME									AS uis_name
+			, member_master.UM_USERID										AS um_userid
+			, member_master.UM_NAME											AS um_name
+			, member_master.UM_UIS_CODE										AS um_uis_code
+			, member_master.UM_REG_TYPE										AS um_reg_type
+			, member_master.UM_NAME											AS um_name
+			, member_master.UM_TEL											AS um_tel
+			, member_master.UM_EMAIL										AS um_email
+			, member_master.UM_MAX_DEVICE_COUNT								AS um_max_device_count
+			, member_master.UM_MAX_LIBRARY_IN_BOOK							AS um_max_library_in_book
+			, member_master.UM_FREE_ACCOUNT									AS um_free_account
+			, member_master.UM_USEYN										AS um_useyn
+			, IFNULL(institution_master.UIS_UCP_CODE, '')					AS uis_ucp_code
+			, institution_master.UIS_WEB_LOGO_URL							AS uis_web_logo_url
+			, institution_master.UIS_MOBILE_LOGO_URL						AS uis_mobile_logo_url
+			, institution_master.UIS_KEYCOLOR								AS uis_keycolor
+			, institution_master.UIS_COMMON_BOOK_FLAG						AS uis_common_book_flag
+			, institution_master.UIS_PREVIEW_FLAG							AS uis_preview_flag
+			, institution_master.UIS_RETURN_FLAG							AS uis_return_flag
+			, institution_master.UIS_RETURN_UI_FLAG							AS uis_return_ui_flag
+		FROM
+			TBL_B2B_MEMBER_MASTER member_master
+		LEFT OUTER JOIN
+			TBL_INSTITUTION_MASTER institution_master
+		ON
+			member_master.UM_UIS_CODE = institution_master.UIS_CODE
+		WHERE
+			member_master.UM_UIS_CODE = #{um_uis_code}
+		AND
+			member_master.UM_USERID = #{um_userid}
+		ORDER BY member_master.UM_CODE ASC
+		LIMIT 1
+	</select>
+	
+	<update id="updateSsoMemberPwd" parameterType="java.util.HashMap">
+		UPDATE TBL_B2B_MEMBER_MASTER
+		SET
+			UM_PWD					= PASSWORD(#{um_pwd})
+			<if test='um_name != null and um_name != ""'>
+			, UM_NAME			= #{UM_NAME}
+			</if>
+			<if test='um_group_code != null and um_group_code != ""'>
+			, UM_GROUP_CODE			= #{um_group_code}
+			</if>
+			<if test='um_group != null and um_group != ""'>
+			, UM_GROUP = #{um_group}
+			</if>
+			<if test='um_user_type != null and um_user_type != ""'>
+			, UM_USER_TYPE = #{um_user_type}
+			</if>
+			<if test='um_school_grade != null and um_school_grade != ""'>
+			, UM_SCHOOL_GRADE = #{um_school_grade}
+			</if>
+			<if test='um_school_class != null and um_school_class != ""'>
+			, UM_SCHOOL_CLASS = #{um_school_class} 
+			</if>
+			<if test='um_useyn != null and um_useyn != ""'>
+			, UM_USEYN = #{um_useyn} 
+			</if>
+		WHERE
+			UM_UIS_CODE				= #{um_uis_code}
+		AND
+			UM_USERID = #{um_userid}
+	</update>
+	<insert id="insertFormUser" parameterType="userDataFormVO">
+		INSERT INTO TBL_MEMBER_FORM_INFO
+		(
+			UDF_NAME,					UDF_TELL,				UDF_DEP,
+			UDF_DOB,					UDF_OS,					UDF_IP, 			
+			UDF_INSTITUTION
+			
+		)
+		VALUES
+		(
+			#{udf_name},				#{udf_tel},				#{udf_dep},
+			#{udf_dob}, 				#{udf_os},				#{udf_ip}, 				
+			#{udf_institution}
+		)
+	</insert>
+	<select id="existFormUser" parameterType="userDataFormVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(UDF_TELL)
+		FROM TBL_MEMBER_FORM_INFO
+		WHERE
+			UDF_TELL			= #{udf_tel}
+	</select>
+	
+	<select id="entryProc" parameterType="userDataFormVO" resultType="java.lang.Integer">
+		SELECT 
+			COUNT(UMEI_TEL)
+		FROM TBL_MEMBER_ENTRY_INFO
+		WHERE
+			UMEI_NAME= #{entry_um_name} 
+		AND
+			UMEI_TEL			= #{entry_um_phone}
+	</select>
+	
+</mapper>

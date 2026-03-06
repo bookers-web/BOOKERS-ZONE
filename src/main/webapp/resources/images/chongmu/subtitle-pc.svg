@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="766" height="48" viewBox="0 0 766 48">
+    <defs>
+        <filter id="apr91tozfa" x="296" y="0" width="174" height="48" filterUnits="userSpaceOnUse">
+            <feOffset dy="2"/>
+            <feGaussianBlur stdDeviation="1" result="blur"/>
+            <feFlood flood-opacity=".122"/>
+            <feComposite operator="in" in2="blur"/>
+            <feComposite in="SourceGraphic"/>
+        </filter>
+    </defs>
+    <path data-name="사각형 2622" transform="translate(0 22)" style="fill:#222" d="M0 0h766v1H0z"/>
+    <g style="filter:url(#apr91tozfa)">
+        <g data-name="사각형 2621" transform="translate(299 1)" style="fill:#fff;stroke:#707070">
+            <rect width="168" height="42" rx="21" style="stroke:none"/>
+            <rect x=".5" y=".5" width="167" height="41" rx="20.5" style="fill:none"/>
+        </g>
+    </g>
+    <g data-name="그룹 6973">
+        <text transform="translate(399.487 30)" style="font-size:22px;font-family:Pretendard-Regular,Pretendard"><tspan x="-14.274" y="0">PC</tspan></text>
+        <g data-name="그룹 6971">
+            <g data-name="그룹 6970">
+                <path data-name="패스 15896" d="M154.118 354.13h-.487a.471.471 0 1 1 0-.942h.487a.471.471 0 1 1 0 .942z" transform="translate(211.005 -325.248)" style="fill:#333"/>
+            </g>
+            <path data-name="패스 15897" d="M124.152 288.323H102.3a1.954 1.954 0 0 0-1.952 1.952v13.076a1.954 1.954 0 0 0 1.952 1.949h8.285v2.078h-2.042a.471.471 0 1 0 0 .942h9.371a.471.471 0 0 0 0-.942h-2.044V305.3h8.286a1.954 1.954 0 0 0 1.952-1.952v-13.073a1.954 1.954 0 0 0-1.956-1.952zm-21.856.942h21.856a1.011 1.011 0 0 1 1.01 1.01V302.2h-23.876v-11.925a1.011 1.011 0 0 1 1.014-1.01zm12.628 18.116h-3.4V305.3h3.4zm9.229-3.02H102.3a1.011 1.011 0 0 1-1.01-1.01v-.208h23.876v.208a1.011 1.011 0 0 1-1.014 1.01z" transform="translate(251.656 -275.323)" style="fill:#333"/>
+        </g>
+    </g>
+</svg>
