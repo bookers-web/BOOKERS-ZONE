@@ -3013,4 +3013,60 @@
 		  );
 	</select>
 
+
+	<select id="selectSearchCategoryList" parameterType="frontCmVO" resultType="frontCmVO">
+		SELECT
+			category.UCT_CODE AS uct_code,
+			category.UCT_PARENT AS uct_parent,
+			category.UCT_NAME AS uct_name,
+			category.UCT_DEPTH AS uct_depth,
+			category.UCT_TYPE AS uct_type,
+			category.UCT_PRIORTY AS uct_priorty,
+			(
+				SELECT COUNT(*)
+				FROM TBL_CONTENTS_MASTER content
+				WHERE content.UCM_MAIN_CODE = category.UCT_MAIN_CODE
+				  AND content.UCM_STATUS = 'S'
+				  AND content.UCM_SVRYN = 'Y'
+				<if test='uis_ucp_code != null and uis_ucp_code != ""'>
+				  AND content.UCM_UCP_CODE = #{uis_ucp_code}
+				</if>
+				<if test='uis_copy_book_flag == "N"'>
+				  AND content.UCM_COPY_BOOK_FLAG = 'N'
+				</if>
+				  AND NOT EXISTS (
+				      SELECT 1 FROM TBL_CONTENTS_EXCLUDE e
+				      WHERE e.UCE_UCM_CODE = content.UCM_CODE
+				        AND e.UCE_UIS_CODE = #{uis_code}
+				  )
+			) AS content_count
+		FROM TBL_CATEGORY_MASTER category
+		WHERE category.UCT_DEPTH = 0
+		  AND category.UCT_TYPE IN ('E', 'A')
+		  AND EXISTS (
+		      SELECT 1
+		      FROM TBL_CONTENTS_MASTER content
+		      <if test='uis_return_flag == "Y"'>
+		      INNER JOIN TBL_RETURN_CONTENTS rc
+		          ON rc.URC_UCM_CODE = content.UCM_CODE
+		         AND rc.URC_UIS_CODE = #{uis_code}
+		      </if>
+		      WHERE content.UCM_MAIN_CODE = category.UCT_MAIN_CODE
+		        AND content.UCM_STATUS = 'S'
+		        AND content.UCM_SVRYN = 'Y'
+		      <if test='uis_ucp_code != null and uis_ucp_code != ""'>
+		        AND content.UCM_UCP_CODE = #{uis_ucp_code}
+		      </if>
+		      <if test='uis_copy_book_flag == "N"'>
+		        AND content.UCM_COPY_BOOK_FLAG = 'N'
+		      </if>
+		        AND NOT EXISTS (
+		            SELECT 1 FROM TBL_CONTENTS_EXCLUDE e
+		            WHERE e.UCE_UCM_CODE = content.UCM_CODE
+		              AND e.UCE_UIS_CODE = #{uis_code}
+		        )
+		  )
+		ORDER BY category.UCT_TYPE, category.UCT_CODE, category.UCT_PRIORTY ASC
+	</select>
+
 </mapper>

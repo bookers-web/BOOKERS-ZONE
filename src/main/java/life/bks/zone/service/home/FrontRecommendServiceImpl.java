@@ -532,6 +532,11 @@ public class FrontRecommendServiceImpl implements FrontRecommendService {
 		return frontRecommendDAO.selectAvailableCategoryTypes(frontCmVO);
 	}
 
+	@Override
+	public List<FrontCmVO> selectSearchCategoryList(FrontCmVO frontCmVO) {
+		return frontRecommendDAO.selectSearchCategoryList(frontCmVO);
+	}
+
 	private static void extractFields(FrontCmVO frontCmVO, FrontCmVO resultList) {
 		resultList.setSearchName(frontCmVO.getSearchName());
 		resultList.setSearchName2(frontCmVO.getSearchName2());

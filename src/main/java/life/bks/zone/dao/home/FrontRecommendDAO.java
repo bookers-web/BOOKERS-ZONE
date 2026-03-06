@@ -75,5 +75,7 @@ public interface FrontRecommendDAO {
 	List<FrontCmVO> selectCategoryListV2(FrontCmVO frontCmVO);
 	// 사용 가능한 카테고리 타입 조회 (E, A)
 	List<String> selectAvailableCategoryTypes(FrontCmVO frontCmVO);
+    // 검색 페이지용 카테고리 목록 (content_count 포함)
+    List<FrontCmVO> selectSearchCategoryList(FrontCmVO frontCmVO);
 
 }
