@@ -214,9 +214,9 @@ function fn_Detail(ucm_ucs_code, ucm_code){
 			<div class="btn_prevArea">
 				<button class="btn_Prev" onclick="javascript:fn_back();"><span class="blind">이전페이지 이동</span></button>
 			</div>
-			<div class="screenTitle"><!-- 책 제목 -->
+			<div class="screenTitle" style="text-align:left; margin-left:56px;"><!-- 책 제목 -->
 				${cmVO.ucm_title }
-			</div>	
+			</div>
 		</div>
 	</header>
 	<main class="max_main">
@@ -594,7 +594,7 @@ function fn_Detail(ucm_ucs_code, ucm_code){
 		</c:if>
 		<!-- 하단 버튼들 고정으로 나오는 부분 -->
 		<div class="btn_bottomArea">
-			<div class="btn_bottomBox">
+			<div class="btn_bottomBox" style="justify-content:center;">
 				<c:choose>
 				<c:when test='${cmVO.ucm_webdrm_yn eq "Y" }'>
 				<button type="button" class="btn_detail_read" id='${cmVO.ucm_code }_Btn' onClick="webviewer_Btn('${cmVO.ucm_code }','${cmVO.ume_code}')">바로 읽기</button>

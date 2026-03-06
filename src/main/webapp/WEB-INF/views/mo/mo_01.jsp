@@ -56,7 +56,7 @@ function fn_back(){
 			<div class="btn_prevArea">
 				<button class="btn_Prev" onclick="javascript:fn_back();"><span class="blind">이전페이지 이동</span></button>
 			</div>
-			<div class="screenTitle">
+			<div class="screenTitle" style="text-align:left; margin-left:56px;">
 				${groupName}
 			</div>	
 		</div>
