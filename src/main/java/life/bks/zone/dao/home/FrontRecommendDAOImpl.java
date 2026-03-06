@@ -199,6 +199,16 @@ public class FrontRecommendDAOImpl implements FrontRecommendDAO {
         return sqlSession.selectList(namespace + ".selectSearchCategoryList", frontCmVO);
     }
 
+    @Override
+    public List<FrontCmVO> solrCategorySearchList(List<String> codeList) {
+        return sqlSession.selectList(namespace + ".solrCategorySearchList", codeList);
+    }
+
+    @Override
+    public FrontCmVO solrCategorySearchType(List<String> codeList) {
+        return sqlSession.selectOne(namespace + ".solrCategorySearchType", codeList);
+    }
+
     private boolean isReturnProcessEnabled(FrontCmVO frontCmVO) {
         try {
             Field field = FrontCmVO.class.getDeclaredField("uis_return_flag");

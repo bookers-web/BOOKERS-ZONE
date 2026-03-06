@@ -3069,4 +3069,90 @@
 		ORDER BY category.UCT_TYPE, category.UCT_CODE, category.UCT_PRIORTY ASC
 	</select>
 
+	<!-- Solr faceting 결과의 카테고리 코드 리스트로 카테고리 정보 조회 (WWW CmMapper.xml solrCategorySearchList 동일) -->
+	<select id="solrCategorySearchList" parameterType="java.util.List" resultType="frontCmVO">
+		SELECT category_master.UCT_CODE AS uct_code,
+		       category_master.UCT_PARENT AS uct_parent,
+		       category_master.UCT_NAME AS uct_name,
+		       category_master.UCT_DEPTH AS uct_depth,
+		       category_master.UCT_TYPE AS uct_type,
+		       category_master.UCT_PRIORTY AS uct_priorty,
+		       category_master.UCT_UCP_CODE AS uct_ucp_code
+		FROM TBL_CATEGORY_MASTER category_master
+		WHERE category_master.UCT_TYPE != 'C'
+		  AND category_master.UCT_DEPTH = 0
+		<if test="list != null and list.size() > 0">
+		  AND LEFT(category_master.UCT_CODE, 8) IN
+		  <foreach item="code" collection="list" open="(" separator="," close=")">
+		    #{code}
+		  </foreach>
+		</if>
+		ORDER BY category_master.UCT_CODE
+	</select>
+
+	<!-- Solr faceting 결과의 카테고리 코드 리스트로 타입 판정 (WWW CmMapper.xml solrCategorySearchType 동일) -->
+	<select id="solrCategorySearchType" parameterType="java.util.List" resultType="frontCmVO">
+		SELECT
+		    CASE
+		        WHEN EXISTS (
+		            SELECT 1
+		            FROM TBL_CATEGORY_MASTER category_master
+		                INNER JOIN TBL_CONTENTS_MASTER contents_master
+		                    ON contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		            WHERE category_master.UCT_TYPE != 'C'
+		            <if test="list != null and list.size() > 0">
+		                AND LEFT(category_master.UCT_CODE, 8) IN
+		                <foreach item="code" collection="list" open="(" separator="," close=")">
+		                    #{code}
+		                </foreach>
+		            </if>
+		                AND category_master.UCT_TYPE = 'A'
+		        )
+		        AND EXISTS (
+		            SELECT 1
+		            FROM TBL_CATEGORY_MASTER category_master
+		                INNER JOIN TBL_CONTENTS_MASTER contents_master
+		                    ON contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		            WHERE category_master.UCT_TYPE != 'C'
+		            <if test="list != null and list.size() > 0">
+		                AND LEFT(category_master.UCT_CODE, 8) IN
+		                <foreach item="code" collection="list" open="(" separator="," close=")">
+		                    #{code}
+		                </foreach>
+		            </if>
+		                AND category_master.UCT_TYPE = 'E'
+		        ) THEN 'TYPEALL'
+		        WHEN EXISTS (
+		            SELECT 1
+		            FROM TBL_CATEGORY_MASTER category_master
+		                INNER JOIN TBL_CONTENTS_MASTER contents_master
+		                    ON contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		            WHERE category_master.UCT_TYPE != 'C'
+		            <if test="list != null and list.size() > 0">
+		                AND LEFT(category_master.UCT_CODE, 8) IN
+		                <foreach item="code" collection="list" open="(" separator="," close=")">
+		                    #{code}
+		                </foreach>
+		            </if>
+		                AND category_master.UCT_TYPE = 'A'
+		        ) THEN 'TYPEA'
+		        WHEN EXISTS (
+		            SELECT 1
+		            FROM TBL_CATEGORY_MASTER category_master
+		                INNER JOIN TBL_CONTENTS_MASTER contents_master
+		                    ON contents_master.UCM_UCT_CODE = category_master.UCT_CODE
+		            WHERE category_master.UCT_TYPE != 'C'
+		            <if test="list != null and list.size() > 0">
+		                AND LEFT(category_master.UCT_CODE, 8) IN
+		                <foreach item="code" collection="list" open="(" separator="," close=")">
+		                    #{code}
+		                </foreach>
+		            </if>
+		                AND category_master.UCT_TYPE = 'E'
+		        ) THEN 'TYPEE'
+		        ELSE 'NONE'
+		    END AS type_result
+		FROM DUAL
+	</select>
+
 </mapper>

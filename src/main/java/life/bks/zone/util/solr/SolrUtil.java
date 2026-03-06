@@ -154,11 +154,43 @@ public class SolrUtil {
         if (useCategory) {
             stringBuilder.append("facet.field=").append("ucm_uct_code").append("&");
             stringBuilder.append("facet.mincount=").append(1).append("&");
-            stringBuilder.append("facet=").append(true);
+            stringBuilder.append("facet=").append(true).append("&");
         }
 
         stringBuilder.append("wt=").append("json");
 
         return stringBuilder.toString();
+    }
+
+    /**
+     * Solr Facet 결과에서 카테고리별 건수 추출
+     * facet.field=ucm_uct_code 기반
+     * @param solrUrl Facet 정보가 포함된 Solr 요청 URL
+     * @return 카테고리 코드별 콘텐츠 수 Map
+     * @throws Exception Solr 응답 파싱 실패 등
+     */
+    public static Map<String, Integer> getSolrCategoryFacetMap(String solrUrl) throws Exception {
+        HttpHeaders headers = solrAuthHeaders();
+        RestTemplate restTemplate = SolrRestTemplateUtil.defaultTemplate();
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(solrUrl, HttpMethod.GET, entity, String.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            return Collections.emptyMap();
+        }
+
+        JSONObject root = (JSONObject) new JSONParser().parse(response.getBody());
+        JSONObject facetCounts = (JSONObject) root.get("facet_counts");
+        JSONObject facetFields = (JSONObject) facetCounts.get("facet_fields");
+        JSONArray uctCodeArray = (JSONArray) facetFields.get("ucm_uct_code");
+
+        Map<String, Integer> categoryCountMap = new LinkedHashMap<>();
+        for (int i = 0; i < uctCodeArray.size(); i += 2) {
+            String categoryCode = (String) uctCodeArray.get(i);
+            Long count = (Long) uctCodeArray.get(i + 1);
+            categoryCountMap.put(categoryCode, count.intValue());
+        }
+        return categoryCountMap;
     }
 }

@@ -53,4 +53,7 @@ public interface FrontRecommendService {
     // 검색 페이지용 카테고리 목록 (content_count 포함)
     List<FrontCmVO> selectSearchCategoryList(FrontCmVO frontCmVO);
 
+	// Solr faceting 기반 카테고리 검색 (WWW unifiedCategorySearch 동일)
+	// 반환: resultList=카테고리목록(content_count 포함), type_result=타입판정(TYPEALL/TYPEA/TYPEE/NONE)
+	FrontCmVO solrCategorySearch(FrontCmVO frontCmVO);
 }

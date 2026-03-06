@@ -15,8 +15,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class FrontRecommendServiceImpl implements FrontRecommendService {
@@ -535,6 +534,55 @@ public class FrontRecommendServiceImpl implements FrontRecommendService {
 	@Override
 	public List<FrontCmVO> selectSearchCategoryList(FrontCmVO frontCmVO) {
 		return frontRecommendDAO.selectSearchCategoryList(frontCmVO);
+	}
+
+	@Override
+	public FrontCmVO solrCategorySearch(FrontCmVO frontCmVO) {
+		FrontCmVO result = new FrontCmVO();
+		try {
+			// Solr URL 생성 (faceting 활성화, 페이징 비활성화)
+			String solrUrl = SolrUtil.buildSolrURL_v2(
+					frontCmVO.getSearchName(), frontCmVO.getUis_code(),
+					frontCmVO.getUis_copy_book_flag(), frontCmVO.getUis_ucp_code(),
+					frontCmVO.getUis_return_flag(), null, null,
+					frontCmVO.getSortField(),
+					0, 0, false, true, null);
+
+			Map<String, Integer> facetMap = SolrUtil.getSolrCategoryFacetMap(solrUrl);
+
+			if (!facetMap.isEmpty()) {
+				List<String> codeList = new ArrayList<>(facetMap.keySet());
+				List<FrontCmVO> categoryList = frontRecommendDAO.solrCategorySearchList(codeList);
+
+				// Solr facet 건수를 content_count에 매핑 (WWW 동일)
+				for (FrontCmVO cat : categoryList) {
+					String code8 = cat.getUct_code() != null && cat.getUct_code().length() >= 8
+							? cat.getUct_code().substring(0, 8) : cat.getUct_code();
+					cat.setContent_count(facetMap.getOrDefault(code8, 0));
+				}
+				result.setResultList(categoryList);
+
+				// 카테고리 타입 판정 (TYPEALL/TYPEA/TYPEE/NONE)
+				FrontCmVO typeVO = frontRecommendDAO.solrCategorySearchType(codeList);
+				result.setType_result(typeVO != null ? typeVO.getType_result() : "NONE");
+			} else {
+				result.setResultList(Collections.emptyList());
+				result.setType_result("NONE");
+			}
+		} catch (Exception e) {
+			// DB fallback (Solr 실패 시 기존 DB 조회 방식으로 폴백)
+			List<FrontCmVO> categoryList = frontRecommendDAO.selectSearchCategoryList(frontCmVO);
+			result.setResultList(categoryList != null ? categoryList : Collections.emptyList());
+
+			List<String> availableTypes = frontRecommendDAO.selectAvailableCategoryTypes(frontCmVO);
+			boolean hasEbook = availableTypes != null && availableTypes.contains("E");
+			boolean hasAudio = availableTypes != null && availableTypes.contains("A");
+			if (hasEbook && hasAudio) result.setType_result("TYPEALL");
+			else if (hasEbook) result.setType_result("TYPEE");
+			else if (hasAudio) result.setType_result("TYPEA");
+			else result.setType_result("TYPEALL");
+		}
+		return result;
 	}
 
 	private static void extractFields(FrontCmVO frontCmVO, FrontCmVO resultList) {

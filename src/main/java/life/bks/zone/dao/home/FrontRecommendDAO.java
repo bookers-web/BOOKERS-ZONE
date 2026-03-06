@@ -78,4 +78,7 @@ public interface FrontRecommendDAO {
     // 검색 페이지용 카테고리 목록 (content_count 포함)
     List<FrontCmVO> selectSearchCategoryList(FrontCmVO frontCmVO);
 
+    // Solr faceting 결과 기반 카테고리 조회 (WWW CmDAO 동일)
+    List<FrontCmVO> solrCategorySearchList(List<String> codeList);
+    FrontCmVO solrCategorySearchType(List<String> codeList);
 }
