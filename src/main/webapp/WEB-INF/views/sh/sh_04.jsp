@@ -566,7 +566,7 @@ $(document).on('click', '.bt-func-read', function () {
 					<c:set var="eIndex" value="${eIndex + 1}" />
 					
 					<c:forEach items="${categoryList }" var="list" varStatus="status">
-						<c:if test="${list.uct_type eq searchVO.uct_type}">
+						<c:if test="${empty searchVO.uct_type or list.uct_type eq searchVO.uct_type}">
 						<!-- 8개 묶음 시작 -->
 						<c:if test="${eIndex % 8 == 0}">
 				        <div class="cateRow">

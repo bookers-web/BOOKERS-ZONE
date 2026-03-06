@@ -486,7 +486,9 @@ public class HomeController {
         model.addObject("BookPaging", bookList);
         model.addObject("frontCmVO", frontCmVO);
         model.addObject("searchVO", frontCmVO);
-        model.addObject("categoryList", List.of());
+        // 카테고리 목록 조회 (content_count 포함)
+        List<FrontCmVO> categoryList = frontRecommendService.selectSearchCategoryList(frontCmVO);
+        model.addObject("categoryList", categoryList != null ? categoryList : List.of());
 
         // 검색 결과 없을 때 실시간 인기 도서 표시용 (WWW 동일: limit_count=10, 검색결과 없을 때만)
         if (bookList == null || bookList.getResultList() == null || bookList.getResultList().isEmpty()) {
@@ -495,8 +497,20 @@ public class HomeController {
             model.addObject("searchPopularList", searchPopularList);
         }
 
+        // 카테고리 타입 (eBook/오디오북 탭) 설정
         FrontCmVO categoryTypeVO = new FrontCmVO();
-        categoryTypeVO.setType_result("TYPEALL");
+        List<String> availableTypes = frontRecommendService.selectAvailableCategoryTypes(frontCmVO);
+        boolean hasEbook = availableTypes != null && availableTypes.contains("E");
+        boolean hasAudio = availableTypes != null && availableTypes.contains("A");
+        if (hasEbook && hasAudio) {
+            categoryTypeVO.setType_result("TYPEALL");
+        } else if (hasEbook) {
+            categoryTypeVO.setType_result("TYPEE");
+        } else if (hasAudio) {
+            categoryTypeVO.setType_result("TYPEA");
+        } else {
+            categoryTypeVO.setType_result("TYPEALL");
+        }
         model.addObject("cmVO", categoryTypeVO);
 
         model.setViewName("sh/sh_04");
