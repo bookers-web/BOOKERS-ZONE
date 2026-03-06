@@ -58,6 +58,7 @@ function fn_go_search() {
 	<header class="m_head">
 		<div class="mainTop">
 			<div class="Toplogo">
+				<a href="/front/home/main.do">
 				<c:choose>
 				<c:when test="${empty sessionScope.UIS_MOBILE_LOGO_URL }">
 					<img src="/images/mobile/logo_top.svg" alt="bookers logo" >
@@ -66,6 +67,7 @@ function fn_go_search() {
 					<img src="<%=filePath %>${sessionScope.UIS_MOBILE_LOGO_URL }" alt="bookers logo image" />
 				</c:otherwise>
 				</c:choose>
+				</a>
 			</div>
 			<div class="btn_T_searchArea">
 				<button class="btn_search" onclick="fn_go_search();"><span class="blind">검색하기</span></button>
