@@ -16,8 +16,6 @@ public interface IpAuthConfigMapper {
 
     IpAuthConfig selectByUisCodeForUpdate(@Param("uisCode") String uisCode);
 
-    IpAuthConfig selectByIpPattern(@Param("ipPattern") String ipPattern);
-
     int insert(IpAuthConfig config);
 
     int update(IpAuthConfig config);

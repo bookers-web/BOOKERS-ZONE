@@ -1,12 +1,14 @@
 package life.bks.zone.service.auth;
 
 import life.bks.zone.domain.IpAuthConfig;
+import life.bks.zone.domain.IpAuthIpRange;
 import life.bks.zone.domain.IpAuthLog;
 import life.bks.zone.domain.IpAuthSession;
 import life.bks.zone.dto.IpAuthCheckResponse;
 import life.bks.zone.dto.SessionCreateResponse;
 import life.bks.zone.dto.SessionValidateResponse;
 import life.bks.zone.mapper.IpAuthConfigMapper;
+import life.bks.zone.mapper.IpAuthIpRangeMapper;
 import life.bks.zone.mapper.IpAuthLogMapper;
 import life.bks.zone.mapper.IpAuthSessionMapper;
 import life.bks.zone.util.IpUtils;
@@ -27,6 +29,7 @@ public class IpAuthServiceImpl implements IpAuthService {
     private static final int SESSION_TIMEOUT_MINUTES = 20;
 
     private final IpAuthConfigMapper configMapper;
+    private final IpAuthIpRangeMapper rangeMapper;
     private final IpAuthSessionMapper sessionMapper;
     private final IpAuthLogMapper logMapper;
 
@@ -57,17 +60,11 @@ public class IpAuthServiceImpl implements IpAuthService {
     @Override
     @Transactional(readOnly = true)
     public IpAuthConfig findConfigByIp(String clientIp) {
-        List<IpAuthConfig> configs = configMapper.selectEnabledConfigs();
+        List<IpAuthIpRange> ranges = rangeMapper.selectEnabledRanges();
 
-        for (IpAuthConfig config : configs) {
-            String pattern = config.getIpPattern();
-            if (pattern != null) {
-                String[] patterns = pattern.split(",");
-                for (String p : patterns) {
-                    if (IpUtils.isInRange(clientIp, p.trim())) {
-                        return config;
-                    }
-                }
+        for (IpAuthIpRange range : ranges) {
+            if (range.getIpPattern() != null && IpUtils.isInRange(clientIp, range.getIpPattern().trim())) {
+                return configMapper.selectByUisCode(range.getUisCode());
             }
         }
 

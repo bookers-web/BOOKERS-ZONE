@@ -40,15 +40,22 @@ public class IpUtils {
         if (clientIp == null || ipPattern == null) {
             return false;
         }
-        
+
         ipPattern = ipPattern.trim();
         clientIp = clientIp.trim();
-        
-        if (!ipPattern.contains("/")) {
-            return clientIp.equals(ipPattern);
+
+        // IP 범위 (start~end) 형식: 198.0.0.1~198.0.1.199
+        if (ipPattern.contains("~")) {
+            return isInIpRange(clientIp, ipPattern);
         }
-        
-        return isInCidrRange(clientIp, ipPattern);
+
+        // CIDR 형식: 192.168.0.0/16
+        if (ipPattern.contains("/")) {
+            return isInCidrRange(clientIp, ipPattern);
+        }
+
+        // 단일 IP 정확 매칭
+        return clientIp.equals(ipPattern);
     }
     
     private static boolean isInCidrRange(String ip, String cidr) {
@@ -86,6 +93,47 @@ public class IpUtils {
             return true;
         } catch (UnknownHostException | NumberFormatException e) {
             return false;
+        }
+    }
+
+    /**
+     * IP 범위(start~end) 매칭. IPv4 주소를 long으로 변환하여 숫자 범위 비교.
+     * 예: "198.0.0.1~198.0.1.199" → 198.0.0.1 <= clientIp <= 198.0.1.199
+     */
+    private static boolean isInIpRange(String clientIp, String rangePattern) {
+        try {
+            String[] parts = rangePattern.split("~");
+            if (parts.length != 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
+                return false;
+            }
+
+            long target = ipv4ToLong(clientIp);
+            long start = ipv4ToLong(parts[0].trim());
+            long end = ipv4ToLong(parts[1].trim());
+
+            return target >= start && target <= end;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    /**
+     * IPv4 주소를 unsigned long 값으로 변환한다.
+     * 예: "192.168.1.100" → 3232235876L
+     */
+    private static long ipv4ToLong(String ipAddress) {
+        try {
+            byte[] octets = InetAddress.getByName(ipAddress.trim()).getAddress();
+            if (octets.length != 4) {
+                throw new IllegalArgumentException("IPv4 only: " + ipAddress);
+            }
+            long result = 0;
+            for (byte octet : octets) {
+                result = (result << 8) | (octet & 0xFF);
+            }
+            return result;
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException("Invalid IP: " + ipAddress, e);
         }
     }
     

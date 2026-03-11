@@ -23,6 +23,7 @@ public class B2bMember {
     private String umName;         // UM_NAME - 회원명
     private String umRegUserid;    // UM_REG_USERID - 등록자
     private String umUseyn;        // UM_USEYN - 사용여부
+    private String umFreeAccount;   // UM_FREE_ACCOUNT - 무료 계정 여부 (Y/N)
     private LocalDateTime umRegdate;  // UM_REGDATE - 등록일
 
     // 시퀀스 조회용 (TBL_SEQUENCES)

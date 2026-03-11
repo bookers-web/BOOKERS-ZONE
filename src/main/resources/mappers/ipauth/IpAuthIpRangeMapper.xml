@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="life.bks.zone.mapper.IpAuthIpRangeMapper">
+
+    <resultMap id="ipAuthIpRangeMap" type="life.bks.zone.domain.IpAuthIpRange">
+        <id property="id" column="id"/>
+        <result property="uisCode" column="uis_code"/>
+        <result property="ipVersion" column="ip_version"/>
+        <result property="ipPattern" column="ip_pattern"/>
+        <result property="isEnabled" column="is_enabled"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectEnabledRanges" resultMap="ipAuthIpRangeMap">
+        SELECT r.id, r.uis_code, r.ip_version, r.ip_pattern, r.is_enabled, r.created_at, r.updated_at
+        FROM TBL_IP_AUTH_IP_RANGE r
+        INNER JOIN TBL_IP_AUTH_CONFIG c ON r.uis_code = c.uis_code
+        WHERE r.is_enabled = true AND c.is_enabled = true
+        ORDER BY r.uis_code, r.id
+    </select>
+
+    <select id="selectByUisCode" resultMap="ipAuthIpRangeMap">
+        SELECT id, uis_code, ip_version, ip_pattern, is_enabled, created_at, updated_at
+        FROM TBL_IP_AUTH_IP_RANGE
+        WHERE uis_code = #{uisCode}
+        ORDER BY id
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO TBL_IP_AUTH_IP_RANGE (uis_code, ip_version, ip_pattern, is_enabled, created_at, updated_at)
+        VALUES (#{uisCode}, #{ipVersion}, #{ipPattern}, #{isEnabled}, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE TBL_IP_AUTH_IP_RANGE
+        SET ip_version = #{ipVersion},
+            ip_pattern = #{ipPattern},
+            is_enabled = #{isEnabled},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteByUisCode">
+        DELETE FROM TBL_IP_AUTH_IP_RANGE WHERE uis_code = #{uisCode}
+    </delete>
+
+</mapper>

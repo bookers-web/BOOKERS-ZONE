@@ -13,12 +13,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IpAuthConfig {
-    
+public class IpAuthIpRange {
+
     private Long id;
     private String uisCode;
-    private String uisName;
-    private Integer maxConcurrent;
+    private String ipVersion;
+    private String ipPattern;
     private Boolean isEnabled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

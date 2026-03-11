@@ -1,10 +1,6 @@
 package life.bks.zone.service.auth;
 
-import life.bks.zone.dto.GuestLoginResponse;
-
 public interface GuestLoginService {
-    
-    GuestLoginResponse guestLogin(String requestCode, String requestId, String clientIp, String userAgent);
 
     /**
      * 관내 비회원 Zone guest 회원 조회 또는 생성

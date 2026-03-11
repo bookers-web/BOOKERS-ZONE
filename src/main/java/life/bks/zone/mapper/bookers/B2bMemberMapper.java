@@ -13,4 +13,6 @@ public interface B2bMemberMapper {
     B2bMember selectByUisCodeAndUserid(@Param("umUisCode") String umUisCode, @Param("umUserid") String umUserid);
 
     void getSequence(B2bMember member);
+
+    B2bMember selectByUisCodeAndUseridForUpdate(@Param("umUisCode") String umUisCode, @Param("umUserid") String umUserid);
 }

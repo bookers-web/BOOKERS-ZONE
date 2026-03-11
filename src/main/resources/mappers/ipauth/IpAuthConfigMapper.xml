@@ -2,77 +2,66 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="life.bks.zone.mapper.IpAuthConfigMapper">
-    
+
     <resultMap id="ipAuthConfigMap" type="life.bks.zone.domain.IpAuthConfig">
         <id property="id" column="id"/>
         <result property="uisCode" column="uis_code"/>
         <result property="uisName" column="uis_name"/>
-        <result property="ipVersion" column="ip_version"/>
-        <result property="ipPattern" column="ip_pattern"/>
         <result property="maxConcurrent" column="max_concurrent"/>
         <result property="isEnabled" column="is_enabled"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
-    
+
     <select id="selectAll" resultMap="ipAuthConfigMap">
-        SELECT id, uis_code, uis_name, ip_version, ip_pattern, max_concurrent, is_enabled, created_at, updated_at
+        SELECT id, uis_code, uis_name, max_concurrent, is_enabled, created_at, updated_at
         FROM TBL_IP_AUTH_CONFIG
         ORDER BY created_at DESC
     </select>
-    
+
     <select id="selectEnabledConfigs" resultMap="ipAuthConfigMap">
-        SELECT id, uis_code, uis_name, ip_version, ip_pattern, max_concurrent, is_enabled, created_at, updated_at
+        SELECT id, uis_code, uis_name, max_concurrent, is_enabled, created_at, updated_at
         FROM TBL_IP_AUTH_CONFIG
         WHERE is_enabled = true
         ORDER BY uis_code
     </select>
-    
+
     <select id="selectByUisCode" resultMap="ipAuthConfigMap">
-        SELECT id, uis_code, uis_name, ip_version, ip_pattern, max_concurrent, is_enabled, created_at, updated_at
+        SELECT id, uis_code, uis_name, max_concurrent, is_enabled, created_at, updated_at
         FROM TBL_IP_AUTH_CONFIG
         WHERE uis_code = #{uisCode}
     </select>
-    
+
     <select id="selectByUisCodeForUpdate" resultMap="ipAuthConfigMap">
-        SELECT id, uis_code, uis_name, ip_version, ip_pattern, max_concurrent, is_enabled, created_at, updated_at
+        SELECT id, uis_code, uis_name, max_concurrent, is_enabled, created_at, updated_at
         FROM TBL_IP_AUTH_CONFIG
         WHERE uis_code = #{uisCode}
-        LIMIT 1
         FOR UPDATE
     </select>
-    
-    <select id="selectByIpPattern" resultMap="ipAuthConfigMap">
-        SELECT id, uis_code, uis_name, ip_version, ip_pattern, max_concurrent, is_enabled, created_at, updated_at
-        FROM TBL_IP_AUTH_CONFIG
-        WHERE ip_pattern = #{ipPattern} AND is_enabled = true
-    </select>
-    
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO TBL_IP_AUTH_CONFIG (uis_code, uis_name, ip_version, ip_pattern, max_concurrent, is_enabled, created_at, updated_at)
-        VALUES (#{uisCode}, #{uisName}, #{ipVersion}, #{ipPattern}, #{maxConcurrent}, #{isEnabled}, NOW(), NOW())
+        INSERT INTO TBL_IP_AUTH_CONFIG (uis_code, uis_name, max_concurrent, is_enabled, created_at, updated_at)
+        VALUES (#{uisCode}, #{uisName}, #{maxConcurrent}, #{isEnabled}, NOW(), NOW())
     </insert>
-    
+
     <update id="update">
         UPDATE TBL_IP_AUTH_CONFIG
         SET uis_name = #{uisName},
-            ip_version = #{ipVersion},
-            ip_pattern = #{ipPattern},
             max_concurrent = #{maxConcurrent},
             is_enabled = #{isEnabled},
             updated_at = NOW()
         WHERE uis_code = #{uisCode}
     </update>
-    
+
     <update id="updateMaxConcurrent">
         UPDATE TBL_IP_AUTH_CONFIG
         SET max_concurrent = #{maxConcurrent},
             updated_at = NOW()
         WHERE uis_code = #{uisCode}
     </update>
-    
+
     <delete id="delete">
         DELETE FROM TBL_IP_AUTH_CONFIG WHERE uis_code = #{uisCode}
     </delete>
-    
+
 </mapper>

@@ -79,6 +79,73 @@ class IpUtilsTest {
     }
 
     @Nested
+    @DisplayName("isInRange - IP 범위(start~end) 매칭")
+    class IpRangeTest {
+
+        @Test
+        @DisplayName("범위 내 IP 매칭")
+        void ipInRange() {
+            String range = "198.0.0.1~198.0.1.199";
+
+            assertThat(IpUtils.isInRange("198.0.0.1", range)).isTrue();   // start
+            assertThat(IpUtils.isInRange("198.0.0.100", range)).isTrue(); // 중간
+            assertThat(IpUtils.isInRange("198.0.1.0", range)).isTrue();   // 두 번째 옥텏 넘어가는 경우
+            assertThat(IpUtils.isInRange("198.0.1.199", range)).isTrue(); // end
+        }
+
+        @Test
+        @DisplayName("범위 밖 IP 불일치")
+        void ipOutOfRange() {
+            String range = "198.0.0.1~198.0.1.199";
+
+            assertThat(IpUtils.isInRange("198.0.0.0", range)).isFalse();  // start 미만
+            assertThat(IpUtils.isInRange("198.0.1.200", range)).isFalse(); // end 초과
+            assertThat(IpUtils.isInRange("197.255.255.255", range)).isFalse();
+            assertThat(IpUtils.isInRange("199.0.0.1", range)).isFalse();
+        }
+
+        @Test
+        @DisplayName("동일 서브넷 내 좋은 범위")
+        void sameSubnetRange() {
+            // 192.168.1.100 ~ 192.168.1.200 (동일 /24 내 부분 범위)
+            String range = "192.168.1.100~192.168.1.200";
+
+            assertThat(IpUtils.isInRange("192.168.1.99", range)).isFalse();
+            assertThat(IpUtils.isInRange("192.168.1.100", range)).isTrue();
+            assertThat(IpUtils.isInRange("192.168.1.150", range)).isTrue();
+            assertThat(IpUtils.isInRange("192.168.1.200", range)).isTrue();
+            assertThat(IpUtils.isInRange("192.168.1.201", range)).isFalse();
+        }
+
+        @Test
+        @DisplayName("넓은 대역 범위 (CIDR로 표현 불가)")
+        void wideRange() {
+            // 10.0.0.1 ~ 10.0.5.255 (여러 CIDR 블록에 걸침)
+            String range = "10.0.0.1~10.0.5.255";
+
+            assertThat(IpUtils.isInRange("10.0.0.0", range)).isFalse();
+            assertThat(IpUtils.isInRange("10.0.0.1", range)).isTrue();
+            assertThat(IpUtils.isInRange("10.0.3.128", range)).isTrue();
+            assertThat(IpUtils.isInRange("10.0.5.255", range)).isTrue();
+            assertThat(IpUtils.isInRange("10.0.6.0", range)).isFalse();
+        }
+
+        @Test
+        @DisplayName("잘못된 범위 형식")
+        void invalidRange() {
+            assertThat(IpUtils.isInRange("192.168.1.1", "invalid~range")).isFalse();
+            assertThat(IpUtils.isInRange("192.168.1.1", "~192.168.1.255")).isFalse();
+            assertThat(IpUtils.isInRange("192.168.1.1", "192.168.1.1~")).isFalse();
+        }
+
+        @Test
+        @DisplayName("공백 포함 범위 패턴")
+        void rangeWithSpaces() {
+            assertThat(IpUtils.isInRange("198.0.0.50", " 198.0.0.1 ~ 198.0.1.199 ")).isTrue();
+        }
+    }
+
+    @Nested
     @DisplayName("실제 사용 시나리오")
     class RealWorldScenarioTest {
 

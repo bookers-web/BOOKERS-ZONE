@@ -20,7 +20,7 @@ public class WebviewerServiceImpl implements WebviewerService {
     private final DrmTokenService drmTokenService;
 
     @Override
-    @Transactional(transactionManager = "bookersTransactionManager")
+    @Transactional(readOnly = true)
     public WebviewerResponse processWebviewer(String ucmCode, String umeCode, String umCode, String uisCode) {
         WebviewerBook requestBook = new WebviewerBook();
         requestBook.setUcmCode(ucmCode);
