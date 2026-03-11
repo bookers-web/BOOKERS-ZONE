@@ -18,4 +18,6 @@ public interface IpAuthIpRangeMapper {
     int update(IpAuthIpRange range);
 
     int deleteByUisCode(@Param("uisCode") String uisCode);
+
+    int countByIpPattern(@Param("ipPattern") String ipPattern);
 }

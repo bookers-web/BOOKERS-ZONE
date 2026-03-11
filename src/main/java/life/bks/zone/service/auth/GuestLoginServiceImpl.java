@@ -23,14 +23,14 @@ public class GuestLoginServiceImpl implements GuestLoginService {
         // 2. 세션당 고유 guest 계정 생성 (시퀀스로 충돌 방지)
         String seqStr = Integer.toString(seqMember.getSeqCurrval());
         String umCode = "UM" + String.format("%011d", seqMember.getSeqCurrval());
-        String zoneUserId = "zone_" + uisCode + "_" + seqStr;
+        String zoneUserId = "zone" + uisCode + seqStr;
 
         B2bMember newMember = B2bMember.builder()
                 .umCode(seqStr)
                 .umUserid(zoneUserId)
                 .umUisCode(uisCode)
                 .umRegType("Z")
-                .umName("관내이용자_" + clientIp)
+                .umName("관내이용자" + clientIp)
                 .umRegUserid("zone_system")
                 .umUseyn("Y")
                 .umFreeAccount("Y")
