@@ -1,6 +1,6 @@
 package life.bks.zone.controller;
 
-import life.bks.zone.domain.IpAuthConfig;
+import life.bks.zone.domain.ZoneConfig;
 import life.bks.zone.domain.InstitutionInfo;
 import life.bks.zone.mapper.InstitutionMapper;
 import life.bks.zone.dto.SessionCreateResponse;
@@ -40,7 +40,7 @@ public class PageController {
         ModelAndView model = new ModelAndView("login");
 
         String clientIp = IpUtils.getClientIp(request);
-        IpAuthConfig config = ipAuthService.findConfigByIp(clientIp);
+        ZoneConfig config = ipAuthService.findConfigByIp(clientIp);
 
         if (config != null) {
             model.addObject("maxConcurrent", config.getMaxConcurrent());
@@ -63,7 +63,7 @@ public class PageController {
         String clientIp = IpUtils.getClientIp(request);
         String userAgent = request.getHeader("User-Agent");
 
-        IpAuthConfig config = ipAuthService.findConfigByIp(clientIp);
+        ZoneConfig config = ipAuthService.findConfigByIp(clientIp);
         if (config == null) {
             log.warn("IP 인증 실패 - 허용되지 않은 IP: {}", clientIp);
             return "redirect:https://www.bookers.life/";

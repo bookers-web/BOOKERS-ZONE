@@ -1,6 +1,6 @@
 package life.bks.zone.service.auth;
 
-import life.bks.zone.domain.IpAuthConfig;
+import life.bks.zone.domain.ZoneConfig;
 import life.bks.zone.domain.IpAuthSession;
 import life.bks.zone.dto.IpAuthCheckResponse;
 import life.bks.zone.dto.SessionCreateResponse;
@@ -10,7 +10,7 @@ public interface IpAuthService {
     
     IpAuthCheckResponse checkIpAuth(String clientIp);
     
-    IpAuthConfig findConfigByIp(String clientIp);
+    ZoneConfig findConfigByIp(String clientIp);
     
     SessionCreateResponse createSession(String uisCode, String clientIp, String userAgent);
     

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="life.bks.zone.mapper.ZoneConfigMapper">
+
+    <resultMap id="zoneConfigMap" type="life.bks.zone.domain.ZoneConfig">
+        <id property="uisCode" column="uis_code"/>
+        <result property="maxConcurrent" column="max_concurrent"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="uisName" column="uis_name"/>
+    </resultMap>
+
+    <select id="selectByUisCode" resultMap="zoneConfigMap">
+        SELECT z.uis_code, z.max_concurrent, z.created_at, z.updated_at,
+               i.UIS_NAME AS uis_name
+        FROM TBL_ZONE_CONFIG z
+        LEFT JOIN TBL_INSTITUTION_MASTER i ON z.uis_code = i.UIS_CODE
+        WHERE z.uis_code = #{uisCode}
+    </select>
+
+    <select id="selectByUisCodeForUpdate" resultMap="zoneConfigMap">
+        SELECT uis_code, max_concurrent, created_at, updated_at
+        FROM TBL_ZONE_CONFIG
+        WHERE uis_code = #{uisCode}
+        FOR UPDATE
+    </select>
+
+    <select id="selectAll" resultMap="zoneConfigMap">
+        SELECT z.uis_code, z.max_concurrent, z.created_at, z.updated_at,
+               i.UIS_NAME AS uis_name
+        FROM TBL_ZONE_CONFIG z
+        LEFT JOIN TBL_INSTITUTION_MASTER i ON z.uis_code = i.UIS_CODE
+        ORDER BY z.created_at DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO TBL_ZONE_CONFIG (uis_code, max_concurrent, created_at, updated_at)
+        VALUES (#{uisCode}, #{maxConcurrent}, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE TBL_ZONE_CONFIG
+        SET max_concurrent = #{maxConcurrent},
+            updated_at = NOW()
+        WHERE uis_code = #{uisCode}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM TBL_ZONE_CONFIG WHERE uis_code = #{uisCode}
+    </delete>
+
+</mapper>

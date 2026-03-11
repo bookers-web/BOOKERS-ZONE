@@ -13,13 +13,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IpAuthConfig {
-    
-    private Long id;
-    private String uisCode;
-    private String uisName;
+public class ZoneConfig {
+
+    private String uisCode;          // PK (TBL_ZONE_CONFIG)
     private Integer maxConcurrent;
-    private Boolean isEnabled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // JOIN 필드 (TBL_INSTITUTION_MASTER)
+    private String uisName;
 }

@@ -3,7 +3,7 @@ package life.bks.zone.interceptor;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import life.bks.zone.domain.IpAuthConfig;
+import life.bks.zone.domain.ZoneConfig;
 import life.bks.zone.dto.SessionValidateResponse;
 import life.bks.zone.service.auth.IpAuthService;
 import life.bks.zone.util.IpUtils;
@@ -27,7 +27,7 @@ public class IpAuthInterceptor implements HandlerInterceptor {
         String clientIp = IpUtils.getClientIp(request);
         String path = request.getServletPath();
         
-        IpAuthConfig config = ipAuthService.findConfigByIp(clientIp);
+        ZoneConfig config = ipAuthService.findConfigByIp(clientIp);
         
         if (config == null) {
             log.info("IP 인증 실패 - 허용되지 않은 IP: {}, www.bookers.life로 리다이렉트", clientIp);

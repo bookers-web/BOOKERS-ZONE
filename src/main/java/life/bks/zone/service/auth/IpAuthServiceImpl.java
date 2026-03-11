@@ -1,13 +1,13 @@
 package life.bks.zone.service.auth;
 
-import life.bks.zone.domain.IpAuthConfig;
+import life.bks.zone.domain.ZoneConfig;
 import life.bks.zone.domain.IpAuthIpRange;
 import life.bks.zone.domain.IpAuthLog;
 import life.bks.zone.domain.IpAuthSession;
 import life.bks.zone.dto.IpAuthCheckResponse;
 import life.bks.zone.dto.SessionCreateResponse;
 import life.bks.zone.dto.SessionValidateResponse;
-import life.bks.zone.mapper.IpAuthConfigMapper;
+import life.bks.zone.mapper.ZoneConfigMapper;
 import life.bks.zone.mapper.IpAuthIpRangeMapper;
 import life.bks.zone.mapper.IpAuthLogMapper;
 import life.bks.zone.mapper.IpAuthSessionMapper;
@@ -28,7 +28,7 @@ public class IpAuthServiceImpl implements IpAuthService {
 
     private static final int SESSION_TIMEOUT_MINUTES = 20;
 
-    private final IpAuthConfigMapper configMapper;
+    private final ZoneConfigMapper zoneConfigMapper;
     private final IpAuthIpRangeMapper rangeMapper;
     private final IpAuthSessionMapper sessionMapper;
     private final IpAuthLogMapper logMapper;
@@ -36,7 +36,7 @@ public class IpAuthServiceImpl implements IpAuthService {
     @Override
     @Transactional(readOnly = true)
     public IpAuthCheckResponse checkIpAuth(String clientIp) {
-        IpAuthConfig config = findConfigByIp(clientIp);
+        ZoneConfig config = findConfigByIp(clientIp);
 
         if (config == null) {
             return IpAuthCheckResponse.builder()
@@ -59,12 +59,12 @@ public class IpAuthServiceImpl implements IpAuthService {
 
     @Override
     @Transactional(readOnly = true)
-    public IpAuthConfig findConfigByIp(String clientIp) {
+    public ZoneConfig findConfigByIp(String clientIp) {
         List<IpAuthIpRange> ranges = rangeMapper.selectEnabledRanges();
 
         for (IpAuthIpRange range : ranges) {
             if (range.getIpPattern() != null && IpUtils.isInRange(clientIp, range.getIpPattern().trim())) {
-                return configMapper.selectByUisCode(range.getUisCode());
+                return zoneConfigMapper.selectByUisCode(range.getUisCode());
             }
         }
 
@@ -74,7 +74,7 @@ public class IpAuthServiceImpl implements IpAuthService {
     @Override
     @Transactional
     public SessionCreateResponse createSession(String uisCode, String clientIp, String userAgent) {
-        IpAuthConfig config = configMapper.selectByUisCodeForUpdate(uisCode);
+        ZoneConfig config = zoneConfigMapper.selectByUisCodeForUpdate(uisCode);
 
         if (config == null) {
             return SessionCreateResponse.builder()

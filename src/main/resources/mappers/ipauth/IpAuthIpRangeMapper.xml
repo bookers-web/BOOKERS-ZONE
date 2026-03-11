@@ -16,8 +16,8 @@
     <select id="selectEnabledRanges" resultMap="ipAuthIpRangeMap">
         SELECT r.id, r.uis_code, r.ip_version, r.ip_pattern, r.is_enabled, r.created_at, r.updated_at
         FROM TBL_IP_AUTH_IP_RANGE r
-        INNER JOIN TBL_IP_AUTH_CONFIG c ON r.uis_code = c.uis_code
-        WHERE r.is_enabled = true AND c.is_enabled = true
+        INNER JOIN TBL_INSTITUTION_MASTER i ON r.uis_code = i.UIS_CODE
+        WHERE r.is_enabled = true AND i.UIS_ZONE_FLAG = 'Y'
         ORDER BY r.uis_code, r.id
     </select>
 
