@@ -6,7 +6,6 @@ import life.bks.zone.mapper.InstitutionMapper;
 import life.bks.zone.dto.SessionCreateResponse;
 import life.bks.zone.service.auth.IpAuthService;
 import life.bks.zone.service.member.MemberService;
-import life.bks.zone.service.auth.GuestLoginService;
 import life.bks.zone.util.IpUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +27,6 @@ public class PageController {
 
     private final IpAuthService ipAuthService;
     private final MemberService memberService;
-    private final GuestLoginService guestLoginService;
     private final InstitutionMapper institutionMapper;
 
     /**
@@ -89,6 +87,7 @@ public class PageController {
         httpSession.setAttribute("UM_UIS_CODE", config.getUisCode());
         httpSession.setAttribute("UIS_UCP_CODE", memberService.selectUcpCode(config.getUisCode()));
         httpSession.setAttribute("ZONE_SESSION_ID", result.getSessionId());
+        httpSession.setAttribute("UM_CODE", result.getUmCode());
 
         // 기관 상세 정보 세션 저장 (JSP에서 참조)
         InstitutionInfo institutionInfo = institutionMapper.selectByUisCode(config.getUisCode());
@@ -101,16 +100,8 @@ public class PageController {
             httpSession.setAttribute("UIS_NAME", institutionInfo.getUisName());
         }
 
-        // Zone guest 회원 조회/생성 → UM_CODE 세션 저장 (webviewer에서 사용)
-        try {
-            String umCode = guestLoginService.findOrCreateZoneGuest(config.getUisCode(), clientIp);
-            httpSession.setAttribute("UM_CODE", umCode);
-            log.info("비회원 진입 성공 - IP: {}, sessionId: {}, 기관: {}, umCode: {}",
-                    clientIp, result.getSessionId(), config.getUisName(), umCode);
-        } catch (Exception e) {
-            log.error("Zone guest 회원 생성 실패 - IP: {}, uisCode: {}", clientIp, config.getUisCode(), e);
-            // 회원 생성 실패해도 진입은 허용 (웹뷰어만 사용 불가)
-        }
+        log.info("비회원 진입 성공 - IP: {}, sessionId: {}, 기관: {}, umCode: {}",
+                clientIp, result.getSessionId(), config.getUisName(), result.getUmCode());
 
         // IP 인증 로그
         ipAuthService.logAction(result.getSessionId(), config.getUisCode(),

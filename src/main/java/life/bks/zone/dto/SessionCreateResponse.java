@@ -15,4 +15,5 @@ public class SessionCreateResponse {
     private String sessionId;
     private String message;
     private String errorCode;
+    private String umCode;
 }

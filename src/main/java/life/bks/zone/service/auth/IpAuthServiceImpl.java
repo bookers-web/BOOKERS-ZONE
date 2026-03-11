@@ -32,6 +32,7 @@ public class IpAuthServiceImpl implements IpAuthService {
     private final IpAuthIpRangeMapper rangeMapper;
     private final IpAuthSessionMapper sessionMapper;
     private final IpAuthLogMapper logMapper;
+    private final GuestLoginService guestLoginService;
 
     @Override
     @Transactional(readOnly = true)
@@ -104,21 +105,32 @@ public class IpAuthServiceImpl implements IpAuthService {
 
         String sessionId = UUID.randomUUID().toString();
 
+        // Zone guest 회원 생성 (세션당 개별 계정 — 정산용)
+        String umCode = null;
+        try {
+            umCode = guestLoginService.createZoneGuest(uisCode, clientIp);
+        } catch (Exception e) {
+            log.error("Zone guest 회원 생성 실패 - uisCode: {}, IP: {}", uisCode, clientIp, e);
+            // 회원 생성 실패해도 세션은 생성 (웹뷰어만 사용 불가)
+        }
+
         IpAuthSession session = IpAuthSession.builder()
                 .sessionId(sessionId)
                 .uisCode(uisCode)
                 .clientIp(clientIp)
                 .userAgent(userAgent)
+                .umCode(umCode)
                 .build();
 
         sessionMapper.insert(session);
 
-        log.info("세션 생성 - sessionId: {}, uisCode: {}, clientIp: {}, 현재: {}/{}", 
-                sessionId, uisCode, clientIp, currentCount + 1, config.getMaxConcurrent());
+        log.info("세션 생성 - sessionId: {}, uisCode: {}, clientIp: {}, umCode: {}, 현재: {}/{}",
+                sessionId, uisCode, clientIp, umCode, currentCount + 1, config.getMaxConcurrent());
 
         return SessionCreateResponse.builder()
                 .success(true)
                 .sessionId(sessionId)
+                .umCode(umCode)
                 .message("세션이 생성되었습니다.")
                 .build();
     }

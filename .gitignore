@@ -51,3 +51,6 @@ skills/
 
 ### 테스트 결과 ###
 k6-tests/*.json
+
+### 마이그레이션 SQL ###
+src/main/resources/migration/
