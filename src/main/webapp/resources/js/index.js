@@ -37,22 +37,22 @@ $(document).ready(function () {
 	makeSelectBoxMadeView('make_select');
 	document.addEventListener("click", closeAllSelect);
 
-	// Swiper 캐러셀 초기화
-	if (typeof Swiper !== 'undefined') {
-		$('.cardList_wrap.swiper-container').each(function () {
-			var $container = $(this);
-			var nextBtn = $container.find('.swiper-button-next')[0];
-			var prevBtn = $container.find('.swiper-button-prev')[0];
-			new Swiper(this, {
-				slidesPerView: 6,
-				slidesPerGroup: 6,
-				spaceBetween: 10,
-				loop: true,
-				nextButton: nextBtn,
-				prevButton: prevBtn
+	// Swiper 캐러셀 초기화 (WWW 동일)
+	$('.swiper-container').each(function(){
+		var clen = $(this).find('.swiper-slide').length;
+		if (clen >= 6) {
+			new Swiper($(this), {
+				pagination: $(this).find('.swiper-pagination'),
+				paginationClickable: $(this).find('.swiper-pagination'),
+				nextButton: $(this).find('.swiper-button-next'),
+				prevButton: $(this).find('.swiper-button-prev'),
+				slidesPerView : clen > 6 ? 6 : clen,
+				slidesPerGroup : clen > 6 ? 6 : clen,
+				loopFillGroupWithBlank: true,
+				loop: true
 			});
-		});
-	}
+		}
+	});
 	
 	// 도서 상세 정보 펼쳐보기 버튼 — 8줄(256px) 미만이면 감추고, 이상이면 표시
 	var H1=$(".book_introduce .infoTxt").height();
