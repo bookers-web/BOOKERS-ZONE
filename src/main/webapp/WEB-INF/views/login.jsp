@@ -90,6 +90,7 @@
       var params = new URLSearchParams(window.location.search);
       if (params.get('error') === 'max_concurrent') {
         document.getElementById('maxConcurrentModal').style.display = 'flex';
+        history.replaceState(null, '', window.location.pathname);
       }
     })();
   </script>

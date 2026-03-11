@@ -503,6 +503,8 @@ function fn_Detail(ucm_ucs_code, ucm_code) {
 						</c:otherwise>
 					</c:choose>
 
+					<!-- 독서토론하러가기 -->
+					<div class="btn_debate" onclick="javascript:location.href='/front/lounge/discussionView.do?ucd_code=${cmVO.ucd_code}&ucm_code=${cmVO.ucm_code}'"><div class="debate_link">독서 토론 하러 가기</div></div>
 				</div>
 				<!-- 카운트 수 알림 or 책 읽고 있는 유저 수 and 독서 토론 이동 버튼 나오는 부분 끝 23y01.26 -->
 				<c:if test="${cmVO.ucm_webdrm_yn eq 'N'}">
