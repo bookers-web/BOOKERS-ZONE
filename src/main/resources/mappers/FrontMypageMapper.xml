@@ -13,7 +13,7 @@
 			, faq.UFQ_AM_USERID										AS ufq_am_userid
 			, DATE_FORMAT(faq.UFQ_REGDATE, '%Y-%m-%d %h:%i')		AS ufq_regdate
 		FROM
-			TBL_FAQ faq
+			TBL_ZONE_FAQ faq
 		ORDER BY faq.UFQ_REGDATE DESC
 		LIMIT 3
 	</select>
@@ -22,7 +22,7 @@
 		SELECT
 			COUNT(faq.UFQ_NO) AS count
 		FROM
-			TBL_FAQ faq
+			TBL_ZONE_FAQ faq
 		WHERE
 			1=1
 		<if test='searchKey != null and searchKey != ""'>
@@ -42,7 +42,7 @@
 			, faq.UFQ_AM_USERID										AS ufq_am_userid
 			, DATE_FORMAT(faq.UFQ_REGDATE, '%Y-%m-%d %h:%i')		AS ufq_regdate
 		FROM
-			TBL_FAQ faq
+			TBL_ZONE_FAQ faq
 		WHERE
 			1=1
 		<if test='searchKey != null and searchKey != ""'>
