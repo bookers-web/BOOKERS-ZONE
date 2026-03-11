@@ -15,6 +15,7 @@ import life.bks.zone.util.IpUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -26,7 +27,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class IpAuthServiceImpl implements IpAuthService {
 
-    private static final int SESSION_TIMEOUT_MINUTES = 20;
+    @Value("${zone.session.timeout-minutes}")
+    private int sessionTimeoutMinutes;
 
     private final ZoneConfigMapper zoneConfigMapper;
     private final IpAuthIpRangeMapper rangeMapper;
@@ -86,7 +88,7 @@ public class IpAuthServiceImpl implements IpAuthService {
         }
 
         // 만료 세션 정리
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(SESSION_TIMEOUT_MINUTES);
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(sessionTimeoutMinutes);
         List<IpAuthSession> expiredSessions = sessionMapper.selectExpiredSessions(threshold);
         if (!expiredSessions.isEmpty()) {
             sessionMapper.deleteExpiredSessions(threshold);
@@ -149,7 +151,7 @@ public class IpAuthServiceImpl implements IpAuthService {
         }
 
         // 세션 만료 체크
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(SESSION_TIMEOUT_MINUTES);
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(sessionTimeoutMinutes);
         if (session.getLastActiveAt() != null && session.getLastActiveAt().isBefore(threshold)) {
             return SessionValidateResponse.builder()
                     .valid(false)
@@ -213,7 +215,7 @@ public class IpAuthServiceImpl implements IpAuthService {
     @Override
     @Transactional
     public void cleanupExpiredSessions() {
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(SESSION_TIMEOUT_MINUTES);
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(sessionTimeoutMinutes);
         List<IpAuthSession> expiredSessions = sessionMapper.selectExpiredSessions(threshold);
 
         if (!expiredSessions.isEmpty()) {

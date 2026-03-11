@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -22,8 +23,11 @@ import org.springframework.web.servlet.ModelAndView;
 @RequiredArgsConstructor
 public class PageController {
 
-    private static final String SESSION_COOKIE_NAME = "BKS_ZONE_SESSION";
-    private static final int COOKIE_MAX_AGE = 60 * 20;
+    @Value("${zone.session.cookie-name}")
+    private String sessionCookieName;
+
+    @Value("${zone.session.cookie-max-age}")
+    private int cookieMaxAge;
 
     private final IpAuthService ipAuthService;
     private final MemberService memberService;
@@ -76,10 +80,10 @@ public class PageController {
         }
 
         // 세션 쿠키 설정
-        Cookie sessionCookie = new Cookie(SESSION_COOKIE_NAME, result.getSessionId());
+        Cookie sessionCookie = new Cookie(sessionCookieName, result.getSessionId());
         sessionCookie.setPath("/");
         sessionCookie.setHttpOnly(true);
-        sessionCookie.setMaxAge(COOKIE_MAX_AGE);
+        sessionCookie.setMaxAge(cookieMaxAge);
         response.addCookie(sessionCookie);
 
         // HttpSession에 기관 정보 저장 (레거시 컨트롤러에서 사용)

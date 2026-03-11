@@ -8,7 +8,7 @@ server:
 
 spring:
   profiles:
-    active: dev
+    active: prod
   mvc:
     view:
       prefix: /WEB-INF/views/
@@ -22,3 +22,9 @@ mybatis:
     map-underscore-to-camel-case: true
     default-fetch-size: 100
     default-statement-timeout: 30
+
+zone:
+  session:
+    cookie-name: BKS_ZONE_SESSION
+    cookie-max-age: 1200
+    timeout-minutes: 20
