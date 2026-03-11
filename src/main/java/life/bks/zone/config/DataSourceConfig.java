@@ -29,9 +29,7 @@ public class DataSourceConfig {
         sessionFactory.setDataSource(dataSource);
         sessionFactory.setTypeAliasesPackage("life.bks.zone.vo,life.bks.zone.domain");
 
-        org.apache.ibatis.session.Configuration mybatisConfig = new org.apache.ibatis.session.Configuration();
-        mybatisConfig.setMapUnderscoreToCamelCase(true);
-        sessionFactory.setConfiguration(mybatisConfig);
+
 
         sessionFactory.setMapperLocations(
             new PathMatchingResourcePatternResolver().getResources("classpath:mappers/**/*.xml")
