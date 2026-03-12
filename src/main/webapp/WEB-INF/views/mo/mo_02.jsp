@@ -56,7 +56,7 @@ function webviewer_Btn(ucm_code, ume_code){
 				alert(data.resultMsg);
 			} else if (data.count == -1){
 				alert(data.resultMsg);
-				var url = '/login.do';
+				var url = '/login';
 				location.replace(url);
 			} else if (data.count == -21){
 				alert(data.resultMsg);

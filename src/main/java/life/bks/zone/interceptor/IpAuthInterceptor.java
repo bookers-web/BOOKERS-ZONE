@@ -55,6 +55,13 @@ public class IpAuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        // AJAX 요청(.json)은 리다이렉트 대신 JSON 응답 반환
+        if (path.endsWith(".json")) {
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"count\":-1,\"resultMsg\":\"로그인 후 이용가능합니다.\"}");
+            return false;
+        }
+
         response.sendRedirect(request.getContextPath() + "/login");
         return false;
     }

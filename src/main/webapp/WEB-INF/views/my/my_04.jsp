@@ -249,6 +249,11 @@ function fn_close_popup(target){
 			contentType: "application/x-www-form-urlencoded; charset=UTF-8",
 			dataType : "json",
 			success: function(data) {
+				if(data.count == -1){
+					alert(data.resultMsg);
+					var url = '/login';
+					location.replace(url);
+				}
 			}
 		});
 		

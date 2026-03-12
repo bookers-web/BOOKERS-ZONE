@@ -87,12 +87,16 @@ $(document).ready(function() {
 			contentType: "application/x-www-form-urlencoded; charset=UTF-8",
 			async : false,
 			success: function( data ) {
-				if(data.count > 0 ){
+				if(data.count == -1){
+					alert(data.resultMsg);
+					var url = '/login';
+					location.replace(url);
+				} else if(data.count > 0 ){
 					$("#"+like_off).css("display","none");
 					$("#"+like_on).css("display","inline-block");
-					var Like=$("#count_"+ubr_code).text();//좋아요 값
-					var LikeNum=parseInt(Like);//좋아요 값 정수로 변환
-					$("#count_"+ubr_code).text(LikeNum+1);//나의 좋아요 클릭으로 카운트+1
+					var Like=$("#count_"+ubr_code).text();
+					var LikeNum=parseInt(Like);
+					$("#count_"+ubr_code).text(LikeNum+1);
 					
 					$("#ubrc_code_"+ubr_code).val(data.resultMsg);
 				}
@@ -117,12 +121,16 @@ $(document).ready(function() {
 			contentType: "application/x-www-form-urlencoded; charset=UTF-8",
 			async : false,
 			success: function( data ) {
-				if(data.count > 0 ){
+				if(data.count == -1){
+					alert(data.resultMsg);
+					var url = '/login';
+					location.replace(url);
+				} else if(data.count > 0 ){
 					$("#"+like_on).css("display","none");
 					$("#"+like_off).css("display","inline-block");
-					var Like=$("#count_"+ubr_code).text();//좋아요 값
-					var LikeNum=parseInt(Like);//좋아요 값 정수로 변환
-					$("#count_"+ubr_code).text(LikeNum-1);//나의 좋아요 클릭으로 카운트-1
+					var Like=$("#count_"+ubr_code).text();
+					var LikeNum=parseInt(Like);
+					$("#count_"+ubr_code).text(LikeNum-1);
 					$("#ubrc_code").val("");
 				}
 			},
