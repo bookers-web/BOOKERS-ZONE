@@ -85,7 +85,7 @@ $(document).on('click', '.bt-func-read', function () {
     const ucm_code = $item.data('ucm-code');
     $.ajax( {
 		url: "/front/myLibrary/webViewer.json",
-		data: {"ucm_code" : ucm_code },
+		data: {"ucm_code" : ucm_code, "ume_code" : "" },
 		dataType: "json",
 		contentType: "application/x-www-form-urlencoded; charset=UTF-8",
 		async : false,

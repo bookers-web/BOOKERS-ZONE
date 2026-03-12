@@ -22,7 +22,7 @@ public class WebviewerController {
     @ResponseBody
     public WebviewerResponse webviewerDetail(
             @RequestParam String ucm_code,
-            @RequestParam String ume_code,
+            @RequestParam(required = false, defaultValue = "") String ume_code,
             HttpServletRequest request) {
 
         String umCode = (String) request.getSession().getAttribute("UM_CODE");
