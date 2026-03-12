@@ -116,8 +116,10 @@ public class HomeController {
 
         // 주제별 nav에 eBook/오디오북 서브메뉴 표시 여부
         List<FrontCmVO> categoryList = frontRecommendService.selectCategoryList(new FrontCmVO());
-        model.addObject("hasEbook", categoryList.stream().anyMatch(c -> "E".equals(c.getUct_type())));
-        model.addObject("hasAudio", categoryList.stream().anyMatch(c -> "A".equals(c.getUct_type())));
+        boolean hasEbook = categoryList.stream().anyMatch(c -> "E".equals(c.getUct_type()));
+        boolean hasAudio = categoryList.stream().anyMatch(c -> "A".equals(c.getUct_type()));
+        model.addObject("hasEbook", hasEbook);
+        model.addObject("hasAudio", hasAudio);
         model.setViewName("home/hm_01");
 
         return model;

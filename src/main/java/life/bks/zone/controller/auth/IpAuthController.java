@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class IpAuthController {
 
     private static final String SESSION_COOKIE_NAME = "BKS_ZONE_SESSION";
-    private static final int COOKIE_MAX_AGE = 60 * 20;
+    private static final int COOKIE_MAX_AGE = 60 * 3;
 
     private final IpAuthService ipAuthService;
 

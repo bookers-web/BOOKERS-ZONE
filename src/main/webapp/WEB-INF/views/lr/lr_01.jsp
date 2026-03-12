@@ -159,7 +159,7 @@ function fn_SelectInstitution(type) {
 				<div class="reportYes_list"><!--독서감상문 있는 도서 리스트-->
 					<div class="optionMenu_area mT_30">
 						<div class="totalNum">총 <span class="txt_primary_c"><fmt:formatNumber value="${paging.totalCount }" pattern="#,###" /></span>권</div>
-							<div class="bookTypeArea">
+							<div class="bookTypeArea" style="display:none;">
 								<div class="bookAll <c:if test="${(searchVO.ubr_is_open_checking eq 'Y') || (searchVO.ubr_is_open_checking eq null)}">bookType_focus</c:if>" onclick="fn_SelectInstitution('Y')">전체 기관</div>
 								<div class="book_ebook <c:if test="${searchVO.ubr_is_open_checking eq 'N'}">bookType_focus</c:if>" onclick="fn_SelectInstitution('N')">내 기관</div>
 							</div><!-- span 클래스 추가 04.29 --></div>

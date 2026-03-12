@@ -26,5 +26,5 @@ mybatis:
 zone:
   session:
     cookie-name: BKS_ZONE_SESSION
-    cookie-max-age: 1200
-    timeout-minutes: 20
+    cookie-max-age: 180
+    timeout-minutes: 3

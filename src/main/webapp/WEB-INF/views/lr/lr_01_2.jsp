@@ -265,7 +265,7 @@ function fn_all_view(event) {
 				</div>
 				<div class="optionMenu_area mT_15">
 					<div class="totalNum">총 <span class="txt_primary_c"><fmt:formatNumber value="${paging.totalCount }" pattern="#,###" /></span> 건</div>
-					<div style="margin-top: 9px; float:right;">
+					<div style="margin-top: 9px; float:right; display:none;">
 						<button class="report_btn_all" onclick="javascript:fn_all_view('${searchVO.um_code}','${searchVO.ucm_code}');">전체 보기</button>
 						<button class="report_btn_agency" onclick="javascript:fn_only_agency_view('${searchVO.um_code}','${searchVO.ucm_code}');">내 소속기관 보기</button>
 						<!-- Zone(비회원)에서는 내 감상문 보기 비활성화 -->
