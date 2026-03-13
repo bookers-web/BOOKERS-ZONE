@@ -20,7 +20,7 @@
     
     <div class="card">
       <div class="card-content">
-        <h2 class="title">매일 새로운 독서가 시작되는 곳<br><strong>부커스 전자도서관에 오신걸 환영합니다.</strong></h2>
+        <h2 class="title">매일 새로운 독서가 시작되는 곳<br><strong>부커스 존에 오신걸 환영합니다.</strong></h2>
         
         <div class="login-options">
           <a href="${pageContext.request.contextPath}/zone/enter" class="login-btn login-btn--guest">
